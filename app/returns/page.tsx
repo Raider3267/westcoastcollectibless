@@ -1,3 +1,4 @@
+// app/returns/page.tsx
 export default function ReturnsPage() {
   return (
     <main style={{ padding: '2rem' }}>
