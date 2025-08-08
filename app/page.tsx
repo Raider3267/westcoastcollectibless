@@ -1,3 +1,4 @@
+// app/page.tsx
 import { SITE, PRODUCTS } from '../lib/products'
 
 export default function HomePage() {
@@ -21,11 +22,11 @@ export default function HomePage() {
         <h2 className="text-xl font-semibold">Featured</h2>
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {PRODUCTS.map((p) => {
-            const hasStripe = Boolean(p.variations?.[0]?.paymentLink && p.variations[0].paymentLink!.trim() !== '')
-            const fallbackEbay =
-              SITE.socials?.ebay ||
-              'https://www.ebay.com/usr/westcoastcollectibless' // your eBay profile
-            const buyURL = hasStripe ? p.variations![0]!.paymentLink! : fallbackEbay
+            const stripeLink =
+              p?.variations?.[0]?.paymentLink && p.variations[0].paymentLink.trim() !== ''
+                ? p.variations[0].paymentLink
+                : null
+            const buyURL = stripeLink || 'https://www.ebay.com/usr/westcoastcollectibless'
 
             return (
               <div key={p.id} className="border rounded-3xl overflow-hidden bg-white hover:shadow-md transition">
@@ -50,10 +51,10 @@ export default function HomePage() {
                       target="_blank"
                       rel="noreferrer"
                       className={`inline-flex items-center rounded-2xl px-4 py-2 text-sm ${
-                        hasStripe ? 'bg-black text-white' : 'border'
+                        stripeLink ? 'bg-black text-white' : 'border'
                       }`}
                     >
-                      {hasStripe ? 'Buy Now' : 'Buy on eBay'}
+                      {stripeLink ? 'Buy Now' : 'Buy on eBay'}
                     </a>
                   </div>
                 </div>
