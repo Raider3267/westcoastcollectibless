@@ -1,5 +1,5 @@
 // app/page.tsx
-import { SITE, PRODUCTS } from '@/lib/products'
+import { SITE, PRODUCTS } from '../lib/products'
 
 export default function HomePage() {
   return (
