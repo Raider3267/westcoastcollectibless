@@ -1,0 +1,46 @@
+name: Import eBay CSV
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'data/eBay-all-active-listings-report-2025-08-07-12257717404.csv'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  import-csv:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install deps
+        run: npm ci || npm i
+
+      - name: Convert CSV → JSON
+        run: node scripts/ebay_csv_to_products.mjs
+        env:
+          EBAY_CSV_PATH: data/eBay-all-active-listings-report-2025-08-07-12257717404.csv
+
+      - name: Write lib/products.ts
+        run: node scripts/json_to_products_ts.mjs
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: chore/ebay-import
+          title: "chore: refresh products from eBay CSV"
+          commit-message: "chore: refresh products from eBay CSV"
+          body: |
+            Automated import from eBay CSV.
+            - Source: data/eBay-all-active-listings-report-2025-08-07-12257717404.csv
+            - Generated: scripts/products.from-ebay.json
+            - Updated: lib/products.ts (preserved SITE, replaced PRODUCTS)
