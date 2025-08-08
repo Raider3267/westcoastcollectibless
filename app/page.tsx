@@ -7,9 +7,7 @@ export default function HomePage() {
       {/* Hero */}
       <section className="rounded-3xl border bg-white p-8">
         <h1 className="text-3xl md:text-4xl font-semibold">{SITE.brand}</h1>
-        <p className="mt-2 text-gray-600">
-          Authentic collectibles, designer toys, and custom 3D-printed accessories. Orders ship from Santa Monica, CA.
-        </p>
+        <p className="mt-2 text-gray-600">{SITE.tagline}</p>
         <div className="mt-6 flex flex-wrap gap-3 text-sm">
           <span className="inline-flex items-center rounded-2xl bg-gray-100 px-3 py-1">Fast shipping</span>
           <span className="inline-flex items-center rounded-2xl bg-gray-100 px-3 py-1">Collector-first</span>
@@ -29,13 +27,13 @@ export default function HomePage() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={p.images[0]} alt={p.name} className="h-full w-full object-cover" />
                 ) : (
-                  'Add product image'
+                  'Image coming soon'
                 )}
               </div>
               <div className="p-5">
                 <div className="text-sm text-gray-500">{p.category}</div>
                 <h3 className="text-lg font-medium mt-1">{p.name}</h3>
-                <p className="text-sm text-gray-600 mt-1 line-clamp-3">{p.description}</p>
+                <p className="text-sm text-gray-600 mt-1" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.description}</p>
                 <div className="mt-3 font-semibold">
                   {new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(p.price)}
                 </div>
