@@ -1,3 +1,4 @@
+// app/contact/page.tsx
 export default function ContactPage() {
   return (
     <main style={{ padding: '2rem' }}>
@@ -10,4 +11,3 @@ export default function ContactPage() {
     </main>
   );
 }
-
