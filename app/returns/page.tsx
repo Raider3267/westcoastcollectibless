@@ -1,17 +1,20 @@
 // app/returns/page.tsx
 export default function ReturnsPage() {
   return (
-    <main style={{ padding: '2rem' }}>
-      <h1>Shipping & Returns</h1>
-      <p style={{ marginTop: 12 }}>
+    <main className="p-8">
+      <h1 className="text-2xl font-semibold">Shipping & Returns</h1>
+      <p className="mt-3">
         Orders ship within 2–3 business days via USPS with tracking from Santa Monica, California.
       </p>
-      <p style={{ marginTop: 12 }}>
+      <p className="mt-3">
         Returns accepted within 30 days of delivery on unused items. Buyer pays return shipping unless the item is defective.
       </p>
-      <p style={{ marginTop: 12 }}>
-        Questions? <a href="mailto:support@westcoastcollectibless.com">support@westcoastcollectibless.com</a>
+      <p className="mt-3">
+        Questions?{' '}
+        <a className="underline" href="mailto:support@westcoastcollectibless.com">
+          support@westcoastcollectibless.com
+        </a>
       </p>
     </main>
-  );
+  )
 }
