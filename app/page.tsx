@@ -2,6 +2,7 @@ export const runtime = 'nodejs'
 // app/page.tsx
 import { SITE } from '../lib/products'
 import { getListingsFromCsv } from '../lib/listings'
+import { DetailsButton } from '@/components/details-button'
 
 export default function HomePage() {
   return (
@@ -100,13 +101,7 @@ async function FeaturedFromCSV() {
                   >
                     {isStripe ? 'Buy Now' : 'View on eBay'}
                   </a>
-                  <a
-                    href="#"
-                    className="btn btn-secondary"
-                    onClick={(e) => { e.preventDefault(); alert('Details coming soon ✨'); }}
-                  >
-                    Details
-                  </a>
+                  <DetailsButton />
                 </div>
               </div>
             </article>
