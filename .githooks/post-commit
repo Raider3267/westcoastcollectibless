@@ -1,9 +1,28 @@
 #!/bin/sh
 set -e
 
-# Opt-out by setting: export GIT_DISABLE_AUTO_PUSH=1
+# Opt-in control: enable auto-push only when explicitly enabled
+# - Enable with env: export GIT_ENABLE_AUTO_PUSH=1
+# - Or enable per-repo: git config autopush.enabled true
+# Opt-out always wins:
+# - Disable with env: export GIT_DISABLE_AUTO_PUSH=1
 if [ "$GIT_DISABLE_AUTO_PUSH" = "1" ]; then
   exit 0
+fi
+
+enabled_env="${GIT_ENABLE_AUTO_PUSH:-0}"
+enabled_cfg="$(git config --get autopush.enabled || echo "")"
+if [ "$enabled_env" != "1" ] && [ "$enabled_cfg" != "true" ]; then
+  # Not explicitly enabled -> do nothing
+  exit 0
+fi
+
+# Optional repo guard: only push when origin URL contains this substring.
+#   git config autopush.repo github.com/Raider3267/westcoastcollectibless.git
+guard_repo="$(git config --get autopush.repo || echo "")"
+if [ -n "$guard_repo" ]; then
+  origin_url="$(git remote get-url origin 2>/dev/null || echo "")"
+  echo "$origin_url" | grep -q "$guard_repo" || exit 0
 fi
 
 branch=$(git symbolic-ref --quiet --short HEAD || true)
