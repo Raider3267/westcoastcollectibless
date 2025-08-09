@@ -1,6 +1,6 @@
-import fs from 'fs/promises'
-import path from 'path'
-import Papa from 'papaparse'
+import { readFile } from 'node:fs/promises'
+import path from 'node:path'
+import { parse } from 'csv-parse/sync'
 
 export type Listing = {
   id: string
@@ -12,57 +12,30 @@ export type Listing = {
   description?: string | null
 }
 
-/**
- * Column mapping assumptions for eBay Active Listings report:
- *  - Title:            "Title"
- *  - Item ID:          "Item ID"
- *  - View URL:         "View Item URL"
- *  - Primary image:    "Picture URL" | "Gallery URL" | "PictureURL"
- *  - Price:            "Start Price" | "Buy It Now Price" | "Price"
- *  - Notes/desc:       "Custom Label" | "Subtitle"
- *
- * Stripe override (optional columns you may add/maintain in your CSV):
- *  - "Stripe Link" | "Stripe URL" | "paymentLink"
- */
-const FIRST = <T>(...vals: (T | undefined | null | false | '')[]) =>
+const FIRST = <T>(...vals: (T | undefined | null | false | '' )[]) =>
   vals.find(v => typeof v === 'number' || (typeof v === 'string' && v.trim() !== '')) as T | undefined
 
-export async function getListingsFromCsv(
-  filename = 'eBay-all-active-listings-report-2025-08-07-12257717404.csv'
-): Promise<Listing[]> {
+export async function getListingsFromCsv(filename = 'eBay-all-active-listings-report-2025-08-07-12257717404.csv'): Promise<Listing[]> {
   const filePath = path.join(process.cwd(), 'public', filename)
-  const text = await fs.readFile(filePath, 'utf8')
+  const text = await readFile(filePath, 'utf8')
 
-  const parsed = Papa.parse(text, { header: true, skipEmptyLines: true })
-  const rows = Array.isArray(parsed.data) ? (parsed.data as any[]) : []
+  const rows = parse(text, { columns: true, skip_empty_lines: true }) as any[]
 
-  const items: Listing[] = rows
-    .map((row, idx): Listing | null => {
-      const id = FIRST<string>(row['Item ID'], row['ItemID'], String(idx))
-      const name = FIRST<string>(row['Title'], row['title'])
-      if (!id || !name) return null
+  const items: Listing[] = rows.map((row, idx) => {
+    const id = FIRST<string>(row['Item ID'], row['ItemID'], String(idx))!
+    const name = FIRST<string>(row['Title'], row['title']) || `Item ${idx + 1}`
 
-      const priceStr = FIRST<string>(row['Start Price'], row['Buy It Now Price'], row['Price'])
-      const price = priceStr ? Number(String(priceStr).replace(/[^0-9.]/g, '')) : null
+    const priceStr = FIRST<string>(row['Start Price'], row['Buy It Now Price'], row['Price'])
+    const price = priceStr ? Number(String(priceStr).replace(/[^0-9.]/g, '')) : null
 
-      const ebayUrl = FIRST<string>(row['View Item URL'], row['ViewItemURL'], row['Item URL'])
-      const image = FIRST<string>(row['Picture URL'], row['Gallery URL'], row['PictureURL'], row['Photo URL'])
-      const description = FIRST<string>(row['Custom Label'], row['Subtitle'])
+    const ebayUrl = FIRST<string>(row['View Item URL'], row['ViewItemURL'], row['Item URL']) || null
+    const image = FIRST<string>(row['Picture URL'], row['Gallery URL'], row['PictureURL'], row['Photo URL']) || null
+    const description = FIRST<string>(row['Custom Label'], row['Subtitle']) || null
 
-      // Stripe override (prefer these if present)
-      const stripeLink = FIRST<string>(row['Stripe Link'], row['Stripe URL'], row['paymentLink'])
+    const stripeLink = FIRST<string>(row['Stripe Link'], row['Stripe URL'], row['paymentLink']) || null
 
-      return {
-        id: String(id),
-        name,
-        price,
-        ebayUrl: ebayUrl || null,
-        image: image || null,
-        stripeLink: stripeLink || null,
-        description: description || null,
-      }
-    })
-    .filter(Boolean) as Listing[]
+    return { id: String(id), name, price, ebayUrl, image, stripeLink, description }
+  })
 
   return items
 }

@@ -1,3 +1,4 @@
+export const runtime = 'nodejs'
 // app/page.tsx
 import { SITE } from '../lib/products'
 import { getListingsFromCsv } from '../lib/listings'
