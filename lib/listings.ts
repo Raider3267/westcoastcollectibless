@@ -1,14 +1,6 @@
-import { readFile } from 'node:fs/promises'
-import path from 'node:path'
-let parse: any
-try {
-  // Works when subpath exports are available
-  ;({ parse } = await import('csv-parse/sync'))
-} catch {
-  // Fallback: some bundlers only expose the root; this gets the sync export
-  const mod: any = await import('csv-parse')
-  parse = mod.parse || mod.default?.parse || mod['sync']?.parse
-}
+import path from 'path'
+import { readFile } from 'fs/promises'
+import { parse } from 'csv-parse/sync'
 
 export type Listing = {
   id: string
@@ -20,30 +12,30 @@ export type Listing = {
   description?: string | null
 }
 
-const FIRST = <T>(...vals: (T | undefined | null | false | '' )[]) =>
-  vals.find(v => typeof v === 'number' || (typeof v === 'string' && v.trim() !== '')) as T | undefined
-
-export async function getListingsFromCsv(filename = 'eBay-all-active-listings-report-2025-08-07-12257717404.csv'): Promise<Listing[]> {
+export async function getListingsFromCsv(
+  filename = 'eBay-all-active-listings-report-2025-08-07-12257717404.csv'
+): Promise<Listing[]> {
   const filePath = path.join(process.cwd(), 'public', filename)
-  const text = await readFile(filePath, 'utf8')
+  let text: string
+  try {
+    text = await readFile(filePath, 'utf8')
+  } catch (err) {
+    console.warn(`CSV not found: ${filePath}`)
+    return []
+  }
 
   const rows = parse(text, { columns: true, skip_empty_lines: true }) as any[]
 
-  const items: Listing[] = rows.map((row, idx) => {
-    const id = FIRST<string>(row['Item ID'], row['ItemID'], String(idx))!
-    const name = FIRST<string>(row['Title'], row['title']) || `Item ${idx + 1}`
-
-    const priceStr = FIRST<string>(row['Start Price'], row['Buy It Now Price'], row['Price'])
-    const price = priceStr ? Number(String(priceStr).replace(/[^0-9.]/g, '')) : null
-
-    const ebayUrl = FIRST<string>(row['View Item URL'], row['ViewItemURL'], row['Item URL']) || null
-    const image = FIRST<string>(row['Picture URL'], row['Gallery URL'], row['PictureURL'], row['Photo URL']) || null
-    const description = FIRST<string>(row['Custom Label'], row['Subtitle']) || null
-
-    const stripeLink = FIRST<string>(row['Stripe Link'], row['Stripe URL'], row['paymentLink']) || null
-
-    return { id: String(id), name, price, ebayUrl, image, stripeLink, description }
-  })
-
-  return items
+  return rows.map((row: any, idx: number) => ({
+    id: row['Item ID'] || String(idx),
+    name: row['Title'] || `Item ${idx + 1}`,
+    price: row['Start Price']
+      ? Number(String(row['Start Price']).replace(/[^0-9.]/g, ''))
+      : null,
+    ebayUrl: row['View Item URL'] || null,
+    image: row['Picture URL'] || null,
+    stripeLink: row['Stripe Link'] || null,
+    description: row['Custom Label'] || null
+  })) as Listing[]
 }
+
