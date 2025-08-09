@@ -10,49 +10,16 @@
 // - Category (fallback "Collectibles") → category
 // - id = slug(sku) or slug(title)
 
-import fs from 'node:fs';
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
+import { parse } from 'csv-parse/sync';
 
 const CSV_PATH = process.env.EBAY_CSV_PATH
   || path.join(process.cwd(), 'data', 'eBay-all-active-listings-report-2025-08-07-12257717404.csv');
 
 const OUT_JSON = path.join(process.cwd(), 'scripts', 'products.from-ebay.json');
 
-// --- minimal CSV parser (handles quotes, commas) ---
-function parseCSV(text) {
-  const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
-  if (lines.length === 0) return { headers: [], rows: [] };
-  const headers = splitCSVLine(lines[0]);
-  const rows = lines.slice(1).map(line => {
-    const cells = splitCSVLine(line);
-    const obj = {};
-    headers.forEach((h, i) => (obj[h] = (cells[i] ?? '').trim()));
-    return obj;
-  });
-  return { headers, rows };
-}
-
-function splitCSVLine(line) {
-  const out = [];
-  let cur = '';
-  let inQuotes = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (ch === '"') {
-      if (inQuotes && line[i + 1] === '"') {
-        cur += '"'; i++;
-      } else {
-        inQuotes = !inQuotes;
-      }
-    } else if (ch === ',' && !inQuotes) {
-      out.push(cur); cur = '';
-    } else {
-      cur += ch;
-    }
-  }
-  out.push(cur);
-  return out;
-}
+// CSV parsing handled by csv-parse/sync
 
 // --- helpers ---
 function firstCol(obj, candidates) {
@@ -85,8 +52,13 @@ function slugify(s) {
 }
 
 // --- main ---
-const csv = fs.readFileSync(CSV_PATH, 'utf8');
-const { rows } = parseCSV(csv);
+const csv = await readFile(CSV_PATH, 'utf8');
+const rows = parse(csv, {
+  columns: true,
+  skip_empty_lines: true,
+  relax_column_count: true,
+  trim: true
+});
 
 const products = rows.map((row, idx) => {
   // dynamic header detection per row (robust to varying exports)
@@ -137,6 +109,6 @@ if (!products.some(p => (p.images?.[0] ?? '') !== '')) {
   console.warn('Warning: No product has a primary image (images[0]). Consider adding at least one for Stripe review.');
 }
 
-fs.mkdirSync(path.dirname(OUT_JSON), { recursive: true });
-fs.writeFileSync(OUT_JSON, JSON.stringify(products, null, 2));
+await mkdir(path.dirname(OUT_JSON), { recursive: true });
+await writeFile(OUT_JSON, JSON.stringify(products, null, 2));
 console.log(`Wrote ${products.length} products → ${OUT_JSON}`);
