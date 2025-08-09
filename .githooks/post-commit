@@ -1,0 +1,20 @@
+#!/bin/sh
+set -e
+
+# Opt-out by setting: export GIT_DISABLE_AUTO_PUSH=1
+if [ "$GIT_DISABLE_AUTO_PUSH" = "1" ]; then
+  exit 0
+fi
+
+branch=$(git symbolic-ref --quiet --short HEAD || true)
+# If detached HEAD or no branch, do nothing
+if [ -z "$branch" ]; then
+  exit 0
+fi
+
+# Only push if upstream is configured (avoids errors before first push)
+if git rev-parse --abbrev-ref --symbolic-full-name "@{u}" >/dev/null 2>&1; then
+  git push
+fi
+
+exit 0
