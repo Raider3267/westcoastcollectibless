@@ -37,3 +37,30 @@ body {
 .card {
   @apply rounded-card border bg-white shadow-sm transition hover:shadow-pop hover:-translate-y-0.5;
 }
+
+/* Fun toy store styles */
+.bg-300% {
+  background-size: 300% 300%;
+}
+
+/* Bouncy hover effects for toy store feel */
+@keyframes bounce-gentle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.hover-bounce:hover {
+  animation: bounce-gentle 0.6s ease infinite;
+}
+
+/* Confetti animation */
+@keyframes confetti-fall {
+  from {
+    transform: translateY(-50px) rotate(0deg);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
