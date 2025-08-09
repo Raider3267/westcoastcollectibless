@@ -1,6 +1,14 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
-import { parse } from 'csv-parse/sync'
+let parse: any
+try {
+  // Works when subpath exports are available
+  ;({ parse } = await import('csv-parse/sync'))
+} catch {
+  // Fallback: some bundlers only expose the root; this gets the sync export
+  const mod: any = await import('csv-parse')
+  parse = mod.parse || mod.default?.parse || mod['sync']?.parse
+}
 
 export type Listing = {
   id: string
