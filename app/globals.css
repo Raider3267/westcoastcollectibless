@@ -1,3 +1,39 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Light, playful background gradient */
+:root { color-scheme: light; }
+body {
+  @apply min-h-screen text-gray-900;
+  background: linear-gradient(120deg, #fff 0%, #FFF6F9 30%, #F2FBFF 70%, #FDF8E7 100%);
+  background-attachment: fixed;
+}
+
+/* Provide global keyframes so raw animation: gradient-x works */
+@keyframes gradient-x {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Re-usable pills + buttons */
+.pill {
+  @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium;
+}
+.btn {
+  @apply inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition;
+}
+.btn-primary {
+  @apply text-white shadow-pop;
+  background: linear-gradient(120deg, theme(colors.pop.purple), theme(colors.pop.pink), theme(colors.pop.orange));
+  background-size: 200% 200%;
+  animation: gradient-x 8s ease infinite;
+}
+.btn-secondary {
+  @apply border border-gray-300 bg-white;
+}
+
+/* Card */
+.card {
+  @apply rounded-card border bg-white shadow-sm transition hover:shadow-pop hover:-translate-y-0.5;
+}
