@@ -20,7 +20,7 @@ export default function HomePage() {
       {/* Product grid */}
       <section className="mt-10">
         <h2 className="text-xl font-semibold">Featured</h2>
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {PRODUCTS.map((p) => {
             const stripeLink =
               p?.variations?.[0]?.paymentLink && p.variations[0].paymentLink.trim() !== ''
@@ -29,36 +29,51 @@ export default function HomePage() {
             const buyURL = stripeLink || 'https://www.ebay.com/usr/westcoastcollectibless'
 
             return (
-              <div key={p.id} className="border rounded-3xl overflow-hidden bg-white hover:shadow-md transition">
-                <div className="aspect-square bg-gray-50 grid place-items-center text-gray-400 text-sm">
+              <article key={p.id} className="rounded-card border bg-white shadow-sm overflow-hidden transition hover:shadow-pop">
+                {/* Image area: neutral background, centered placeholder */}
+                <div className="aspect-square bg-gray-100 grid place-items-center">
                   {p.images?.[0] ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={p.images[0]} alt={p.name} className="h-full w-full object-cover" />
+                    <img
+                      src={p.images[0]}
+                      alt={p.name}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
                   ) : (
-                    'Add product image'
+                    <span className="text-sm text-gray-400">Add product image</span>
                   )}
                 </div>
-                <div className="p-5">
-                  <div className="text-sm text-gray-500">{p.category}</div>
-                  <h3 className="text-lg font-medium mt-1">{p.name}</h3>
-                  <p className="text-sm text-gray-600 mt-1">{p.description}</p>
-                  <div className="mt-3 font-semibold">
+
+                {/* Content: simple, clean */}
+                <div className="p-4">
+                  <h3 className="text-base font-semibold leading-tight line-clamp-2">{p.name}</h3>
+                  {p.description ? (
+                    <p className="text-sm text-gray-600 mt-1 line-clamp-2">{p.description}</p>
+                  ) : null}
+                  <div className="mt-2 text-base font-bold">
                     {new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(p.price)}
                   </div>
-                  <div className="mt-4">
+
+                  <div className="mt-3 flex gap-2">
                     <a
                       href={buyURL}
                       target="_blank"
                       rel="noreferrer"
-                      className={`inline-flex items-center rounded-2xl px-4 py-2 text-sm ${
-                        stripeLink ? 'bg-black text-white' : 'border'
-                      }`}
+                      className={stripeLink ? 'btn btn-primary' : 'btn btn-secondary'}
                     >
                       {stripeLink ? 'Buy Now' : 'Buy on eBay'}
                     </a>
+                    <a
+                      href="#"
+                      className="btn btn-secondary"
+                      onClick={(e: { preventDefault: () => void }) => { e.preventDefault(); alert('Details coming soon ✨'); }}
+                    >
+                      Details
+                    </a>
                   </div>
                 </div>
-              </div>
+              </article>
             )
           })}
         </div>
