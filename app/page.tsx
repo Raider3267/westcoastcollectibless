@@ -1,11 +1,36 @@
-export const runtime = 'nodejs'
+'use client'
 // app/page.tsx
 import { SITE } from '../lib/products'
-import { getListingsFromCsv } from '../lib/listings'
+import { Listing } from '../lib/listings'
 import Confetti from '../components/Confetti'
 import ProductCard from '../components/ProductCard'
+import { useEffect, useState } from 'react'
 
 export default function HomePage() {
+  const [items, setItems] = useState<Listing[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const loadProducts = async () => {
+    try {
+      const response = await fetch('/api/public/products')
+      if (response.ok) {
+        const data = await response.json()
+        setItems(data)
+      }
+    } catch (error) {
+      console.error('Failed to load products:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadProducts()
+    
+    // Auto-refresh every 30 seconds to pick up new products
+    const interval = setInterval(loadProducts, 30000)
+    return () => clearInterval(interval)
+  }, [])
   return (
     <div>
       <Confetti />
@@ -47,7 +72,7 @@ export default function HomePage() {
         </section>
 
         {/* Featured Listings */}
-        <FeaturedFromCSV />
+        <FeaturedSection items={items} loading={loading} />
 
         {/* Trust + Contact */}
         <section className="mt-12 grid md:grid-cols-3 gap-6">
@@ -80,14 +105,39 @@ export default function HomePage() {
   )
 }
 
-async function FeaturedFromCSV() {
-  const items = await getListingsFromCsv()
+function FeaturedSection({ items, loading }: { items: Listing[], loading: boolean }) {
+  if (loading) {
+    return (
+      <section className="mt-10">
+        <h2 className="text-3xl font-bold text-center mb-8">
+          <span className="bg-gradient-to-r from-pop-teal to-pop-purple bg-clip-text text-transparent">
+            🎁 Featured Treasures 🎁
+          </span>
+        </h2>
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-white rounded-2xl p-6 shadow-sm animate-pulse">
+              <div className="bg-gray-200 h-48 rounded-lg mb-4"></div>
+              <div className="bg-gray-200 h-4 rounded mb-2"></div>
+              <div className="bg-gray-200 h-3 rounded w-2/3"></div>
+            </div>
+          ))}
+        </div>
+      </section>
+    )
+  }
 
   if (!items || items.length === 0) {
     return (
       <section className="mt-10">
-        <h2 className="text-xl font-semibold">Featured</h2>
-        <p className="mt-3 text-gray-700">No listings found in CSV.</p>
+        <h2 className="text-3xl font-bold text-center mb-8">
+          <span className="bg-gradient-to-r from-pop-teal to-pop-purple bg-clip-text text-transparent">
+            🎁 Featured Treasures 🎁
+          </span>
+        </h2>
+        <div className="text-center py-12">
+          <p className="text-gray-500">No products in stock at the moment. Check back soon! 🎪</p>
+        </div>
       </section>
     )
   }

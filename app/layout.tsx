@@ -28,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <a href="/returns">Shipping & Returns</a>
               <a href="/privacy">Privacy</a>
               <a href="/contact">Contact</a>
+              <a href="/admin/login" style={{ color: '#7c3aed' }}>Admin</a>
             </div>
           </nav>
         </header>

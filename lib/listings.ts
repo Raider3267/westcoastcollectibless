@@ -18,6 +18,7 @@ export type Listing = {
   image?: string | null
   stripeLink?: string | null
   description?: string | null
+  quantity?: number
 }
 
 const FIRST = <T>(...vals: (T | undefined | null | false | '' )[]) =>
@@ -80,7 +81,7 @@ function cleanDescription(htmlDesc: string): string {
   return formatted.trim()
 }
 
-export async function getListingsFromCsv(filename = 'export.csv'): Promise<Listing[]> {
+export async function getListingsFromCsv(filename = 'export.csv', includeOutOfStock = false): Promise<Listing[]> {
   const filePath = path.join(process.cwd(), filename)
   const text = await readFile(filePath, 'utf8')
 
@@ -95,6 +96,10 @@ export async function getListingsFromCsv(filename = 'export.csv'): Promise<Listi
       // Get price (export.csv has price as a number)
       const priceStr = FIRST<string>(row['price'], row['Price'])
       const price = priceStr ? Number(String(priceStr).replace(/[^0-9.]/g, '')) : null
+
+      // Get quantity for stock filtering
+      const quantityStr = FIRST<string>(row['quantity'], row['Quantity'])
+      const quantity = quantityStr ? Number(String(quantityStr).replace(/[^0-9]/g, '')) : 0
 
       // Get the first image from the comma-separated image URLs
       const imagesString = FIRST<string>(row['images'], row['Images']) || ''
@@ -118,12 +123,25 @@ export async function getListingsFromCsv(filename = 'export.csv'): Promise<Listi
         ebayUrl, 
         image, 
         stripeLink, 
-        description 
+        description,
+        quantity
       }
     })
-    // Filter out items with no price or quantity of 0 (if you want to hide out-of-stock items)
+    // Filter based on stock, price, and content quality
     .filter(item => {
-      return item.price && item.price > 0
+      // Filter out items without basic required fields
+      if (!item.name || item.name.trim() === '' || item.name === 'Item 1' || item.name.includes('Item ')) return false
+      
+      // Always require a price
+      if (!item.price || item.price <= 0) return false
+      
+      // Filter by stock unless out-of-stock items are specifically requested
+      if (!includeOutOfStock && (!item.quantity || item.quantity <= 0)) return false
+      
+      // Filter out items without images
+      if (!item.image || item.image.trim() === '') return false
+      
+      return true
     })
 
   return items
