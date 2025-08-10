@@ -23,69 +23,101 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
   const [isModalOpen, setIsModalOpen] = useState(false)
   
   const isStripe = Boolean(product.stripeLink)
+  
+  // Extract brand name from title
+  const extractBrand = (title: string) => {
+    const brandPatterns = ['POP MART', 'Labubu', 'Skullpanda']
+    for (const brand of brandPatterns) {
+      if (title.startsWith(brand)) {
+        return {
+          brand,
+          titleWithoutBrand: title.slice(brand.length).trim().replace(/^[-–—×:]/, '').trim()
+        }
+      }
+    }
+    // If no brand found, use first word as brand
+    const words = title.split(/[\s×\-–—:]/);
+    const brand = words[0] || '';
+    const titleWithoutBrand = title.slice(brand.length).trim().replace(/^[-–—×:]/, '').trim();
+    return { brand, titleWithoutBrand };
+  }
+  
+  const { brand, titleWithoutBrand } = extractBrand(product.name)
+  
+  // Rotate through accent colors
+  const accents = ['accent-lilac', 'accent-teal', 'accent-gold']
+  const accentClass = accents[Math.abs(product.id.split('').reduce((a, b) => a + b.charCodeAt(0), 0)) % accents.length]
 
   return (
     <>
-      <article 
-        className={`group rounded-3xl border-2 bg-gradient-to-br ${cardColor} backdrop-blur-sm 
-                   shadow-lg overflow-hidden transition-all duration-300 
-                   hover:shadow-2xl hover:scale-105 hover:-rotate-1 
-                   transform hover:border-pop-pink/50 relative`}
-      >
-        {/* Fun decorative elements */}
-        <div className="absolute top-2 right-2 text-2xl group-hover:animate-spin">
-          {randomEmoji}
-        </div>
-        
-        {/* Image */}
-        <div className="aspect-square bg-gradient-to-br from-white/50 to-gray-100/50 grid place-items-center relative overflow-hidden">
+      <article className={`product-card wcc-card ${accentClass}`}>
+        <div className="product-thumb wcc-thumb">
           {product.image ? (
             <img 
+              className="wcc-zoom"
               src={product.image} 
               alt={product.name} 
-              className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-300" 
               loading="lazy" 
             />
           ) : (
-            <div className="text-center">
-              <div className="text-6xl mb-2">{randomEmoji}</div>
-              <span className="text-sm text-gray-500 font-medium">Surprise Inside!</span>
+            <div className="wcc-zoom" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', background: '#f8f9fa' }}>
+              <div style={{ fontSize: '3rem', marginBottom: '8px' }}>{randomEmoji}</div>
+              <span style={{ fontSize: '0.9rem', color: '#6c757d', fontWeight: 500 }}>Surprise Inside!</span>
             </div>
           )}
-          {/* Sparkle effect overlay */}
-          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300
-                         bg-gradient-to-t from-transparent via-transparent to-white/20"></div>
         </div>
 
-        {/* Content */}
-        <div className="p-5 bg-white/90 backdrop-blur-sm">
-          <h3 className="text-lg font-bold leading-tight line-clamp-2 text-gray-800 group-hover:text-pop-purple transition-colors">
-            {product.name}
+        <div className="product-body wcc-body">
+          <h3 className="product-title wcc-title">
+            <span className="wcc-brand">{brand}</span> {titleWithoutBrand}
           </h3>
-          {product.description ? (
-            <p className="text-sm text-gray-600 mt-2 line-clamp-2">{product.description}</p>
-          ) : null}
-          {typeof product.price === 'number' ? (
-            <div className="mt-3 text-xl font-extrabold text-pop-orange">
-              💰 {new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(product.price)}
-            </div>
-          ) : null}
+        </div>
 
-          <div className="mt-4 flex gap-2">
+        <div className="product-foot wcc-foot">
+          {typeof product.price === 'number' ? (
+            <span className="product-price wcc-price">
+              {new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(product.price)}
+            </span>
+          ) : (
+            <span className="product-price wcc-price">Price Available</span>
+          )}
+          
+          <div className="wcc-actions">
             <a
+              className="btn wcc-btn wcc-btn--grad"
               href={product.ebayUrl || 'https://www.ebay.com/usr/westcoastcollectibless'}
               target="_blank"
-              rel="noreferrer"
-              className={`flex-1 text-center rounded-full px-4 py-3 font-bold text-sm transition-all duration-300 transform hover:scale-105 
-                         ${isStripe 
-                           ? 'bg-gradient-to-r from-pop-pink to-pop-orange text-white shadow-lg hover:shadow-xl' 
-                           : 'bg-gradient-to-r from-pop-teal to-pop-blue text-white shadow-lg hover:shadow-xl'}`}
+              rel="noopener"
             >
-              {isStripe ? '🛒 Buy Now!' : '🏪 View on eBay'}
+              View on eBay
             </a>
-            <DetailsButton onClick={() => setIsModalOpen(true)} />
+            <button 
+              type="button"
+              className="btn wcc-btn"
+              data-toggle="desc"
+              onClick={(e) => {
+                e.preventDefault()
+                const card = e.target.closest('.wcc-card')
+                const desc = card && card.querySelector('.wcc-desc')
+                if (desc) {
+                  const isOpen = desc.hasAttribute('hidden')
+                  desc.toggleAttribute('hidden', !isOpen)
+                  e.target.textContent = isOpen ? 'Hide details' : 'Details'
+                } else {
+                  setIsModalOpen(true)
+                }
+              }}
+            >
+              Details
+            </button>
           </div>
         </div>
+
+        {product.description ? (
+          <div className="wcc-desc" hidden>
+            <p>{product.description}</p>
+          </div>
+        ) : null}
       </article>
 
       <ProductModal 
