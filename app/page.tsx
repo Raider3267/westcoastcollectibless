@@ -17,12 +17,19 @@ export default function HomePage() {
           <div className="absolute bottom-4 left-4 text-3xl animate-bounce">🎨</div>
           <div className="absolute top-1/2 right-1/4 text-2xl animate-pulse">✨</div>
           
-          {/* Colorful floating title */}
-          <h1 className="text-4xl md:text-6xl font-bold animate-float mb-2">
-            <span className="bg-gradient-to-r from-pop-pink via-pop-orange to-pop-purple bg-clip-text text-transparent animate-gradient-x bg-300%">
-              🎪 WestCoast Collectibles 🎪
-            </span>
-          </h1>
+          {/* Logo and colorful floating title */}
+          <div className="flex flex-col items-center mb-2">
+            <img 
+              src="/Logo.png" 
+              alt="WestCoast Collectibles Logo" 
+              className="h-16 w-auto mb-4 animate-float"
+            />
+            <h1 className="text-4xl md:text-6xl font-bold animate-float">
+              <span className="bg-gradient-to-r from-pop-pink via-pop-orange to-pop-purple bg-clip-text text-transparent animate-gradient-x bg-300%">
+                🎪 WestCoast Collectibles 🎪
+              </span>
+            </h1>
+          </div>
           <p className="mt-4 text-lg text-gray-700 font-medium">
             🌟 Your magical toy wonderland! Authentic collectibles, designer toys, and custom 3D-printed treasures! 🌟
           </p>

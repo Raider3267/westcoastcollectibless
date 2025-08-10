@@ -12,11 +12,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <header style={{ padding: '12px 24px', borderBottom: '1px solid #eee' }}>
-          <nav style={{ display: 'flex', gap: 16 }}>
-            <a href="/">Home</a>
-            <a href="/returns">Shipping & Returns</a>
-            <a href="/privacy">Privacy</a>
-            <a href="/contact">Contact</a>
+          <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <img 
+                src="/Logo.png" 
+                alt="WestCoast Collectibles Logo" 
+                style={{ height: '40px', width: 'auto' }}
+              />
+              <a href="/" style={{ fontWeight: 'bold', color: '#7c3aed', textDecoration: 'none' }}>
+                WestCoast Collectibles
+              </a>
+            </div>
+            <div style={{ display: 'flex', gap: 16 }}>
+              <a href="/">Home</a>
+              <a href="/returns">Shipping & Returns</a>
+              <a href="/privacy">Privacy</a>
+              <a href="/contact">Contact</a>
+            </div>
           </nav>
         </header>
         <div>{children}</div>
