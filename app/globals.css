@@ -336,7 +336,8 @@ body{
 .wcc-actions{display:flex; gap:8px;}
 
 .wcc-btn{display:inline-flex; align-items:center; gap:8px; padding:10px 14px; font-size:.92rem;
-  border-radius:999px; border:1px solid var(--wcc-line); background:#fff; position:relative; overflow:hidden;}
+  border-radius:999px; border:1px solid var(--wcc-line); background:#fff; position:relative; overflow:hidden;
+  cursor:pointer !important; pointer-events:all !important; z-index:100 !important;}
 .wcc-btn--grad{border:none; color:#0b0b0f; background:linear-gradient(135deg,var(--wcc-teal),var(--wcc-grad-c)); box-shadow:0 10px 24px rgba(94,208,192,.22);}
 .wcc-btn--grad::after{content:""; position:absolute; inset:0;
   background:linear-gradient(120deg,rgba(255,255,255,0) 30%, rgba(255,255,255,.5) 50%, rgba(255,255,255,0) 70%);

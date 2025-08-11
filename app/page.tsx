@@ -51,13 +51,20 @@ export default function HomePage() {
                 <a className="luxury-btn" href="#featured">Browse Featured</a>
               </div>
             </div>
-            <div className="luxury-card accent-lilac" style={{ background: 'linear-gradient(#fff,#fff) padding-box, linear-gradient(135deg,var(--accent-start),var(--accent-mid),var(--accent-end)) border-box', border: '2px solid transparent', borderRadius: '22px', padding: '18px', boxShadow: 'var(--shadow-card)', position: 'relative', overflow: 'hidden' }}>
-              <div className="luxury-thumb" style={{ height: '380px', borderRadius: '16px', background: '#fff', overflow: 'hidden', margin: 0 }}>
+            <div style={{ 
+              background: 'linear-gradient(135deg,var(--accent-start),var(--accent-mid),var(--accent-end))', 
+              borderRadius: '22px', 
+              padding: '2px',
+              boxShadow: 'var(--shadow-card)', 
+              position: 'relative', 
+              overflow: 'hidden',
+              pointerEvents: 'none'
+            }}>
+              <div style={{ height: '380px', borderRadius: '20px', overflow: 'hidden', margin: 0 }}>
                 <img 
                   src="/Logo.png" 
                   alt="WestCoast Collectibles Logo" 
-                  className="luxury-thumb-inner"
-                  style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '20px' }}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', borderRadius: '20px' }}
                 />
               </div>
             </div>

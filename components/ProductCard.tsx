@@ -82,30 +82,43 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
             <span className="product-price wcc-price">Price Available</span>
           )}
           
-          <div className="wcc-actions">
+          <div className="wcc-actions" style={{ position: 'relative', zIndex: 10 }}>
             <a
               className="btn wcc-btn wcc-btn--grad"
               href={product.ebayUrl || 'https://www.ebay.com/usr/westcoastcollectibless'}
               target="_blank"
-              rel="noopener"
+              rel="noopener noreferrer"
+              style={{ 
+                pointerEvents: 'all',
+                cursor: 'pointer',
+                position: 'relative',
+                zIndex: 11,
+                textDecoration: 'none',
+                display: 'inline-block'
+              }}
+              onMouseDown={() => console.log('eBay mousedown')}
+              onMouseUp={() => console.log('eBay mouseup')} 
+              onClick={(e) => {
+                console.log('eBay link clicked:', product.ebayUrl)
+                window.open(product.ebayUrl || 'https://www.ebay.com/usr/westcoastcollectibless', '_blank')
+              }}
             >
               View on eBay
             </a>
             <button 
               type="button"
               className="btn wcc-btn"
-              data-toggle="desc"
+              style={{ 
+                pointerEvents: 'all',
+                cursor: 'pointer',
+                position: 'relative',
+                zIndex: 11
+              }}
               onClick={(e) => {
+                console.log('Opening modal for product:', product.name)
                 e.preventDefault()
-                const card = e.target.closest('.wcc-card')
-                const desc = card && card.querySelector('.wcc-desc')
-                if (desc) {
-                  const isOpen = desc.hasAttribute('hidden')
-                  desc.toggleAttribute('hidden', !isOpen)
-                  e.target.textContent = isOpen ? 'Hide details' : 'Details'
-                } else {
-                  setIsModalOpen(true)
-                }
+                e.stopPropagation()
+                setIsModalOpen(true)
               }}
             >
               Details
@@ -113,11 +126,6 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
           </div>
         </div>
 
-        {product.description ? (
-          <div className="wcc-desc" hidden>
-            <p>{product.description}</p>
-          </div>
-        ) : null}
       </article>
 
       <ProductModal 

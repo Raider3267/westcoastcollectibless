@@ -18,7 +18,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <img 
                   src="/Logo.png" 
                   alt="WestCoast Collectibles Logo" 
-                  style={{ height: '36px', width: '36px', borderRadius: '12px', objectFit: 'cover' }}
+                  style={{ 
+                    height: '36px', 
+                    width: '36px', 
+                    borderRadius: '12px', 
+                    objectFit: 'cover',
+                    objectPosition: 'center',
+                    padding: '2px',
+                    background: 'linear-gradient(135deg, var(--wcc-grad-a), var(--wcc-grad-b))',
+                    border: '2px solid transparent'
+                  }}
                 />
                 <h1 style={{ margin: 0, fontSize: '1rem', letterSpacing: '.14em', textTransform: 'uppercase', fontWeight: 'bold' }}>
                   WestCoast Collectibles
@@ -93,18 +102,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 <script id="wcc-dropin-js" dangerouslySetInnerHTML={{__html: `
 document.addEventListener('DOMContentLoaded', function(){
   document.querySelectorAll('.emoji-confetti, .falling-emoji, [data-confetti]').forEach(n=>n.remove());
-
-  document.addEventListener('click', function(e){
-    const btn = e.target.closest('.wcc-btn[data-toggle="desc"]');
-    if(!btn) return;
-    e.preventDefault();
-    const card = btn.closest('.wcc-card');
-    const desc = card && card.querySelector('.wcc-desc');
-    if(!desc) return;
-    const open = desc.hasAttribute('hidden');
-    desc.toggleAttribute('hidden', !open);
-    btn.textContent = open ? 'Hide details' : 'Details';
-  });
 
   const colors=['#C7A3FF','#5ED0C0','#F7E7C3'];
   function addFloaters(where, n){
