@@ -34,43 +34,139 @@ export default function HomePage() {
   return (
     <div>      
       <main>
-        {/* Hero Section */}
-        <section className="luxury-hero">
-        <div style={{ maxWidth: '1224px', margin: '0 auto', padding: '0 20px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1.1fr .9fr', gap: '48px', alignItems: 'center', position: 'relative', zIndex: 2 }}>
-            <div>
-              <div className="luxury-eyebrow">Curated • Limited • Authentic</div>
-              <h1 className="luxury-hero">
-                Luxury Designer Toys with Playful Energy
-              </h1>
-              <p className="luxury-hero">
-                Chic gradients, elegant cards, and magical hover effects — built for premium collectibles!
-              </p>
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '10px' }}>
-                <a className="luxury-btn grad" href="#featured">Shop New Arrivals</a>
-                <a className="luxury-btn" href="#featured">Browse Featured</a>
-              </div>
-            </div>
-            <div style={{ 
-              background: 'linear-gradient(135deg,var(--accent-start),var(--accent-mid),var(--accent-end))', 
-              borderRadius: '22px', 
-              padding: '2px',
-              boxShadow: 'var(--shadow-card)', 
-              position: 'relative', 
-              overflow: 'hidden',
-              pointerEvents: 'none'
+        {/* Hero Video Section */}
+        <section style={{ 
+          position: 'relative', 
+          height: '100vh', 
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center'
+        }}>
+          {/* Video Background */}
+          <video 
+            autoPlay 
+            muted 
+            loop 
+            playsInline
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              minWidth: '100%',
+              minHeight: '100%',
+              width: 'auto',
+              height: 'auto',
+              zIndex: -1,
+              transform: 'translate(-50%, -50%)',
+              objectFit: 'cover'
+            }}
+          >
+            <source src="/hero-video.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+
+          {/* Overlay for better text readability */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.3) 100%)',
+            zIndex: 0
+          }} />
+
+          {/* Hero Content */}
+          <div style={{ 
+            position: 'relative', 
+            zIndex: 2, 
+            color: 'white', 
+            textAlign: 'left', 
+            maxWidth: '700px', 
+            padding: '0 50px',
+            width: '100%'
+          }}>
+            <div className="luxury-eyebrow" style={{ 
+              color: 'rgba(255,255,255,0.9)',
+              textShadow: '0 2px 4px rgba(0,0,0,0.3)'
             }}>
-              <div style={{ height: '380px', borderRadius: '20px', overflow: 'hidden', margin: 0 }}>
-                <img 
-                  src="/Logo.png" 
-                  alt="WestCoast Collectibles Logo" 
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', borderRadius: '20px' }}
-                />
-              </div>
+              Curated • Limited • Authentic
+            </div>
+            <h1 style={{ 
+              fontSize: 'clamp(2.5rem, 4vw, 4rem)', 
+              margin: '0.35em 0 0.3em', 
+              lineHeight: 1.07, 
+              fontWeight: 800,
+              color: 'white',
+              textShadow: '0 4px 8px rgba(0,0,0,0.4)'
+            }}>
+              Luxury Designer Toys with Playful Energy
+            </h1>
+            <p style={{ 
+              margin: '0 0 30px', 
+              fontSize: '1.2rem',
+              color: 'rgba(255,255,255,0.95)',
+              textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+              lineHeight: 1.6
+            }}>
+              Chic gradients, elegant cards, and magical hover effects — built for premium collectibles!
+            </p>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <a 
+                href="#featured"
+                className="luxury-btn"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '14px 20px',
+                  fontSize: '1rem',
+                  borderRadius: '999px',
+                  border: 'none',
+                  color: '#0b0b0f',
+                  background: 'linear-gradient(135deg, var(--wcc-teal), var(--wcc-grad-c))',
+                  boxShadow: '0 12px 28px rgba(94,208,192,.4)',
+                  textDecoration: 'none',
+                  fontWeight: 600,
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+              >
+                Shop New Arrivals
+              </a>
+              <a 
+                href="#featured"
+                className="luxury-btn"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '14px 20px',
+                  fontSize: '1rem',
+                  borderRadius: '999px',
+                  border: '2px solid rgba(255,255,255,0.8)',
+                  color: 'white',
+                  background: 'rgba(255,255,255,0.1)',
+                  backdropFilter: 'blur(10px)',
+                  textDecoration: 'none',
+                  fontWeight: 600,
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.2)'
+                  e.currentTarget.style.transform = 'translateY(-2px)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.1)'
+                  e.currentTarget.style.transform = 'translateY(0)'
+                }}
+              >
+                Browse Featured
+              </a>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
         {/* Featured Listings */}
         <FeaturedSection items={items} loading={loading} />
