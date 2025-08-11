@@ -85,7 +85,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   .accent-gold{--wcc-accent:var(--wcc-gold)}
 
   .wcc-card:hover{transform:translateY(-4px);box-shadow:0 22px 46px var(--wcc-glow)}
-  .wcc-card:hover::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:0 0 0 2px var(--wcc-accent) inset}
   .wcc-card:hover .wcc-thumb::before{border-color:var(--wcc-accent)}
   .wcc-card:hover .wcc-zoom{transform:scale(1.03)}
 
