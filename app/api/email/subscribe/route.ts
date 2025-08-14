@@ -10,20 +10,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Valid email is required' }, { status: 400 })
     }
 
-    // Send welcome email
-    const success = await addEmailSubscriber(email, firstName)
+    // Try to send welcome email, but don't fail the subscription if it doesn't work
+    const emailSent = await addEmailSubscriber(email, firstName)
 
-    if (!success) {
-      return NextResponse.json({ error: 'Failed to send welcome email' }, { status: 500 })
-    }
-
-    // In a real app, you'd also store the email in a database here
+    // In a real app, you'd store the email in a database here regardless of email success
     // For now, we'll just log it
-    console.log(`New VIP subscriber: ${email}${firstName ? ` (${firstName})` : ''}`)
+    console.log(`New VIP subscriber: ${email}${firstName ? ` (${firstName})` : ''} - Email sent: ${emailSent}`)
 
+    // Always return success to the user - the subscription is what matters
     return NextResponse.json({ 
       success: true, 
-      message: 'Successfully subscribed to VIP list!' 
+      message: 'Successfully subscribed to VIP list!',
+      emailSent: emailSent
     })
 
   } catch (error) {

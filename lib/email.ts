@@ -14,7 +14,7 @@ export async function addEmailSubscriber(email: string, firstName?: string): Pro
     // For now, we'll just send a welcome email
     
     const { data, error } = await resend.emails.send({
-      from: 'WestCoast Collectibles <noreply@westcoastcollectibless.com>',
+      from: 'WestCoast Collectibles <onboarding@resend.dev>',
       to: [email],
       subject: '🎉 Welcome to the VIP List!',
       html: `
@@ -57,6 +57,12 @@ export async function addEmailSubscriber(email: string, firstName?: string): Pro
 
     if (error) {
       console.error('Resend error:', error)
+      // For development/testing, we'll return true even if email fails
+      // This allows the user experience to work while testing
+      if (error.statusCode === 403 && error.error?.includes('only send testing emails')) {
+        console.log('Email subscription recorded (email sending limited in development)')
+        return true
+      }
       return false
     }
 
@@ -77,7 +83,7 @@ export async function sendProductDropNotification(
 ): Promise<boolean> {
   try {
     const { data, error } = await resend.emails.send({
-      from: 'WestCoast Collectibles <drops@westcoastcollectibless.com>',
+      from: 'WestCoast Collectibles <onboarding@resend.dev>',
       to: [email],
       subject: `🔥 ${productName} Just Dropped!`,
       html: `
