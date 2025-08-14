@@ -1,5 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
+import { Listing } from './listings'
+
 let parse: any
 try {
   // Works when subpath exports are available
@@ -8,20 +10,6 @@ try {
   // Fallback: some bundlers only expose the root; this gets the sync export
   const mod: any = await import('csv-parse')
   parse = mod.parse || mod.default?.parse || mod['sync']?.parse
-}
-
-export type Listing = {
-  id: string
-  name: string
-  price?: number | null
-  ebayUrl?: string | null
-  image?: string | null
-  stripeLink?: string | null
-  description?: string | null
-  quantity?: number
-  status?: 'live' | 'coming-soon' | 'draft'
-  drop_date?: string | null
-  released_date?: string | null
 }
 
 const FIRST = <T>(...vals: (T | undefined | null | false | '' )[]) =>
@@ -84,93 +72,15 @@ function cleanDescription(htmlDesc: string): string {
   return formatted.trim()
 }
 
-export async function getListingsFromCsv(filename = 'export.csv', includeOutOfStock = false): Promise<Listing[]> {
+export async function getNewReleases(filename = 'export.csv', daysBack = 7): Promise<Listing[]> {
   const filePath = path.join(process.cwd(), filename)
   const text = await readFile(filePath, 'utf8')
 
   const rows = parse(text, { columns: true, skip_empty_lines: true }) as any[]
 
-  const items: Listing[] = rows
-    .map((row, idx) => {
-      // Extract data from export.csv columns
-      const id = FIRST<string>(row['sku'], String(idx)) || String(idx)
-      const name = FIRST<string>(row['title'], row['Title']) || `Item ${idx + 1}`
-      
-      // Get price (export.csv has price as a number)
-      const priceStr = FIRST<string>(row['price'], row['Price'])
-      const price = priceStr ? Number(String(priceStr).replace(/[^0-9.]/g, '')) : null
-
-      // Get quantity for stock filtering
-      const quantityStr = FIRST<string>(row['quantity'], row['Quantity'])
-      const quantity = quantityStr ? Number(String(quantityStr).replace(/[^0-9]/g, '')) : 0
-
-      // Get the first image from the comma-separated image URLs
-      const imagesString = FIRST<string>(row['images'], row['Images']) || ''
-      const imageUrls = imagesString.split(',').map(url => url.trim()).filter(url => url)
-      const image = imageUrls[0] || null
-
-      // Clean the HTML description to plain text
-      const rawDescription = FIRST<string>(row['description'], row['Description']) || ''
-      const description = cleanDescription(rawDescription)
-
-      // For now, we'll use a generic eBay store URL since we don't have item numbers
-      // You could enhance this later by mapping SKUs to eBay item numbers
-      const ebayUrl = 'https://www.ebay.com/usr/westcoastcollectibless'
-
-      const stripeLink = FIRST<string>(row['Stripe Link'], row['Stripe URL'], row['paymentLink']) || null
-
-      // Get status field, default to 'live' for existing products
-      const statusStr = FIRST<string>(row['status'], row['Status']) || 'live'
-      const status = (['live', 'coming-soon', 'draft'].includes(statusStr) ? statusStr : 'live') as 'live' | 'coming-soon' | 'draft'
-
-      // Get drop_date field
-      const drop_date = FIRST<string>(row['drop_date'], row['Drop Date']) || null
-      
-      // Get released_date field
-      const released_date = FIRST<string>(row['released_date'], row['Released Date']) || null
-
-      return { 
-        id: String(id), 
-        name, 
-        price, 
-        ebayUrl, 
-        image, 
-        stripeLink, 
-        description,
-        quantity,
-        status,
-        drop_date,
-        released_date
-      }
-    })
-    // Filter based on stock, price, and content quality
-    .filter(item => {
-      // Filter out items without basic required fields
-      if (!item.name || item.name.trim() === '' || item.name === 'Item 1' || item.name.includes('Item ')) return false
-      
-      // Only show 'live' products in main feed (not coming-soon or draft)
-      if (item.status !== 'live') return false
-      
-      // Always require a price
-      if (!item.price || item.price <= 0) return false
-      
-      // Filter by stock unless out-of-stock items are specifically requested
-      if (!includeOutOfStock && (!item.quantity || item.quantity <= 0)) return false
-      
-      // Filter out items without images
-      if (!item.image || item.image.trim() === '') return false
-      
-      return true
-    })
-
-  return items
-}
-
-export async function getComingSoonProducts(filename = 'export.csv'): Promise<Listing[]> {
-  const filePath = path.join(process.cwd(), filename)
-  const text = await readFile(filePath, 'utf8')
-
-  const rows = parse(text, { columns: true, skip_empty_lines: true }) as any[]
+  // Calculate the cutoff date for "new" releases
+  const cutoffDate = new Date()
+  cutoffDate.setDate(cutoffDate.getDate() - daysBack)
 
   const items: Listing[] = rows
     .map((row, idx) => {
@@ -202,10 +112,8 @@ export async function getComingSoonProducts(filename = 'export.csv'): Promise<Li
       const statusStr = FIRST<string>(row['status'], row['Status']) || 'live'
       const status = (['live', 'coming-soon', 'draft'].includes(statusStr) ? statusStr : 'live') as 'live' | 'coming-soon' | 'draft'
 
-      // Get drop_date field
+      // Get drop_date and released_date fields
       const drop_date = FIRST<string>(row['drop_date'], row['Drop Date']) || null
-      
-      // Get released_date field
       const released_date = FIRST<string>(row['released_date'], row['Released Date']) || null
 
       return { 
@@ -222,18 +130,33 @@ export async function getComingSoonProducts(filename = 'export.csv'): Promise<Li
         released_date
       }
     })
-    // Filter for coming-soon products only
+    // Filter for new releases
     .filter(item => {
       // Filter out items without basic required fields
       if (!item.name || item.name.trim() === '' || item.name === 'Item 1' || item.name.includes('Item ')) return false
       
-      // Must be coming-soon status
-      if (item.status !== 'coming-soon') return false
+      // Must be live status
+      if (item.status !== 'live') return false
+      
+      // Must have a released_date within the specified time range
+      if (!item.released_date) return false
+      
+      const releaseDate = new Date(item.released_date)
+      if (releaseDate < cutoffDate) return false
+      
+      // Always require a price
+      if (!item.price || item.price <= 0) return false
       
       // Filter out items without images
       if (!item.image || item.image.trim() === '') return false
       
       return true
+    })
+    // Sort by release date (newest first)
+    .sort((a, b) => {
+      const dateA = new Date(a.released_date!).getTime()
+      const dateB = new Date(b.released_date!).getTime()
+      return dateB - dateA
     })
 
   return items

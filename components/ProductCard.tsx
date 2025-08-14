@@ -10,7 +10,12 @@ type Product = {
   price?: number | null
   ebayUrl?: string | null
   image?: string | null
+  stripeLink?: string | null
   description?: string | null
+  quantity?: number
+  status?: 'live' | 'coming-soon' | 'draft'
+  drop_date?: string | null
+  released_date?: string | null
 }
 
 interface ProductCardProps {
@@ -116,6 +121,7 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
               }}
               onClick={(e) => {
                 console.log('Opening modal for product:', product.name)
+                console.log('Product data:', product)
                 e.preventDefault()
                 e.stopPropagation()
                 setIsModalOpen(true)

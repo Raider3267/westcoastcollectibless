@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 
 type Product = {
   id: string
@@ -8,7 +9,12 @@ type Product = {
   price?: number | null
   ebayUrl?: string | null
   image?: string | null
+  stripeLink?: string | null
   description?: string | null
+  quantity?: number
+  status?: 'live' | 'coming-soon' | 'draft'
+  drop_date?: string | null
+  released_date?: string | null
 }
 
 interface ProductModalProps {
@@ -40,8 +46,8 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
   const toyEmojis = ['🧸', '🎨', '🎪', '🎭', '🎲', '🚀', '🌟', '💎', '🎯', '⭐']
   const randomEmoji = toyEmojis[Math.floor(Math.random() * toyEmojis.length)]
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ zIndex: 1000 }}>
+  const modalContent = (
+    <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 999999, position: 'fixed' }}>
       {/* Backdrop */}
       <div 
         className="absolute inset-0"
@@ -57,7 +63,9 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
         background: 'linear-gradient(#fff,#fff) padding-box, linear-gradient(135deg,var(--wcc-grad-a),var(--wcc-grad-b),var(--wcc-grad-c)) border-box',
         border: '3px solid transparent',
         borderRadius: '24px',
-        boxShadow: '0 25px 60px rgba(0,0,0,0.3)'
+        boxShadow: '0 25px 60px rgba(0,0,0,0.3)',
+        zIndex: 999999,
+        position: 'relative'
       }}>
         {/* Header */}
         <div className="p-6 border-b" style={{
@@ -90,14 +98,73 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
 
         {/* Content */}
         <div className="p-6">
-          {/* Image */}
+          {/* Image Gallery */}
           {product.image && (
-            <div className="mb-6 wcc-thumb" style={{ maxWidth: '400px', margin: '0 auto 24px auto' }}>
-              <img
-                src={product.image}
-                alt={product.name}
-                className="wcc-zoom"
-              />
+            <div className="mb-6" style={{ maxWidth: '500px', margin: '0 auto 24px auto' }}>
+              {(() => {
+                // Check if image contains multiple URLs separated by commas
+                const imageUrls = product.image.split(',').map(url => url.trim()).filter(url => url)
+                const mainImage = imageUrls[0]
+                const additionalImages = imageUrls.slice(1)
+                
+                return (
+                  <div>
+                    {/* Main Image */}
+                    <div className="mb-4 wcc-thumb">
+                      <img
+                        src={mainImage}
+                        alt={product.name}
+                        className="wcc-zoom"
+                      />
+                    </div>
+                    
+                    {/* Additional Images Thumbnail Gallery */}
+                    {additionalImages.length > 0 && (
+                      <div className="grid grid-cols-4 gap-2">
+                        {additionalImages.slice(0, 6).map((imgUrl, index) => (
+                          <div 
+                            key={index} 
+                            className="wcc-thumb cursor-pointer hover:opacity-80 transition-opacity"
+                            style={{ height: '80px' }}
+                            onClick={() => {
+                              // Swap clicked image with main image
+                              const newMainImage = imgUrl
+                              const newImages = [newMainImage, mainImage, ...additionalImages.filter(url => url !== imgUrl)]
+                              // Update the product image temporarily for display
+                              const imageContainer = document.querySelector('.wcc-thumb img') as HTMLImageElement
+                              if (imageContainer) {
+                                imageContainer.src = newMainImage
+                              }
+                            }}
+                          >
+                            <img
+                              src={imgUrl}
+                              alt={`${product.name} - Image ${index + 2}`}
+                              className="wcc-zoom"
+                              style={{ height: '100%', objectFit: 'cover' }}
+                            />
+                          </div>
+                        ))}
+                        {additionalImages.length > 6 && (
+                          <div 
+                            className="flex items-center justify-center"
+                            style={{ 
+                              height: '80px',
+                              background: 'linear-gradient(135deg, rgba(199,163,255,.15), rgba(94,208,192,.15))',
+                              borderRadius: '8px',
+                              fontSize: '0.8rem',
+                              fontWeight: 600,
+                              color: 'var(--wcc-muted)'
+                            }}
+                          >
+                            +{additionalImages.length - 6} more
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              })()}
             </div>
           )}
 
@@ -171,4 +238,11 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
       </div>
     </div>
   )
+
+  // Use createPortal to render modal at document.body level
+  if (typeof document !== 'undefined') {
+    return createPortal(modalContent, document.body)
+  }
+
+  return modalContent
 }

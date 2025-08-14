@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react'
 export default function HomePage() {
   const [items, setItems] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const loadProducts = async () => {
     try {
@@ -28,7 +29,20 @@ export default function HomePage() {
     
     // Auto-refresh every 30 seconds to pick up new products
     const interval = setInterval(loadProducts, 30000)
-    return () => clearInterval(interval)
+    
+    // Check for scheduled product launches every minute
+    const schedulerInterval = setInterval(async () => {
+      try {
+        await fetch('/api/scheduler', { method: 'POST' })
+      } catch (error) {
+        console.error('Scheduler check failed:', error)
+      }
+    }, 60000) // Check every minute
+    
+    return () => {
+      clearInterval(interval)
+      clearInterval(schedulerInterval)
+    }
   }, [])
 
   return (
@@ -171,6 +185,9 @@ export default function HomePage() {
         {/* Featured Listings */}
         <FeaturedSection items={items} loading={loading} />
 
+        {/* New Releases Section */}
+        <NewReleasesSection />
+
         {/* Coming Soon Section */}
         <ComingSoonSection />
 
@@ -293,10 +310,149 @@ function FeaturedSection({ items, loading }: { items: Listing[], loading: boolea
   )
 }
 
+function NewReleasesSection() {
+  const [newReleases, setNewReleases] = useState<Listing[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchNewReleases = async () => {
+      try {
+        const response = await fetch('/api/new-releases')
+        if (response.ok) {
+          const data = await response.json()
+          setNewReleases(data)
+        }
+      } catch (error) {
+        console.error('Failed to load new releases:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchNewReleases()
+  }, [])
+
+  // Don't show section if no new releases
+  if (!loading && newReleases.length === 0) {
+    return null
+  }
+
+  const cardColors = [
+    'from-pop-pink/20 to-pop-orange/20',
+    'from-pop-teal/20 to-pop-blue/20', 
+    'from-pop-lime/20 to-pop-yellow/20',
+    'from-pop-purple/20 to-pop-pink/20',
+    'from-pop-orange/20 to-pop-teal/20',
+    'from-pop-blue/20 to-pop-purple/20'
+  ]
+
+  return (
+    <section className="luxury-section" style={{ 
+      background: 'linear-gradient(135deg, rgba(255,140,0,.05) 0%, rgba(255,20,147,.05) 50%, rgba(255,69,0,.05) 100%)',
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      {/* Background decoration */}
+      <div style={{
+        position: 'absolute',
+        top: '-20%',
+        left: '-10%',
+        width: '40%',
+        height: '140%',
+        background: 'radial-gradient(circle, rgba(255,140,0,.1) 0%, transparent 70%)',
+        borderRadius: '50%',
+        filter: 'blur(60px)'
+      }} />
+      
+      <div style={{ maxWidth: '1224px', margin: '0 auto', padding: '0 20px', position: 'relative', zIndex: 2 }}>
+        <div className="luxury-eyebrow" style={{ marginBottom: '8px' }}>🔥 Fresh Drops</div>
+        <h2 style={{ 
+          fontSize: 'clamp(1.5rem, 2.5vw, 2rem)', 
+          margin: '0 0 20px', 
+          fontWeight: 800,
+          color: 'var(--wcc-ink)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          🆕 New Releases
+          {newReleases.length > 0 && (
+            <span style={{
+              fontSize: '0.7rem',
+              background: 'linear-gradient(135deg, #ff8c00, #ff1493)',
+              color: 'white',
+              padding: '4px 8px',
+              borderRadius: '999px',
+              fontWeight: 600
+            }}>
+              {newReleases.length} NEW
+            </span>
+          )}
+        </h2>
+        
+        {loading ? (
+          <div className="luxury-grid wcc-scroll">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="luxury-card accent-teal" style={{ opacity: 0.6 }}>
+                <div className="luxury-thumb">
+                  <div className="luxury-thumb-inner" style={{ background: '#f0f0f0' }}></div>
+                </div>
+                <div className="luxury-body">
+                  <div style={{ background: '#f0f0f0', height: '20px', borderRadius: '4px', marginBottom: '8px' }}></div>
+                  <div style={{ background: '#f0f0f0', height: '16px', borderRadius: '4px', width: '60%' }}></div>
+                </div>
+                <div className="luxury-foot">
+                  <div style={{ background: '#f0f0f0', height: '20px', width: '40px', borderRadius: '4px' }}></div>
+                  <div style={{ background: '#f0f0f0', height: '32px', width: '60px', borderRadius: '999px' }}></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="luxury-grid wcc-scroll">
+            {newReleases.map((product, index) => {
+              const cardColor = cardColors[index % cardColors.length]
+              const releaseEmojis = ['🚀', '⭐', '🔥', '✨', '💎', '🎯', '🌟', '💫', '🎪', '🎨']
+              const randomEmoji = releaseEmojis[index % releaseEmojis.length]
+
+              return (
+                <div key={product.id} style={{ position: 'relative' }}>
+                  {/* "NEW" Badge */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '8px',
+                    right: '8px',
+                    background: 'linear-gradient(135deg, #ff8c00, #ff1493)',
+                    color: 'white',
+                    padding: '4px 8px',
+                    borderRadius: '999px',
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    zIndex: 10,
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+                  }}>
+                    NEW
+                  </div>
+                  <ProductCard
+                    product={product}
+                    cardColor={cardColor}
+                    randomEmoji={randomEmoji}
+                  />
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
 function ComingSoonSection() {
   const [email, setEmail] = useState('')
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [comingSoonItems, setComingSoonItems] = useState<Listing[]>([])
+  const [nextDropDate, setNextDropDate] = useState<Date | null>(null)
 
   useEffect(() => {
     const fetchComingSoonItems = async () => {
@@ -305,6 +461,18 @@ function ComingSoonSection() {
         if (response.ok) {
           const data = await response.json()
           setComingSoonItems(data)
+          
+          // Find the earliest drop date among coming soon items
+          const dropDates = data
+            .filter((item: any) => item.drop_date)
+            .map((item: any) => new Date(item.drop_date))
+            .sort((a: Date, b: Date) => a.getTime() - b.getTime())
+          
+          if (dropDates.length > 0) {
+            setNextDropDate(dropDates[0])
+          } else {
+            setNextDropDate(null)
+          }
         }
       } catch (error) {
         console.error('Failed to load coming soon items:', error)
@@ -312,6 +480,10 @@ function ComingSoonSection() {
     }
     
     fetchComingSoonItems()
+    
+    // Refresh coming soon items every 30 seconds to update when products launch
+    const interval = setInterval(fetchComingSoonItems, 30000)
+    return () => clearInterval(interval)
   }, [])
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -325,19 +497,28 @@ function ComingSoonSection() {
     }, 3000)
   }
 
-  const nextDropDate = new Date()
-  nextDropDate.setDate(nextDropDate.getDate() + 7) // Next week
-
   const timeUntilDrop = () => {
+    if (!nextDropDate) {
+      return 'TBA'
+    }
+    
     const now = new Date()
     const timeDiff = nextDropDate.getTime() - now.getTime()
+    
+    if (timeDiff <= 0) {
+      return 'Now available!'
+    }
+    
     const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24))
     const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60))
     
     if (days > 0) {
-      return `${days} day${days > 1 ? 's' : ''}`
+      return `${days} day${days > 1 ? 's' : ''}, ${hours}h`
+    } else if (hours > 0) {
+      return `${hours} hour${hours !== 1 ? 's' : ''}, ${minutes}m`
     } else {
-      return `${hours} hour${hours !== 1 ? 's' : ''}`
+      return `${minutes} minute${minutes !== 1 ? 's' : ''}`
     }
   }
 
@@ -373,34 +554,50 @@ function ComingSoonSection() {
           }}>
             🔥 Next Drop Coming Soon
           </h2>
-          <p style={{ 
-            fontSize: '1.1rem', 
-            color: 'var(--wcc-muted)', 
-            margin: '0 0 32px',
-            maxWidth: '600px',
-            marginLeft: 'auto',
-            marginRight: 'auto',
-            lineHeight: 1.6
-          }}>
-            Get exclusive access to limited designer toys before they sell out. New drops every week featuring rare collectibles and premium figures.
-          </p>
+          {comingSoonItems.length > 0 ? (
+            <p style={{ 
+              fontSize: '1.1rem', 
+              color: 'var(--wcc-muted)', 
+              margin: '0 0 32px',
+              maxWidth: '600px',
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              lineHeight: 1.6
+            }}>
+              Get exclusive access to limited designer toys before they sell out. New drops every week featuring rare collectibles and premium figures.
+            </p>
+          ) : (
+            <p style={{ 
+              fontSize: '1.1rem', 
+              color: 'var(--wcc-muted)', 
+              margin: '0 0 32px',
+              maxWidth: '600px',
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              lineHeight: 1.6
+            }}>
+              No upcoming drops scheduled at the moment. Subscribe to be notified when new products are coming soon!
+            </p>
+          )}
           
           {/* Countdown */}
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '12px',
-            padding: '16px 24px',
-            background: 'linear-gradient(135deg, var(--wcc-lilac), var(--wcc-teal))',
-            borderRadius: '999px',
-            color: 'white',
-            fontWeight: 700,
-            fontSize: '1.1rem',
-            marginBottom: '40px',
-            boxShadow: '0 8px 24px rgba(199,163,255,.3)'
-          }}>
-            ⏰ Next drop in {timeUntilDrop()}
-          </div>
+          {nextDropDate && (
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '16px 24px',
+              background: 'linear-gradient(135deg, var(--wcc-lilac), var(--wcc-teal))',
+              borderRadius: '999px',
+              color: 'white',
+              fontWeight: 700,
+              fontSize: '1.1rem',
+              marginBottom: '40px',
+              boxShadow: '0 8px 24px rgba(199,163,255,.3)'
+            }}>
+              ⏰ {timeUntilDrop() === 'Now available!' ? 'Latest drops now live!' : `Next drop in ${timeUntilDrop()}`}
+            </div>
+          )}
         </div>
 
         <div style={{ 

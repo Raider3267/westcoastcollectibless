@@ -11,6 +11,7 @@ interface Product {
   price: number
   images: string
   status: 'live' | 'coming-soon' | 'draft'
+  drop_date?: string
 }
 
 export default function AdminDashboard() {
@@ -99,6 +100,24 @@ export default function AdminDashboard() {
       }
     } catch (error) {
       console.error('Failed to update product status:', error)
+    }
+  }
+
+  const updateDropDate = async (sku: string, dropDate: string) => {
+    try {
+      const response = await fetch('/api/admin/products', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sku, drop_date: dropDate })
+      })
+      
+      if (response.ok) {
+        setProducts(prev => prev.map(p => 
+          p.sku === sku ? { ...p, drop_date: dropDate } : p
+        ))
+      }
+    } catch (error) {
+      console.error('Failed to update drop date:', error)
     }
   }
 
@@ -284,6 +303,9 @@ export default function AdminDashboard() {
                     Status
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Drop Date
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -350,6 +372,16 @@ export default function AdminDashboard() {
                         <option value="coming-soon">🟡 Coming Soon</option>
                         <option value="draft">⚪ Draft</option>
                       </select>
+                    </td>
+                    <td className="px-6 py-4">
+                      <input
+                        type="datetime-local"
+                        value={product.drop_date || ''}
+                        onChange={(e) => updateDropDate(product.sku, e.target.value)}
+                        className="text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-pop-purple focus:border-transparent"
+                        disabled={product.status !== 'coming-soon'}
+                        placeholder="Set drop date"
+                      />
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
