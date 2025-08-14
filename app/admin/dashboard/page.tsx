@@ -12,6 +12,8 @@ interface Product {
   images: string
   status: 'live' | 'coming-soon' | 'draft'
   drop_date?: string
+  released_date?: string
+  show_in_new_releases?: boolean
 }
 
 export default function AdminDashboard() {
@@ -118,6 +120,24 @@ export default function AdminDashboard() {
       }
     } catch (error) {
       console.error('Failed to update drop date:', error)
+    }
+  }
+
+  const updateNewReleasesVisibility = async (sku: string, showInNewReleases: boolean) => {
+    try {
+      const response = await fetch('/api/admin/products', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sku, show_in_new_releases: showInNewReleases.toString() })
+      })
+      
+      if (response.ok) {
+        setProducts(prev => prev.map(p => 
+          p.sku === sku ? { ...p, show_in_new_releases: showInNewReleases } : p
+        ))
+      }
+    } catch (error) {
+      console.error('Failed to update new releases visibility:', error)
     }
   }
 
@@ -306,6 +326,9 @@ export default function AdminDashboard() {
                     Drop Date
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    New Releases
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -382,6 +405,33 @@ export default function AdminDashboard() {
                         disabled={product.status !== 'coming-soon'}
                         placeholder="Set drop date"
                       />
+                    </td>
+                    <td className="px-6 py-4">
+                      {product.released_date && (
+                        <div className="flex items-center gap-2">
+                          <label className="flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={product.show_in_new_releases || false}
+                              onChange={(e) => updateNewReleasesVisibility(product.sku, e.target.checked)}
+                              className="sr-only"
+                            />
+                            <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors ${
+                              product.show_in_new_releases 
+                                ? 'bg-green-500 border-green-500 text-white' 
+                                : 'border-gray-300 hover:border-green-400'
+                            }`}>
+                              {product.show_in_new_releases && '✓'}
+                            </div>
+                          </label>
+                          <span className="text-xs text-gray-600">
+                            Show in New Releases
+                          </span>
+                        </div>
+                      )}
+                      {!product.released_date && (
+                        <span className="text-xs text-gray-400">Not a new release</span>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">

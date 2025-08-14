@@ -22,6 +22,7 @@ export type Listing = {
   status?: 'live' | 'coming-soon' | 'draft'
   drop_date?: string | null
   released_date?: string | null
+  show_in_new_releases?: boolean
 }
 
 const FIRST = <T>(...vals: (T | undefined | null | false | '' )[]) =>
@@ -128,6 +129,9 @@ export async function getListingsFromCsv(filename = 'export.csv', includeOutOfSt
       
       // Get released_date field
       const released_date = FIRST<string>(row['released_date'], row['Released Date']) || null
+      
+      // Get show_in_new_releases field
+      const show_in_new_releases = FIRST<string>(row['show_in_new_releases'], row['Show In New Releases']) === 'true'
 
       return { 
         id: String(id), 
@@ -140,7 +144,8 @@ export async function getListingsFromCsv(filename = 'export.csv', includeOutOfSt
         quantity,
         status,
         drop_date,
-        released_date
+        released_date,
+        show_in_new_releases
       }
     })
     // Filter based on stock, price, and content quality
@@ -207,6 +212,9 @@ export async function getComingSoonProducts(filename = 'export.csv'): Promise<Li
       
       // Get released_date field
       const released_date = FIRST<string>(row['released_date'], row['Released Date']) || null
+      
+      // Get show_in_new_releases field
+      const show_in_new_releases = FIRST<string>(row['show_in_new_releases'], row['Show In New Releases']) === 'true'
 
       return { 
         id: String(id), 
@@ -219,7 +227,8 @@ export async function getComingSoonProducts(filename = 'export.csv'): Promise<Li
         quantity,
         status,
         drop_date,
-        released_date
+        released_date,
+        show_in_new_releases
       }
     })
     // Filter for coming-soon products only

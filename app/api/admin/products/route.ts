@@ -54,7 +54,9 @@ export async function GET() {
       price: parseFloat(product.price) || 0,
       images: product.images || '',
       status: product.status || 'live', // Include status field, default to 'live'
-      drop_date: product.drop_date || '' // Include drop_date field
+      drop_date: product.drop_date || '', // Include drop_date field
+      released_date: product.released_date || '', // Include released_date field
+      show_in_new_releases: product.show_in_new_releases === 'true' // Convert string to boolean
     })).filter(product => product.title) // Filter out empty products
     
     return NextResponse.json(transformedProducts)
@@ -158,7 +160,9 @@ export async function POST(request: NextRequest) {
       brand: '',
       cost: '',
       status: 'live', // Add status field with default value
-      drop_date: '' // Add drop_date field
+      drop_date: '', // Add drop_date field
+      released_date: '', // Add released_date field
+      show_in_new_releases: 'false' // Add show_in_new_releases field
     }
     
     products.push(newProduct)

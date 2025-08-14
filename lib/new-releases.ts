@@ -112,9 +112,10 @@ export async function getNewReleases(filename = 'export.csv', daysBack = 7): Pro
       const statusStr = FIRST<string>(row['status'], row['Status']) || 'live'
       const status = (['live', 'coming-soon', 'draft'].includes(statusStr) ? statusStr : 'live') as 'live' | 'coming-soon' | 'draft'
 
-      // Get drop_date and released_date fields
+      // Get drop_date, released_date, and show_in_new_releases fields
       const drop_date = FIRST<string>(row['drop_date'], row['Drop Date']) || null
       const released_date = FIRST<string>(row['released_date'], row['Released Date']) || null
+      const show_in_new_releases = FIRST<string>(row['show_in_new_releases'], row['Show In New Releases']) === 'true'
 
       return { 
         id: String(id), 
@@ -127,7 +128,8 @@ export async function getNewReleases(filename = 'export.csv', daysBack = 7): Pro
         quantity,
         status,
         drop_date,
-        released_date
+        released_date,
+        show_in_new_releases
       }
     })
     // Filter for new releases
@@ -143,6 +145,9 @@ export async function getNewReleases(filename = 'export.csv', daysBack = 7): Pro
       
       const releaseDate = new Date(item.released_date)
       if (releaseDate < cutoffDate) return false
+      
+      // Must be explicitly marked to show in new releases
+      if (!item.show_in_new_releases) return false
       
       // Always require a price
       if (!item.price || item.price <= 0) return false

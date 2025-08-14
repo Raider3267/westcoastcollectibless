@@ -16,6 +16,7 @@ type Product = {
   status?: 'live' | 'coming-soon' | 'draft'
   drop_date?: string | null
   released_date?: string | null
+  show_in_new_releases?: boolean
 }
 
 interface ProductCardProps {

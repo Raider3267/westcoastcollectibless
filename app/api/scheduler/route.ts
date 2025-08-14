@@ -31,6 +31,7 @@ export async function POST() {
           record.status = 'live'
           record.drop_date = '' // Clear the drop date since it's now live
           record.released_date = currentTime.toISOString() // Set release timestamp
+          record.show_in_new_releases = 'true' // Show in New Releases by default
           updatedCount++
         }
       }
