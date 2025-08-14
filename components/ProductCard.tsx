@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import ProductModal from './ProductModal'
 import DetailsButton from './DetailsButton'
+import ImageCarousel from './ImageCarousel'
 
 type Product = {
   id: string
@@ -10,6 +11,7 @@ type Product = {
   price?: number | null
   ebayUrl?: string | null
   image?: string | null
+  images?: string[]
   stripeLink?: string | null
   description?: string | null
   quantity?: number
@@ -56,14 +58,14 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
 
   return (
     <>
-      <article className={`product-card wcc-card ${accentClass}`}>
+      <article className={`product-card wcc-card ${accentClass} group`}>
         <div className="product-thumb wcc-thumb">
-          {product.image ? (
-            <img 
+          {(product.images && product.images.length > 0) || product.image ? (
+            <ImageCarousel
+              images={product.images && product.images.length > 0 ? product.images : (product.image ? [product.image] : [])}
+              productName={product.name}
               className="wcc-zoom"
-              src={product.image} 
-              alt={product.name} 
-              loading="lazy" 
+              showThumbnails={false}
             />
           ) : (
             <div className="wcc-zoom" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', background: '#f8f9fa' }}>

@@ -16,6 +16,7 @@ export type Listing = {
   price?: number | null
   ebayUrl?: string | null
   image?: string | null
+  images?: string[]
   stripeLink?: string | null
   description?: string | null
   quantity?: number
@@ -105,10 +106,11 @@ export async function getListingsFromCsv(filename = 'export.csv', includeOutOfSt
       const quantityStr = FIRST<string>(row['quantity'], row['Quantity'])
       const quantity = quantityStr ? Number(String(quantityStr).replace(/[^0-9]/g, '')) : 0
 
-      // Get the first image from the comma-separated image URLs
+      // Get all images from the comma-separated image URLs
       const imagesString = FIRST<string>(row['images'], row['Images']) || ''
       const imageUrls = imagesString.split(',').map(url => url.trim()).filter(url => url)
       const image = imageUrls[0] || null
+      const images = imageUrls.length > 0 ? imageUrls : []
 
       // Clean the HTML description to plain text
       const rawDescription = FIRST<string>(row['description'], row['Description']) || ''
@@ -139,6 +141,7 @@ export async function getListingsFromCsv(filename = 'export.csv', includeOutOfSt
         price, 
         ebayUrl, 
         image, 
+        images,
         stripeLink, 
         description,
         quantity,
@@ -191,10 +194,11 @@ export async function getComingSoonProducts(filename = 'export.csv'): Promise<Li
       const quantityStr = FIRST<string>(row['quantity'], row['Quantity'])
       const quantity = quantityStr ? Number(String(quantityStr).replace(/[^0-9]/g, '')) : 0
 
-      // Get the first image from the comma-separated image URLs
+      // Get all images from the comma-separated image URLs
       const imagesString = FIRST<string>(row['images'], row['Images']) || ''
       const imageUrls = imagesString.split(',').map(url => url.trim()).filter(url => url)
       const image = imageUrls[0] || null
+      const images = imageUrls.length > 0 ? imageUrls : []
 
       // Clean the HTML description to plain text
       const rawDescription = FIRST<string>(row['description'], row['Description']) || ''
@@ -222,6 +226,7 @@ export async function getComingSoonProducts(filename = 'export.csv'): Promise<Li
         price, 
         ebayUrl, 
         image, 
+        images,
         stripeLink, 
         description,
         quantity,

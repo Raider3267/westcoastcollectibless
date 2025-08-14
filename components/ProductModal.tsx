@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import ImageCarousel from './ImageCarousel'
 
 type Product = {
   id: string
@@ -9,6 +10,7 @@ type Product = {
   price?: number | null
   ebayUrl?: string | null
   image?: string | null
+  images?: string[]
   stripeLink?: string | null
   description?: string | null
   quantity?: number
@@ -100,72 +102,20 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
         {/* Content */}
         <div className="p-6">
           {/* Image Gallery */}
-          {product.image && (
+          {((product.images && product.images.length > 0) || product.image) && (
             <div className="mb-6" style={{ maxWidth: '500px', margin: '0 auto 24px auto' }}>
-              {(() => {
-                // Check if image contains multiple URLs separated by commas
-                const imageUrls = product.image.split(',').map(url => url.trim()).filter(url => url)
-                const mainImage = imageUrls[0]
-                const additionalImages = imageUrls.slice(1)
-                
-                return (
-                  <div>
-                    {/* Main Image */}
-                    <div className="mb-4 wcc-thumb">
-                      <img
-                        src={mainImage}
-                        alt={product.name}
-                        className="wcc-zoom"
-                      />
-                    </div>
-                    
-                    {/* Additional Images Thumbnail Gallery */}
-                    {additionalImages.length > 0 && (
-                      <div className="grid grid-cols-4 gap-2">
-                        {additionalImages.slice(0, 6).map((imgUrl, index) => (
-                          <div 
-                            key={index} 
-                            className="wcc-thumb cursor-pointer hover:opacity-80 transition-opacity"
-                            style={{ height: '80px' }}
-                            onClick={() => {
-                              // Swap clicked image with main image
-                              const newMainImage = imgUrl
-                              const newImages = [newMainImage, mainImage, ...additionalImages.filter(url => url !== imgUrl)]
-                              // Update the product image temporarily for display
-                              const imageContainer = document.querySelector('.wcc-thumb img') as HTMLImageElement
-                              if (imageContainer) {
-                                imageContainer.src = newMainImage
-                              }
-                            }}
-                          >
-                            <img
-                              src={imgUrl}
-                              alt={`${product.name} - Image ${index + 2}`}
-                              className="wcc-zoom"
-                              style={{ height: '100%', objectFit: 'cover' }}
-                            />
-                          </div>
-                        ))}
-                        {additionalImages.length > 6 && (
-                          <div 
-                            className="flex items-center justify-center"
-                            style={{ 
-                              height: '80px',
-                              background: 'linear-gradient(135deg, rgba(199,163,255,.15), rgba(94,208,192,.15))',
-                              borderRadius: '8px',
-                              fontSize: '0.8rem',
-                              fontWeight: 600,
-                              color: 'var(--wcc-muted)'
-                            }}
-                          >
-                            +{additionalImages.length - 6} more
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )
-              })()}
+              <ImageCarousel
+                images={
+                  product.images && product.images.length > 0 
+                    ? product.images 
+                    : product.image 
+                    ? product.image.split(',').map(url => url.trim()).filter(url => url)
+                    : []
+                }
+                productName={product.name}
+                showThumbnails={true}
+                autoHeight={false}
+              />
             </div>
           )}
 
