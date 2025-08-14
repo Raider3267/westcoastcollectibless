@@ -493,15 +493,31 @@ function ComingSoonSection() {
     return () => clearInterval(interval)
   }, [])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Integrate with email service (Mailchimp, etc.)
-    console.log('Email submitted:', email)
-    setIsSubmitted(true)
-    setTimeout(() => {
-      setIsSubmitted(false)
-      setEmail('')
-    }, 3000)
+    
+    try {
+      const response = await fetch('/api/email/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      })
+      
+      if (response.ok) {
+        console.log('Email subscribed successfully:', email)
+        setIsSubmitted(true)
+        setTimeout(() => {
+          setIsSubmitted(false)
+          setEmail('')
+        }, 5000) // Show success message longer
+      } else {
+        console.error('Failed to subscribe email')
+        // Could show error message here
+      }
+    } catch (error) {
+      console.error('Email subscription error:', error)
+      // Could show error message here
+    }
   }
 
   const timeUntilDrop = () => {

@@ -33,6 +33,26 @@ export async function POST() {
           record.released_date = currentTime.toISOString() // Set release timestamp
           record.show_in_new_releases = 'true' // Show in New Releases by default
           updatedCount++
+
+          // Send drop notification email (async, don't wait for it)
+          if (record.title && record.images) {
+            const productUrl = `https://westcoastcollectibless.com` // Your site URL
+            const productImage = record.images.split(',')[0].trim() // First image
+            const productPrice = parseFloat(record.price) || 0
+
+            fetch('/api/email/notify-drop', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                productName: record.title,
+                productImage,
+                productPrice,
+                productUrl
+              })
+            }).catch(emailError => {
+              console.error('Failed to send drop notification email:', emailError)
+            })
+          }
         }
       }
       return record
