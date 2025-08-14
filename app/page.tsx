@@ -171,6 +171,9 @@ export default function HomePage() {
         {/* Featured Listings */}
         <FeaturedSection items={items} loading={loading} />
 
+        {/* Coming Soon Section */}
+        <ComingSoonSection />
+
         {/* Trust + Contact */}
         <section className="luxury-section">
           <div style={{ maxWidth: '1224px', margin: '0 auto', padding: '0 20px' }}>
@@ -284,6 +287,274 @@ function FeaturedSection({ items, loading }: { items: Listing[], loading: boolea
               />
             )
           })}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function ComingSoonSection() {
+  const [email, setEmail] = useState('')
+  const [isSubmitted, setIsSubmitted] = useState(false)
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    // TODO: Integrate with email service (Mailchimp, etc.)
+    console.log('Email submitted:', email)
+    setIsSubmitted(true)
+    setTimeout(() => {
+      setIsSubmitted(false)
+      setEmail('')
+    }, 3000)
+  }
+
+  const nextDropDate = new Date()
+  nextDropDate.setDate(nextDropDate.getDate() + 7) // Next week
+
+  const timeUntilDrop = () => {
+    const now = new Date()
+    const timeDiff = nextDropDate.getTime() - now.getTime()
+    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24))
+    const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+    
+    if (days > 0) {
+      return `${days} day${days > 1 ? 's' : ''}`
+    } else {
+      return `${hours} hour${hours !== 1 ? 's' : ''}`
+    }
+  }
+
+  return (
+    <section className="luxury-section" style={{ 
+      background: 'linear-gradient(135deg, rgba(199,163,255,.08) 0%, rgba(94,208,192,.08) 50%, rgba(247,231,195,.08) 100%)',
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      {/* Background decoration */}
+      <div style={{
+        position: 'absolute',
+        top: '-20%',
+        right: '-10%',
+        width: '40%',
+        height: '140%',
+        background: 'radial-gradient(circle, rgba(199,163,255,.15) 0%, transparent 70%)',
+        borderRadius: '50%',
+        filter: 'blur(60px)'
+      }} />
+      
+      <div style={{ maxWidth: '1224px', margin: '0 auto', padding: '60px 20px', position: 'relative', zIndex: 2 }}>
+        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <div className="luxury-eyebrow" style={{ marginBottom: '16px' }}>
+            Exclusive • Limited • Weekly
+          </div>
+          <h2 style={{ 
+            fontSize: 'clamp(2rem, 3vw, 2.5rem)', 
+            margin: '0 0 20px', 
+            fontWeight: 800,
+            color: 'var(--wcc-ink)',
+            lineHeight: 1.2
+          }}>
+            🔥 Next Drop Coming Soon
+          </h2>
+          <p style={{ 
+            fontSize: '1.1rem', 
+            color: 'var(--wcc-muted)', 
+            margin: '0 0 32px',
+            maxWidth: '600px',
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            lineHeight: 1.6
+          }}>
+            Get exclusive access to limited designer toys before they sell out. New drops every week featuring rare collectibles and premium figures.
+          </p>
+          
+          {/* Countdown */}
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '12px',
+            padding: '16px 24px',
+            background: 'linear-gradient(135deg, var(--wcc-lilac), var(--wcc-teal))',
+            borderRadius: '999px',
+            color: 'white',
+            fontWeight: 700,
+            fontSize: '1.1rem',
+            marginBottom: '40px',
+            boxShadow: '0 8px 24px rgba(199,163,255,.3)'
+          }}>
+            ⏰ Next drop in {timeUntilDrop()}
+          </div>
+        </div>
+
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
+          gap: '32px', 
+          alignItems: 'center' 
+        }}>
+          {/* Left: Preview Cards */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <h3 style={{ 
+              fontSize: '1.3rem', 
+              fontWeight: 800, 
+              color: 'var(--wcc-ink)', 
+              margin: '0 0 16px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              👀 Sneak Peek
+            </h3>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+              {[1, 2, 3].map((i) => (
+                <div 
+                  key={i}
+                  className="luxury-card accent-teal"
+                  style={{ 
+                    padding: '12px',
+                    background: 'linear-gradient(#fff,#fff) padding-box, linear-gradient(135deg,var(--wcc-grad-a),var(--wcc-grad-b),var(--wcc-grad-c)) border-box',
+                    border: '2px solid transparent',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <div style={{ 
+                    height: '80px', 
+                    borderRadius: '8px', 
+                    background: 'linear-gradient(45deg, #f0f0f0, #e0e0e0)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.5rem',
+                    filter: 'blur(2px)',
+                    position: 'relative'
+                  }}>
+                    {['🎭', '🎪', '🎨'][i - 1]}
+                  </div>
+                  <div style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    background: 'rgba(0,0,0,0.8)',
+                    color: 'white',
+                    padding: '4px 8px',
+                    borderRadius: '4px',
+                    fontSize: '0.7rem',
+                    fontWeight: 600
+                  }}>
+                    MYSTERY
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div style={{ fontSize: '0.9rem', color: 'var(--wcc-muted)', fontStyle: 'italic' }}>
+              * Actual products may vary. Subscribe for exclusive reveals!
+            </div>
+          </div>
+
+          {/* Right: Email Signup */}
+          <div className="luxury-card accent-lilac" style={{ 
+            padding: '32px',
+            textAlign: 'center',
+            background: 'linear-gradient(#fff,#fff) padding-box, linear-gradient(135deg,var(--wcc-grad-a),var(--wcc-grad-b),var(--wcc-grad-c)) border-box',
+            border: '2px solid transparent'
+          }}>
+            <h3 style={{ 
+              fontSize: '1.4rem', 
+              fontWeight: 800, 
+              color: 'var(--wcc-ink)', 
+              margin: '0 0 16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px'
+            }}>
+              📧 Join the VIP List
+            </h3>
+            
+            <p style={{ 
+              fontSize: '0.95rem', 
+              color: 'var(--wcc-muted)', 
+              margin: '0 0 24px',
+              lineHeight: 1.5
+            }}>
+              Be the first to know about new drops, get exclusive previews, and secure early access before items go public.
+            </p>
+
+            {!isSubmitted ? (
+              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email address"
+                  required
+                  style={{
+                    padding: '14px 16px',
+                    borderRadius: '12px',
+                    border: '2px solid var(--wcc-line)',
+                    fontSize: '1rem',
+                    background: '#fff',
+                    color: 'var(--wcc-ink)',
+                    outline: 'none',
+                    transition: 'border-color 0.3s ease'
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = 'var(--wcc-teal)'}
+                  onBlur={(e) => e.target.style.borderColor = 'var(--wcc-line)'}
+                />
+                <button
+                  type="submit"
+                  style={{
+                    padding: '14px 20px',
+                    borderRadius: '999px',
+                    border: 'none',
+                    background: 'linear-gradient(135deg, var(--wcc-teal), var(--wcc-grad-c))',
+                    color: '#0b0b0f',
+                    fontSize: '1rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 8px 20px rgba(94,208,192,.3)'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                >
+                  🚀 Get Early Access
+                </button>
+              </form>
+            ) : (
+              <div style={{
+                padding: '20px',
+                background: 'linear-gradient(135deg, rgba(94,208,192,.15), rgba(199,163,255,.15))',
+                borderRadius: '12px',
+                border: '2px solid var(--wcc-teal)'
+              }}>
+                <div style={{ fontSize: '2rem', marginBottom: '8px' }}>🎉</div>
+                <div style={{ fontWeight: 700, color: 'var(--wcc-teal)', marginBottom: '4px' }}>
+                  Welcome to the VIP List!
+                </div>
+                <div style={{ fontSize: '0.9rem', color: 'var(--wcc-muted)' }}>
+                  You'll be the first to know about our next drop!
+                </div>
+              </div>
+            )}
+
+            <div style={{ 
+              fontSize: '0.8rem', 
+              color: 'var(--wcc-muted)', 
+              marginTop: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px'
+            }}>
+              <span>🔒</span>
+              <span>We respect your privacy. Unsubscribe anytime.</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
