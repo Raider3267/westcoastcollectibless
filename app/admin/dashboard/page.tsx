@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import ImageUpload from '../../../components/ImageUpload'
 
 interface Product {
   sku: string
@@ -16,21 +17,45 @@ interface Product {
   show_in_new_releases?: boolean
 }
 
+interface ProductForm {
+  sku: string
+  title: string
+  description: string
+  quantity: number
+  price: number
+  images: string[]
+  status: 'live' | 'coming-soon' | 'draft'
+  drop_date?: string
+  released_date?: string
+  show_in_new_releases?: boolean
+}
+
 export default function AdminDashboard() {
   const router = useRouter()
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'in-stock' | 'out-of-stock' | 'coming-soon'>('all')
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const [editingProduct, setEditingProduct] = useState<ProductForm | null>(null)
   const [showAddProduct, setShowAddProduct] = useState(false)
-  const [newProduct, setNewProduct] = useState<Partial<Product>>({
+  const [newProduct, setNewProduct] = useState<Partial<ProductForm>>({
     sku: '',
     title: '',
     description: '',
     quantity: 1,
     price: 0,
-    images: '',
+    images: [],
     status: 'live'
+  })
+
+  // Helper functions to convert between string and array formats
+  const productToForm = (product: Product): ProductForm => ({
+    ...product,
+    images: product.images ? product.images.split(',').map(img => img.trim()).filter(img => img) : []
+  })
+
+  const formToProduct = (form: ProductForm): Product => ({
+    ...form,
+    images: form.images.join(', ')
   })
 
   useEffect(() => {
@@ -161,10 +186,13 @@ export default function AdminDashboard() {
 
   const addProduct = async () => {
     try {
+      // Convert form data to product format before sending
+      const productData = formToProduct(newProduct as ProductForm)
+      
       const response = await fetch('/api/admin/products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newProduct)
+        body: JSON.stringify(productData)
       })
       
       if (response.ok) {
@@ -177,7 +205,7 @@ export default function AdminDashboard() {
           description: '',
           quantity: 1,
           price: 0,
-          images: ''
+          images: []
         })
       }
     } catch (error) {
@@ -436,7 +464,7 @@ export default function AdminDashboard() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => setEditingProduct(product)}
+                          onClick={() => setEditingProduct(productToForm(product))}
                           className="bg-blue-100 text-blue-600 px-3 py-1 rounded text-xs hover:bg-blue-200 transition-colors"
                         >
                           Edit
@@ -509,15 +537,11 @@ export default function AdminDashboard() {
                     />
                   </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Images (URLs separated by commas)</label>
-                  <input
-                    type="text"
-                    value={editingProduct.images}
-                    onChange={(e) => setEditingProduct(prev => prev ? {...prev, images: e.target.value} : null)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
-                  />
-                </div>
+                <ImageUpload
+                  images={editingProduct.images || []}
+                  onChange={(newImages) => setEditingProduct(prev => prev ? {...prev, images: newImages} : null)}
+                  maxImages={8}
+                />
               </div>
               <div className="flex justify-end gap-4 mt-6">
                 <button
@@ -529,15 +553,18 @@ export default function AdminDashboard() {
                 <button
                   onClick={async () => {
                     try {
+                      // Convert form data to product format before sending
+                      const productData = formToProduct(editingProduct)
+                      
                       const response = await fetch('/api/admin/products', {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(editingProduct)
+                        body: JSON.stringify(productData)
                       })
                       
                       if (response.ok) {
                         setProducts(prev => prev.map(p => 
-                          p.sku === editingProduct.sku ? editingProduct : p
+                          p.sku === editingProduct.sku ? productData : p
                         ))
                         setEditingProduct(null)
                       }
@@ -620,16 +647,11 @@ export default function AdminDashboard() {
                     />
                   </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Images (URLs separated by commas)</label>
-                  <input
-                    type="text"
-                    value={newProduct.images || ''}
-                    onChange={(e) => setNewProduct(prev => ({...prev, images: e.target.value}))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
-                    placeholder="https://image1.jpg, https://image2.jpg"
-                  />
-                </div>
+                <ImageUpload
+                  images={newProduct.images || []}
+                  onChange={(newImages) => setNewProduct(prev => ({...prev, images: newImages}))}
+                  maxImages={8}
+                />
               </div>
               <div className="flex justify-end gap-4 mt-6">
                 <button
@@ -641,7 +663,7 @@ export default function AdminDashboard() {
                       description: '',
                       quantity: 1,
                       price: 0,
-                      images: ''
+                      images: []
                     })
                   }}
                   className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
