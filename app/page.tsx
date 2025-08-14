@@ -182,11 +182,11 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Featured Listings */}
-        <FeaturedSection items={items} loading={loading} />
-
         {/* New Releases Section */}
         <NewReleasesSection />
+
+        {/* Featured Listings */}
+        <FeaturedSection items={items} loading={loading} />
 
         {/* Coming Soon Section */}
         <ComingSoonSection />
@@ -409,7 +409,14 @@ function NewReleasesSection() {
             ))}
           </div>
         ) : (
-          <div className="luxury-grid wcc-scroll">
+          <div className="luxury-grid wcc-scroll" style={{
+            gridTemplateColumns: newReleases.length === 1 
+              ? 'repeat(1, minmax(280px, 320px))' 
+              : newReleases.length === 2 
+              ? 'repeat(2, minmax(280px, 320px))'
+              : 'repeat(auto-fit, minmax(280px, 1fr))',
+            justifyContent: newReleases.length <= 2 ? 'center' : 'flex-start'
+          }}>
             {newReleases.map((product, index) => {
               const cardColor = cardColors[index % cardColors.length]
               const releaseEmojis = ['🚀', '⭐', '🔥', '✨', '💎', '🎯', '🌟', '💫', '🎪', '🎨']
