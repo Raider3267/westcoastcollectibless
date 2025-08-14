@@ -52,7 +52,8 @@ export async function GET() {
       description: product.description || '',
       quantity: parseInt(product.quantity) || 0,
       price: parseFloat(product.price) || 0,
-      images: product.images || ''
+      images: product.images || '',
+      status: product.status || 'live' // Include status field, default to 'live'
     })).filter(product => product.title) // Filter out empty products
     
     return NextResponse.json(transformedProducts)
@@ -154,7 +155,8 @@ export async function POST(request: NextRequest) {
       product_identifier: '',
       product_identifier_type: '',
       brand: '',
-      cost: ''
+      cost: '',
+      status: 'live' // Add status field with default value
     }
     
     products.push(newProduct)

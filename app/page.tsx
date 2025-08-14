@@ -296,6 +296,23 @@ function FeaturedSection({ items, loading }: { items: Listing[], loading: boolea
 function ComingSoonSection() {
   const [email, setEmail] = useState('')
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [comingSoonItems, setComingSoonItems] = useState<Listing[]>([])
+
+  useEffect(() => {
+    const fetchComingSoonItems = async () => {
+      try {
+        const response = await fetch('/api/coming-soon/products')
+        if (response.ok) {
+          const data = await response.json()
+          setComingSoonItems(data)
+        }
+      } catch (error) {
+        console.error('Failed to load coming soon items:', error)
+      }
+    }
+    
+    fetchComingSoonItems()
+  }, [])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -407,51 +424,117 @@ function ComingSoonSection() {
             </h3>
             
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-              {[1, 2, 3].map((i) => (
-                <div 
-                  key={i}
-                  className="luxury-card accent-teal"
-                  style={{ 
-                    padding: '12px',
-                    background: 'linear-gradient(#fff,#fff) padding-box, linear-gradient(135deg,var(--wcc-grad-a),var(--wcc-grad-b),var(--wcc-grad-c)) border-box',
-                    border: '2px solid transparent',
-                    position: 'relative',
-                    overflow: 'hidden'
-                  }}
-                >
-                  <div style={{ 
-                    height: '80px', 
-                    borderRadius: '8px', 
-                    background: 'linear-gradient(45deg, #f0f0f0, #e0e0e0)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '1.5rem',
-                    filter: 'blur(2px)',
-                    position: 'relative'
-                  }}>
-                    {['🎭', '🎪', '🎨'][i - 1]}
+              {comingSoonItems.length > 0 ? (
+                comingSoonItems.slice(0, 3).map((item, i) => (
+                  <div 
+                    key={item.id}
+                    className="luxury-card accent-teal"
+                    style={{ 
+                      padding: '12px',
+                      background: 'linear-gradient(#fff,#fff) padding-box, linear-gradient(135deg,var(--wcc-grad-a),var(--wcc-grad-b),var(--wcc-grad-c)) border-box',
+                      border: '2px solid transparent',
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <div style={{ 
+                      height: '80px', 
+                      borderRadius: '8px', 
+                      overflow: 'hidden',
+                      position: 'relative'
+                    }}>
+                      {item.image ? (
+                        <img 
+                          src={item.image} 
+                          alt={item.name}
+                          style={{ 
+                            width: '100%', 
+                            height: '100%', 
+                            objectFit: 'cover',
+                            filter: 'blur(1px) brightness(0.9)'
+                          }}
+                        />
+                      ) : (
+                        <div style={{ 
+                          background: 'linear-gradient(45deg, #f0f0f0, #e0e0e0)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '1.5rem',
+                          filter: 'blur(1px)',
+                          height: '100%'
+                        }}>
+                          🎁
+                        </div>
+                      )}
+                    </div>
+                    <div style={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      background: 'rgba(0,0,0,0.75)',
+                      color: 'white',
+                      padding: '6px 10px',
+                      borderRadius: '6px',
+                      fontSize: '0.7rem',
+                      fontWeight: 700,
+                      textAlign: 'center',
+                      backdropFilter: 'blur(4px)'
+                    }}>
+                      🔥 COMING SOON
+                    </div>
                   </div>
-                  <div style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    background: 'rgba(0,0,0,0.8)',
-                    color: 'white',
-                    padding: '4px 8px',
-                    borderRadius: '4px',
-                    fontSize: '0.7rem',
-                    fontWeight: 600
-                  }}>
-                    MYSTERY
+                ))
+              ) : (
+                [1, 2, 3].map((i) => (
+                  <div 
+                    key={i}
+                    className="luxury-card accent-teal"
+                    style={{ 
+                      padding: '12px',
+                      background: 'linear-gradient(#fff,#fff) padding-box, linear-gradient(135deg,var(--wcc-grad-a),var(--wcc-grad-b),var(--wcc-grad-c)) border-box',
+                      border: '2px solid transparent',
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <div style={{ 
+                      height: '80px', 
+                      borderRadius: '8px', 
+                      background: 'linear-gradient(45deg, #f0f0f0, #e0e0e0)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1.5rem',
+                      filter: 'blur(2px)',
+                      position: 'relative'
+                    }}>
+                      {['🎭', '🎪', '🎨'][i - 1]}
+                    </div>
+                    <div style={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      background: 'rgba(0,0,0,0.8)',
+                      color: 'white',
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                      fontSize: '0.7rem',
+                      fontWeight: 600
+                    }}>
+                      MYSTERY
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
             
             <div style={{ fontSize: '0.9rem', color: 'var(--wcc-muted)', fontStyle: 'italic' }}>
-              * Actual products may vary. Subscribe for exclusive reveals!
+              {comingSoonItems.length > 0 
+                ? '* These items are coming soon! Subscribe for early access when they drop.'
+                : '* New products coming soon! Subscribe for exclusive previews.'}
             </div>
           </div>
 

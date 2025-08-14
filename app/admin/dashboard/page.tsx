@@ -10,13 +10,14 @@ interface Product {
   quantity: number
   price: number
   images: string
+  status: 'live' | 'coming-soon' | 'draft'
 }
 
 export default function AdminDashboard() {
   const router = useRouter()
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState<'all' | 'in-stock' | 'out-of-stock'>('all')
+  const [filter, setFilter] = useState<'all' | 'in-stock' | 'out-of-stock' | 'coming-soon'>('all')
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [showAddProduct, setShowAddProduct] = useState(false)
   const [newProduct, setNewProduct] = useState<Partial<Product>>({
@@ -25,7 +26,8 @@ export default function AdminDashboard() {
     description: '',
     quantity: 1,
     price: 0,
-    images: ''
+    images: '',
+    status: 'live'
   })
 
   useEffect(() => {
@@ -60,6 +62,7 @@ export default function AdminDashboard() {
   const filteredProducts = products.filter(product => {
     if (filter === 'in-stock') return product.quantity > 0
     if (filter === 'out-of-stock') return product.quantity === 0
+    if (filter === 'coming-soon') return product.status === 'coming-soon'
     return true
   })
 
@@ -78,6 +81,24 @@ export default function AdminDashboard() {
       }
     } catch (error) {
       console.error('Failed to update stock:', error)
+    }
+  }
+
+  const updateProductStatus = async (sku: string, newStatus: 'live' | 'coming-soon' | 'draft') => {
+    try {
+      const response = await fetch('/api/admin/products', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sku, status: newStatus })
+      })
+      
+      if (response.ok) {
+        setProducts(prev => prev.map(p => 
+          p.sku === sku ? { ...p, status: newStatus } : p
+        ))
+      }
+    } catch (error) {
+      console.error('Failed to update product status:', error)
     }
   }
 
@@ -175,9 +196,9 @@ export default function AdminDashboard() {
             </p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm">
-            <h3 className="text-sm font-medium text-gray-500">Out of Stock</h3>
-            <p className="text-2xl font-bold text-red-600">
-              {products.filter(p => p.quantity === 0).length}
+            <h3 className="text-sm font-medium text-gray-500">Coming Soon</h3>
+            <p className="text-2xl font-bold text-yellow-600">
+              {products.filter(p => p.status === 'coming-soon').length}
             </p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm">
@@ -222,6 +243,16 @@ export default function AdminDashboard() {
               }`}
             >
               Out of Stock ({products.filter(p => p.quantity === 0).length})
+            </button>
+            <button
+              onClick={() => setFilter('coming-soon')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                filter === 'coming-soon' 
+                  ? 'bg-yellow-500 text-white' 
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              Coming Soon ({products.filter(p => p.status === 'coming-soon').length})
             </button>
             </div>
             <button
@@ -304,13 +335,21 @@ export default function AdminDashboard() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        product.quantity > 0 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {product.quantity > 0 ? 'In Stock' : 'Out of Stock'}
-                      </span>
+                      <select 
+                        value={product.status || 'live'}
+                        onChange={(e) => updateProductStatus(product.sku, e.target.value as 'live' | 'coming-soon' | 'draft')}
+                        className={`text-xs font-semibold rounded-full px-3 py-1 border-0 ${
+                          product.status === 'live' 
+                            ? 'bg-green-100 text-green-800' 
+                            : product.status === 'coming-soon'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
+                        <option value="live">🟢 Live</option>
+                        <option value="coming-soon">🟡 Coming Soon</option>
+                        <option value="draft">⚪ Draft</option>
+                      </select>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">

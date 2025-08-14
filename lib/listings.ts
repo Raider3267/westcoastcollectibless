@@ -19,6 +19,7 @@ export type Listing = {
   stripeLink?: string | null
   description?: string | null
   quantity?: number
+  status?: 'live' | 'coming-soon' | 'draft'
 }
 
 const FIRST = <T>(...vals: (T | undefined | null | false | '' )[]) =>
@@ -116,6 +117,10 @@ export async function getListingsFromCsv(filename = 'export.csv', includeOutOfSt
 
       const stripeLink = FIRST<string>(row['Stripe Link'], row['Stripe URL'], row['paymentLink']) || null
 
+      // Get status field, default to 'live' for existing products
+      const statusStr = FIRST<string>(row['status'], row['Status']) || 'live'
+      const status = (['live', 'coming-soon', 'draft'].includes(statusStr) ? statusStr : 'live') as 'live' | 'coming-soon' | 'draft'
+
       return { 
         id: String(id), 
         name, 
@@ -124,7 +129,8 @@ export async function getListingsFromCsv(filename = 'export.csv', includeOutOfSt
         image, 
         stripeLink, 
         description,
-        quantity
+        quantity,
+        status
       }
     })
     // Filter based on stock, price, and content quality
@@ -132,11 +138,79 @@ export async function getListingsFromCsv(filename = 'export.csv', includeOutOfSt
       // Filter out items without basic required fields
       if (!item.name || item.name.trim() === '' || item.name === 'Item 1' || item.name.includes('Item ')) return false
       
+      // Only show 'live' products in main feed (not coming-soon or draft)
+      if (item.status !== 'live') return false
+      
       // Always require a price
       if (!item.price || item.price <= 0) return false
       
       // Filter by stock unless out-of-stock items are specifically requested
       if (!includeOutOfStock && (!item.quantity || item.quantity <= 0)) return false
+      
+      // Filter out items without images
+      if (!item.image || item.image.trim() === '') return false
+      
+      return true
+    })
+
+  return items
+}
+
+export async function getComingSoonProducts(filename = 'export.csv'): Promise<Listing[]> {
+  const filePath = path.join(process.cwd(), filename)
+  const text = await readFile(filePath, 'utf8')
+
+  const rows = parse(text, { columns: true, skip_empty_lines: true }) as any[]
+
+  const items: Listing[] = rows
+    .map((row, idx) => {
+      // Extract data from export.csv columns
+      const id = FIRST<string>(row['sku'], String(idx)) || String(idx)
+      const name = FIRST<string>(row['title'], row['Title']) || `Item ${idx + 1}`
+      
+      // Get price (export.csv has price as a number)
+      const priceStr = FIRST<string>(row['price'], row['Price'])
+      const price = priceStr ? Number(String(priceStr).replace(/[^0-9.]/g, '')) : null
+
+      // Get quantity for stock filtering
+      const quantityStr = FIRST<string>(row['quantity'], row['Quantity'])
+      const quantity = quantityStr ? Number(String(quantityStr).replace(/[^0-9]/g, '')) : 0
+
+      // Get the first image from the comma-separated image URLs
+      const imagesString = FIRST<string>(row['images'], row['Images']) || ''
+      const imageUrls = imagesString.split(',').map(url => url.trim()).filter(url => url)
+      const image = imageUrls[0] || null
+
+      // Clean the HTML description to plain text
+      const rawDescription = FIRST<string>(row['description'], row['Description']) || ''
+      const description = cleanDescription(rawDescription)
+
+      const ebayUrl = 'https://www.ebay.com/usr/westcoastcollectibless'
+      const stripeLink = FIRST<string>(row['Stripe Link'], row['Stripe URL'], row['paymentLink']) || null
+
+      // Get status field
+      const statusStr = FIRST<string>(row['status'], row['Status']) || 'live'
+      const status = (['live', 'coming-soon', 'draft'].includes(statusStr) ? statusStr : 'live') as 'live' | 'coming-soon' | 'draft'
+
+      return { 
+        id: String(id), 
+        name, 
+        price, 
+        ebayUrl, 
+        image, 
+        stripeLink, 
+        description,
+        quantity,
+        status
+      }
+    })
+    // Filter for coming-soon products only
+    .filter(item => {
+      // Filter out items without basic required fields
+      if (!item.name || item.name.trim() === '' || item.name === 'Item 1' || item.name.includes('Item ')) return false
+      
+      // Must be coming-soon status
+      if (item.status !== 'coming-soon') return false
       
       // Filter out items without images
       if (!item.image || item.image.trim() === '') return false
