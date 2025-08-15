@@ -53,10 +53,21 @@ export async function GET() {
       quantity: parseInt(product.quantity) || 0,
       price: parseFloat(product.price) || 0,
       images: product.images || '',
-      status: product.status || 'live', // Include status field, default to 'live'
-      drop_date: product.drop_date || '', // Include drop_date field
-      released_date: product.released_date || '', // Include released_date field
-      show_in_new_releases: product.show_in_new_releases === 'true' // Convert string to boolean
+      status: product.status || 'live',
+      drop_date: product.drop_date || '',
+      released_date: product.released_date || '',
+      show_in_new_releases: product.show_in_new_releases === 'true',
+      // Cost tracking fields
+      purchase_cost: parseFloat(product.purchase_cost) || 0,
+      shipping_cost: parseFloat(product.shipping_cost) || 0,
+      total_cost: parseFloat(product.total_cost) || 0,
+      purchase_date: product.purchase_date || '',
+      supplier: product.supplier || '',
+      tracking_number: product.tracking_number || '',
+      // Calculated fields
+      profit_per_unit: (parseFloat(product.price) || 0) - (parseFloat(product.total_cost) || 0),
+      total_inventory_value: (parseInt(product.quantity) || 0) * (parseFloat(product.total_cost) || 0),
+      potential_profit: (parseInt(product.quantity) || 0) * ((parseFloat(product.price) || 0) - (parseFloat(product.total_cost) || 0))
     })).filter(product => product.title) // Filter out empty products
     
     return NextResponse.json(transformedProducts)
@@ -123,7 +134,19 @@ export async function DELETE(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { sku, title, description, quantity = 0, price = 0, images = '' } = body
+    const { 
+      sku, 
+      title, 
+      description, 
+      quantity = 0, 
+      price = 0, 
+      images = '',
+      purchase_cost = 0,
+      shipping_cost = 0,
+      purchase_date = '',
+      supplier = '',
+      tracking_number = ''
+    } = body
     
     if (!sku || !title) {
       return NextResponse.json({ error: 'SKU and title are required' }, { status: 400 })
@@ -136,6 +159,9 @@ export async function POST(request: NextRequest) {
     if (existingProduct) {
       return NextResponse.json({ error: 'Product with this SKU already exists' }, { status: 400 })
     }
+    
+    // Calculate total cost
+    const totalCost = parseFloat(purchase_cost) + parseFloat(shipping_cost)
     
     // Create new product with all required CSV columns
     const newProduct = {
@@ -158,11 +184,18 @@ export async function POST(request: NextRequest) {
       product_identifier: '',
       product_identifier_type: '',
       brand: '',
-      cost: '',
-      status: 'live', // Add status field with default value
-      drop_date: '', // Add drop_date field
-      released_date: '', // Add released_date field
-      show_in_new_releases: 'false' // Add show_in_new_releases field
+      cost: '', // Keep existing cost field for eBay compatibility
+      status: 'live',
+      drop_date: '',
+      released_date: '',
+      show_in_new_releases: 'false',
+      // Cost tracking fields
+      purchase_cost: purchase_cost.toString(),
+      shipping_cost: shipping_cost.toString(),
+      total_cost: totalCost.toString(),
+      purchase_date,
+      supplier,
+      tracking_number
     }
     
     products.push(newProduct)

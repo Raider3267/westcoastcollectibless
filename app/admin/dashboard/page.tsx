@@ -15,6 +15,16 @@ interface Product {
   drop_date?: string
   released_date?: string
   show_in_new_releases?: boolean
+  // Cost tracking fields
+  purchase_cost?: number
+  shipping_cost?: number
+  total_cost?: number
+  purchase_date?: string
+  supplier?: string
+  tracking_number?: string
+  profit_per_unit?: number
+  total_inventory_value?: number
+  potential_profit?: number
 }
 
 interface ProductForm {
@@ -28,6 +38,13 @@ interface ProductForm {
   drop_date?: string
   released_date?: string
   show_in_new_releases?: boolean
+  // Cost tracking fields
+  purchase_cost?: number
+  shipping_cost?: number
+  total_cost?: number
+  purchase_date?: string
+  supplier?: string
+  tracking_number?: string
 }
 
 export default function AdminDashboard() {
@@ -44,18 +61,31 @@ export default function AdminDashboard() {
     quantity: 1,
     price: 0,
     images: [],
-    status: 'live'
+    status: 'live',
+    purchase_cost: 0,
+    shipping_cost: 0,
+    total_cost: 0,
+    purchase_date: '',
+    supplier: '',
+    tracking_number: ''
   })
 
   // Helper functions to convert between string and array formats
   const productToForm = (product: Product): ProductForm => ({
     ...product,
-    images: product.images ? product.images.split(',').map(img => img.trim()).filter(img => img) : []
+    images: product.images ? product.images.split(',').map(img => img.trim()).filter(img => img) : [],
+    purchase_cost: product.purchase_cost || 0,
+    shipping_cost: product.shipping_cost || 0,
+    total_cost: product.total_cost || 0,
+    purchase_date: product.purchase_date || '',
+    supplier: product.supplier || '',
+    tracking_number: product.tracking_number || ''
   })
 
   const formToProduct = (form: ProductForm): Product => ({
     ...form,
-    images: form.images.join(', ')
+    images: form.images.join(', '),
+    total_cost: (form.purchase_cost || 0) + (form.shipping_cost || 0)
   })
 
   useEffect(() => {
@@ -205,7 +235,13 @@ export default function AdminDashboard() {
           description: '',
           quantity: 1,
           price: 0,
-          images: []
+          images: [],
+          purchase_cost: 0,
+          shipping_cost: 0,
+          total_cost: 0,
+          purchase_date: '',
+          supplier: '',
+          tracking_number: ''
         })
       }
     } catch (error) {
@@ -238,6 +274,12 @@ export default function AdminDashboard() {
             <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
           </div>
           <div className="flex items-center gap-4">
+            <button
+              onClick={() => router.push('/admin/purchases')}
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              📦 Purchase Management
+            </button>
             <span className="text-sm text-gray-600">Welcome back!</span>
             <button
               onClick={logout}
@@ -251,7 +293,7 @@ export default function AdminDashboard() {
 
       <div className="p-6 max-w-7xl mx-auto">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-6 mb-8">
           <div className="bg-white p-6 rounded-xl shadow-sm">
             <h3 className="text-sm font-medium text-gray-500">Total Products</h3>
             <p className="text-2xl font-bold text-gray-900">{products.length}</p>
@@ -263,15 +305,31 @@ export default function AdminDashboard() {
             </p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm">
-            <h3 className="text-sm font-medium text-gray-500">Coming Soon</h3>
-            <p className="text-2xl font-bold text-yellow-600">
-              {products.filter(p => p.status === 'coming-soon').length}
+            <h3 className="text-sm font-medium text-gray-500">Inventory Value</h3>
+            <p className="text-2xl font-bold text-blue-600">
+              ${products.reduce((sum, p) => sum + ((p.total_cost || 0) * p.quantity), 0).toFixed(2)}
             </p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm">
-            <h3 className="text-sm font-medium text-gray-500">Total Value</h3>
-            <p className="text-2xl font-bold text-blue-600">
+            <h3 className="text-sm font-medium text-gray-500">Potential Revenue</h3>
+            <p className="text-2xl font-bold text-purple-600">
               ${products.reduce((sum, p) => sum + (p.price * p.quantity), 0).toFixed(2)}
+            </p>
+          </div>
+          <div className="bg-white p-6 rounded-xl shadow-sm">
+            <h3 className="text-sm font-medium text-gray-500">Potential Profit</h3>
+            <p className="text-2xl font-bold text-emerald-600">
+              ${products.reduce((sum, p) => sum + ((p.price - (p.total_cost || 0)) * p.quantity), 0).toFixed(2)}
+            </p>
+          </div>
+          <div className="bg-white p-6 rounded-xl shadow-sm">
+            <h3 className="text-sm font-medium text-gray-500">Avg Profit Margin</h3>
+            <p className="text-2xl font-bold text-indigo-600">
+              {products.length > 0 ? 
+                (products.reduce((sum, p) => {
+                  const margin = p.price > 0 ? ((p.price - (p.total_cost || 0)) / p.price) * 100 : 0
+                  return sum + margin
+                }, 0) / products.length).toFixed(1) : 0}%
             </p>
           </div>
         </div>
@@ -342,10 +400,13 @@ export default function AdminDashboard() {
                     Product
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Price
+                    Price / Cost
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Stock
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Profit/Unit
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
@@ -384,8 +445,15 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
-                      ${product.price.toFixed(2)}
+                    <td className="px-6 py-4 text-sm">
+                      <div className="space-y-1">
+                        <div className="font-semibold text-green-600">
+                          💰 ${product.price.toFixed(2)}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          Cost: ${(product.total_cost || 0).toFixed(2)}
+                        </div>
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
@@ -405,6 +473,21 @@ export default function AdminDashboard() {
                         >
                           +
                         </button>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      <div className="space-y-1">
+                        <div className={`font-semibold ${
+                          (product.price - (product.total_cost || 0)) >= 0 
+                            ? 'text-green-600' 
+                            : 'text-red-600'
+                        }`}>
+                          ${(product.price - (product.total_cost || 0)).toFixed(2)}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {product.price > 0 ? 
+                            (((product.price - (product.total_cost || 0)) / product.price) * 100).toFixed(1) : 0}% margin
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -542,6 +625,94 @@ export default function AdminDashboard() {
                   onChange={(newImages) => setEditingProduct(prev => prev ? {...prev, images: newImages} : null)}
                   maxImages={8}
                 />
+                
+                {/* Cost Tracking Section */}
+                <div className="border-t pt-6 mt-6">
+                  <h4 className="text-lg font-semibold mb-4 text-gray-800">💰 Cost Tracking</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Purchase Cost</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={editingProduct.purchase_cost || 0}
+                        onChange={(e) => setEditingProduct(prev => prev ? {...prev, purchase_cost: parseFloat(e.target.value) || 0} : null)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Shipping Cost</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={editingProduct.shipping_cost || 0}
+                        onChange={(e) => setEditingProduct(prev => prev ? {...prev, shipping_cost: parseFloat(e.target.value) || 0} : null)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Purchase Date</label>
+                      <input
+                        type="date"
+                        value={editingProduct.purchase_date || ''}
+                        onChange={(e) => setEditingProduct(prev => prev ? {...prev, purchase_date: e.target.value} : null)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Supplier</label>
+                      <input
+                        type="text"
+                        value={editingProduct.supplier || ''}
+                        onChange={(e) => setEditingProduct(prev => prev ? {...prev, supplier: e.target.value} : null)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
+                        placeholder="Supplier name"
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Tracking Number</label>
+                      <input
+                        type="text"
+                        value={editingProduct.tracking_number || ''}
+                        onChange={(e) => setEditingProduct(prev => prev ? {...prev, tracking_number: e.target.value} : null)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
+                        placeholder="Tracking number"
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Cost Summary */}
+                  <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                    <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-600">Total Cost:</span>
+                        <div className="font-semibold text-blue-600">
+                          ${((editingProduct.purchase_cost || 0) + (editingProduct.shipping_cost || 0)).toFixed(2)}
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Profit per Unit:</span>
+                        <div className={`font-semibold ${
+                          ((editingProduct.price || 0) - ((editingProduct.purchase_cost || 0) + (editingProduct.shipping_cost || 0))) >= 0 
+                            ? 'text-green-600' 
+                            : 'text-red-600'
+                        }`}>
+                          ${((editingProduct.price || 0) - ((editingProduct.purchase_cost || 0) + (editingProduct.shipping_cost || 0))).toFixed(2)}
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Profit Margin:</span>
+                        <div className="font-semibold text-purple-600">
+                          {(editingProduct.price || 0) > 0 ? 
+                            (((editingProduct.price || 0) - ((editingProduct.purchase_cost || 0) + (editingProduct.shipping_cost || 0))) / (editingProduct.price || 0) * 100).toFixed(1) 
+                            : 0}%
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div className="flex justify-end gap-4 mt-6">
                 <button
@@ -652,6 +823,94 @@ export default function AdminDashboard() {
                   onChange={(newImages) => setNewProduct(prev => ({...prev, images: newImages}))}
                   maxImages={8}
                 />
+                
+                {/* Cost Tracking Section */}
+                <div className="border-t pt-6 mt-6">
+                  <h4 className="text-lg font-semibold mb-4 text-gray-800">💰 Cost Tracking</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Purchase Cost</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={newProduct.purchase_cost || 0}
+                        onChange={(e) => setNewProduct(prev => ({...prev, purchase_cost: parseFloat(e.target.value) || 0}))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Shipping Cost</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={newProduct.shipping_cost || 0}
+                        onChange={(e) => setNewProduct(prev => ({...prev, shipping_cost: parseFloat(e.target.value) || 0}))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Purchase Date</label>
+                      <input
+                        type="date"
+                        value={newProduct.purchase_date || ''}
+                        onChange={(e) => setNewProduct(prev => ({...prev, purchase_date: e.target.value}))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Supplier</label>
+                      <input
+                        type="text"
+                        value={newProduct.supplier || ''}
+                        onChange={(e) => setNewProduct(prev => ({...prev, supplier: e.target.value}))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
+                        placeholder="Supplier name"
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Tracking Number</label>
+                      <input
+                        type="text"
+                        value={newProduct.tracking_number || ''}
+                        onChange={(e) => setNewProduct(prev => ({...prev, tracking_number: e.target.value}))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
+                        placeholder="Tracking number"
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Cost Summary */}
+                  <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                    <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-600">Total Cost:</span>
+                        <div className="font-semibold text-blue-600">
+                          ${((newProduct.purchase_cost || 0) + (newProduct.shipping_cost || 0)).toFixed(2)}
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Profit per Unit:</span>
+                        <div className={`font-semibold ${
+                          ((newProduct.price || 0) - ((newProduct.purchase_cost || 0) + (newProduct.shipping_cost || 0))) >= 0 
+                            ? 'text-green-600' 
+                            : 'text-red-600'
+                        }`}>
+                          ${((newProduct.price || 0) - ((newProduct.purchase_cost || 0) + (newProduct.shipping_cost || 0))).toFixed(2)}
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Profit Margin:</span>
+                        <div className="font-semibold text-purple-600">
+                          {(newProduct.price || 0) > 0 ? 
+                            (((newProduct.price || 0) - ((newProduct.purchase_cost || 0) + (newProduct.shipping_cost || 0))) / (newProduct.price || 0) * 100).toFixed(1) 
+                            : 0}%
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div className="flex justify-end gap-4 mt-6">
                 <button
@@ -663,7 +922,13 @@ export default function AdminDashboard() {
                       description: '',
                       quantity: 1,
                       price: 0,
-                      images: []
+                      images: [],
+                      purchase_cost: 0,
+                      shipping_cost: 0,
+                      total_cost: 0,
+                      purchase_date: '',
+                      supplier: '',
+                      tracking_number: ''
                     })
                   }}
                   className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
