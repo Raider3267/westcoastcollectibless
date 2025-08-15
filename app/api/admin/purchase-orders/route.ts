@@ -119,9 +119,15 @@ export async function POST(request: NextRequest) {
     const purchaseOrderId = `PO-${Date.now()}`
     
     // Calculate total product cost
-    const totalProductCost = items.reduce((sum: number, item: any) => 
-      sum + (item.quantity * item.unit_cost), 0
-    )
+    const totalProductCost = items.reduce((sum: number, item: any) => {
+      if (item.is_set) {
+        // For sets: quantity of sets × total_set_price per set
+        return sum + (item.quantity * (item.total_set_price || 0))
+      } else {
+        // For singles: quantity × unit_cost
+        return sum + (item.quantity * (item.unit_cost || 0))
+      }
+    }, 0)
     
     // Create purchase order
     const newPurchaseOrder: PurchaseOrder = {

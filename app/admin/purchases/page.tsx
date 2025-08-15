@@ -36,21 +36,30 @@ export default function PurchasesPage() {
   const [showNewShipmentModal, setShowNewShipmentModal] = useState(false)
 
   // New Purchase Order Form
-  const [newOrder, setNewOrder] = useState({
+  const [newOrder, setNewOrder] = useState(() => ({
     purchase_date: new Date().toISOString().split('T')[0],
     supplier: '',
     notes: '',
-    items: [{ product_sku: '', product_name: '', quantity: 1, unit_cost: 0 }]
-  })
+    items: [{ 
+      id: `item-${Date.now()}`,
+      product_sku: '', 
+      product_name: '', 
+      quantity: 1, 
+      unit_cost: 0,
+      is_set: false,
+      figures_per_set: 6,
+      total_set_price: 0
+    }]
+  }))
 
   // New Shipment Form
-  const [newShipment, setNewShipment] = useState({
+  const [newShipment, setNewShipment] = useState(() => ({
     shipment_date: new Date().toISOString().split('T')[0],
     total_shipping_cost: 0,
     tracking_numbers: '',
     notes: '',
     allocate_immediately: true
-  })
+  }))
 
   useEffect(() => {
     // Check authentication
@@ -88,21 +97,30 @@ export default function PurchasesPage() {
   const addOrderItem = () => {
     setNewOrder(prev => ({
       ...prev,
-      items: [...prev.items, { product_sku: '', product_name: '', quantity: 1, unit_cost: 0 }]
+      items: [...(prev.items || []), { 
+        id: `item-${Date.now()}-${Math.random()}`,
+        product_sku: '', 
+        product_name: '', 
+        quantity: 1, 
+        unit_cost: 0,
+        is_set: false,
+        figures_per_set: 6,
+        total_set_price: 0
+      }]
     }))
   }
 
   const removeOrderItem = (index: number) => {
     setNewOrder(prev => ({
       ...prev,
-      items: prev.items.filter((_, i) => i !== index)
+      items: (prev.items || []).filter((_, i) => i !== index)
     }))
   }
 
   const updateOrderItem = (index: number, field: string, value: any) => {
     setNewOrder(prev => ({
       ...prev,
-      items: prev.items.map((item, i) => 
+      items: (prev.items || []).map((item, i) => 
         i === index ? { ...item, [field]: value } : item
       )
     }))
@@ -123,7 +141,16 @@ export default function PurchasesPage() {
           purchase_date: new Date().toISOString().split('T')[0],
           supplier: '',
           notes: '',
-          items: [{ product_sku: '', product_name: '', quantity: 1, unit_cost: 0 }]
+          items: [{ 
+            id: `item-${Date.now()}`,
+            product_sku: '', 
+            product_name: '', 
+            quantity: 1, 
+            unit_cost: 0,
+            is_set: false,
+            figures_per_set: 6,
+            total_set_price: 0
+          }]
         })
       }
     } catch (error) {
@@ -171,8 +198,8 @@ export default function PurchasesPage() {
     )
   }
 
-  const totalOrderValue = purchaseOrders.reduce((sum, order) => sum + order.total_cost, 0)
-  const totalShippingCosts = shipments.reduce((sum, shipment) => sum + shipment.total_shipping_cost, 0)
+  const totalOrderValue = purchaseOrders.reduce((sum, order) => sum + (parseFloat(order.total_cost) || 0), 0)
+  const totalShippingCosts = shipments.reduce((sum, shipment) => sum + (parseFloat(shipment.total_shipping_cost) || 0), 0)
   const pendingOrders = purchaseOrders.filter(order => order.status === 'pending').length
   const unallocatedShipments = shipments.filter(shipment => !shipment.allocated).length
 
@@ -294,9 +321,9 @@ export default function PurchasesPage() {
                         <td className="px-6 py-4 text-sm font-medium text-gray-900">{order.id}</td>
                         <td className="px-6 py-4 text-sm text-gray-900">{order.purchase_date}</td>
                         <td className="px-6 py-4 text-sm text-gray-900">{order.supplier}</td>
-                        <td className="px-6 py-4 text-sm text-gray-900">${order.total_product_cost.toFixed(2)}</td>
-                        <td className="px-6 py-4 text-sm text-gray-900">${order.allocated_shipping_cost.toFixed(2)}</td>
-                        <td className="px-6 py-4 text-sm font-semibold text-green-600">${order.total_cost.toFixed(2)}</td>
+                        <td className="px-6 py-4 text-sm text-gray-900">${(parseFloat(order.total_product_cost) || 0).toFixed(2)}</td>
+                        <td className="px-6 py-4 text-sm text-gray-900">${(parseFloat(order.allocated_shipping_cost) || 0).toFixed(2)}</td>
+                        <td className="px-6 py-4 text-sm font-semibold text-green-600">${(parseFloat(order.total_cost) || 0).toFixed(2)}</td>
                         <td className="px-6 py-4">
                           <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                             order.status === 'delivered' ? 'bg-green-100 text-green-800' :
@@ -329,7 +356,7 @@ export default function PurchasesPage() {
                       <tr key={shipment.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 text-sm font-medium text-gray-900">{shipment.id}</td>
                         <td className="px-6 py-4 text-sm text-gray-900">{shipment.shipment_date}</td>
-                        <td className="px-6 py-4 text-sm font-semibold text-blue-600">${shipment.total_shipping_cost.toFixed(2)}</td>
+                        <td className="px-6 py-4 text-sm font-semibold text-blue-600">${(parseFloat(shipment.total_shipping_cost) || 0).toFixed(2)}</td>
                         <td className="px-6 py-4 text-sm text-gray-500">{shipment.tracking_numbers || 'N/A'}</td>
                         <td className="px-6 py-4">
                           <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -379,46 +406,194 @@ export default function PurchasesPage() {
 
               <div className="mb-6">
                 <h4 className="text-md font-semibold mb-3">Items</h4>
-                {newOrder.items.map((item, index) => (
-                  <div key={index} className="grid grid-cols-5 gap-3 mb-3 p-3 bg-gray-50 rounded-lg">
-                    <input
-                      type="text"
-                      placeholder="Product SKU"
-                      value={item.product_sku}
-                      onChange={(e) => updateOrderItem(index, 'product_sku', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Product Name"
-                      value={item.product_name}
-                      onChange={(e) => updateOrderItem(index, 'product_name', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg"
-                    />
-                    <input
-                      type="number"
-                      placeholder="Qty"
-                      value={item.quantity}
-                      onChange={(e) => updateOrderItem(index, 'quantity', parseInt(e.target.value) || 1)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg"
-                    />
-                    <input
-                      type="number"
-                      step="0.01"
-                      placeholder="Unit Cost"
-                      value={item.unit_cost}
-                      onChange={(e) => updateOrderItem(index, 'unit_cost', parseFloat(e.target.value) || 0)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg"
-                    />
-                    <button
-                      onClick={() => removeOrderItem(index)}
-                      className="bg-red-100 text-red-600 px-3 py-2 rounded-lg hover:bg-red-200"
-                      disabled={newOrder.items.length === 1}
-                    >
-                      Remove
-                    </button>
+                
+                {(newOrder.items || []).map((item, index) => (
+                  <div key={item.id || `item-${index}`} className="mb-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                    {/* Basic Info Row */}
+                    <div className="grid grid-cols-3 gap-4 mb-4">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Product SKU</label>
+                        <input
+                          type="text"
+                          placeholder="SKU123"
+                          value={item.product_sku}
+                          onChange={(e) => updateOrderItem(index, 'product_sku', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent text-sm"
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Product Name</label>
+                        <input
+                          type="text"
+                          placeholder="Labubu Series 1 Complete Set"
+                          value={item.product_name}
+                          onChange={(e) => updateOrderItem(index, 'product_name', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Type Selection */}
+                    <div className="mb-4">
+                      <label className="block text-xs font-medium text-gray-700 mb-2">Item Type</label>
+                      <div className="flex gap-4">
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            checked={!item.is_set}
+                            onChange={() => updateOrderItem(index, 'is_set', false)}
+                            className="mr-2"
+                          />
+                          <span className="text-sm">Single Item</span>
+                        </label>
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            checked={item.is_set}
+                            onChange={() => updateOrderItem(index, 'is_set', true)}
+                            className="mr-2"
+                          />
+                          <span className="text-sm">Figure Set (6-8 pieces)</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Pricing Section */}
+                    {item.is_set ? (
+                      /* Set Pricing */
+                      <div className="grid grid-cols-4 gap-4 mb-4">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Sets Bought</label>
+                          <input
+                            type="number"
+                            placeholder="1"
+                            min="1"
+                            value={item.quantity}
+                            onChange={(e) => updateOrderItem(index, 'quantity', parseInt(e.target.value) || 1)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Figures per Set</label>
+                          <select
+                            value={item.figures_per_set}
+                            onChange={(e) => {
+                              const figuresPerSet = parseInt(e.target.value)
+                              updateOrderItem(index, 'figures_per_set', figuresPerSet)
+                              // Recalculate unit cost when figures per set changes
+                              if (item.total_set_price > 0) {
+                                updateOrderItem(index, 'unit_cost', item.total_set_price / figuresPerSet)
+                              }
+                            }}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent text-sm"
+                          >
+                            <option value={6}>6 figures</option>
+                            <option value={7}>7 figures</option>
+                            <option value={8}>8 figures</option>
+                            <option value={9}>9 figures</option>
+                            <option value={10}>10 figures</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Total Set Price ($)</label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            placeholder="95.99"
+                            min="0"
+                            value={item.total_set_price}
+                            onChange={(e) => {
+                              const setPrice = parseFloat(e.target.value) || 0
+                              updateOrderItem(index, 'total_set_price', setPrice)
+                              // Auto-calculate per figure cost
+                              updateOrderItem(index, 'unit_cost', setPrice / item.figures_per_set)
+                            }}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Per Figure Cost</label>
+                          <div className="px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg text-sm font-semibold text-blue-800">
+                            ${(item.unit_cost || 0).toFixed(2)}
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      /* Single Item Pricing */
+                      <div className="grid grid-cols-3 gap-4 mb-4">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Quantity</label>
+                          <input
+                            type="number"
+                            placeholder="1"
+                            min="1"
+                            value={item.quantity}
+                            onChange={(e) => updateOrderItem(index, 'quantity', parseInt(e.target.value) || 1)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Unit Price ($)</label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            placeholder="15.99"
+                            min="0"
+                            value={item.unit_cost}
+                            onChange={(e) => updateOrderItem(index, 'unit_cost', parseFloat(e.target.value) || 0)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Total Cost</label>
+                          <div className="px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-sm font-semibold text-green-800">
+                            ${(item.quantity * (item.unit_cost || 0)).toFixed(2)}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Summary and Remove */}
+                    <div className="flex justify-between items-center pt-3 border-t border-gray-300">
+                      <div className="text-sm text-gray-600">
+                        {item.is_set ? (
+                          <span>
+                            <strong>{item.quantity} set(s)</strong> × <strong>{item.figures_per_set} figures</strong> = 
+                            <strong className="text-purple-600"> {item.quantity * item.figures_per_set} total figures</strong> 
+                            @ ${(item.unit_cost || 0).toFixed(2)} each
+                          </span>
+                        ) : (
+                          <span>
+                            <strong>{item.quantity} item(s)</strong> @ ${(item.unit_cost || 0).toFixed(2)} each
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => removeOrderItem(index)}
+                        className="bg-red-100 text-red-600 px-3 py-1 rounded-lg hover:bg-red-200 transition-colors text-sm"
+                        disabled={(newOrder.items || []).length === 1}
+                      >
+                        Remove
+                      </button>
+                    </div>
                   </div>
                 ))}
+                
+                {/* Total Calculation */}
+                <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                  <div className="text-sm font-semibold text-blue-800">
+                    Total Order Value: ${newOrder.items ? newOrder.items.reduce((sum, item) => {
+                      if (item.is_set) {
+                        return sum + (item.quantity * (item.total_set_price || 0))
+                      } else {
+                        return sum + (item.quantity * (item.unit_cost || 0))
+                      }
+                    }, 0).toFixed(2) : '0.00'}
+                  </div>
+                  <div className="text-xs text-blue-600 mt-1">
+                    *Shipping costs will be allocated separately when recorded
+                  </div>
+                </div>
                 <button
                   onClick={addOrderItem}
                   className="bg-blue-100 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-200"
