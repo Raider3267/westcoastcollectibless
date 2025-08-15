@@ -195,11 +195,11 @@ async function allocateShippingCosts(shipmentId: string, shipmentDate: string, s
   }
 }
 
-// POST endpoint for manual allocation
+// PUT endpoint for manual allocation and updates
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { action, shipment_id, shipment_date, shipping_cost } = body
+    const { action, shipment_id, shipment_date, shipping_cost, id, ...updates } = body
     
     if (action === 'allocate') {
       const result = await allocateShippingCosts(shipment_id, shipment_date, shipping_cost)
@@ -209,9 +209,63 @@ export async function PUT(request: NextRequest) {
       })
     }
     
-    return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
+    if (action === 'update' && id) {
+      const shipments = await readCSV(SHIPMENTS_PATH)
+      const shipmentIndex = shipments.findIndex((shipment: any) => shipment.id === id)
+      
+      if (shipmentIndex === -1) {
+        return NextResponse.json({ error: 'Shipment not found' }, { status: 404 })
+      }
+      
+      // Update the shipment
+      const updatedShipment = { ...shipments[shipmentIndex], ...updates }
+      shipments[shipmentIndex] = updatedShipment
+      
+      await writeCSV(SHIPMENTS_PATH, shipments)
+      
+      return NextResponse.json({ 
+        success: true, 
+        shipment: updatedShipment 
+      })
+    }
+    
+    return NextResponse.json({ error: 'Invalid action or missing parameters' }, { status: 400 })
   } catch (error) {
     console.error('PUT /api/admin/shipments error:', error)
     return NextResponse.json({ error: 'Failed to process request' }, { status: 500 })
+  }
+}
+
+// DELETE - Delete shipment
+export async function DELETE(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { id } = body
+    
+    if (!id) {
+      return NextResponse.json({ error: 'Shipment ID is required' }, { status: 400 })
+    }
+    
+    const shipments = await readCSV(SHIPMENTS_PATH)
+    const shipmentIndex = shipments.findIndex((shipment: any) => shipment.id === id)
+    
+    if (shipmentIndex === -1) {
+      return NextResponse.json({ error: 'Shipment not found' }, { status: 404 })
+    }
+    
+    // Remove the shipment
+    const deletedShipment = shipments[shipmentIndex]
+    shipments.splice(shipmentIndex, 1)
+    
+    await writeCSV(SHIPMENTS_PATH, shipments)
+    
+    return NextResponse.json({ 
+      success: true, 
+      deleted_shipment: deletedShipment,
+      message: `Shipment ${id} deleted successfully`
+    })
+  } catch (error) {
+    console.error('DELETE /api/admin/shipments error:', error)
+    return NextResponse.json({ error: 'Failed to delete shipment' }, { status: 500 })
   }
 }

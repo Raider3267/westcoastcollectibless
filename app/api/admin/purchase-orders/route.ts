@@ -191,3 +191,37 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to update purchase order' }, { status: 500 })
   }
 }
+
+// DELETE - Delete purchase order
+export async function DELETE(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { id } = body
+    
+    if (!id) {
+      return NextResponse.json({ error: 'Purchase order ID is required' }, { status: 400 })
+    }
+    
+    const purchaseOrders = await readCSV(PURCHASE_ORDERS_PATH)
+    const orderIndex = purchaseOrders.findIndex((order: any) => order.id === id)
+    
+    if (orderIndex === -1) {
+      return NextResponse.json({ error: 'Purchase order not found' }, { status: 404 })
+    }
+    
+    // Remove the purchase order
+    const deletedOrder = purchaseOrders[orderIndex]
+    purchaseOrders.splice(orderIndex, 1)
+    
+    await writeCSV(PURCHASE_ORDERS_PATH, purchaseOrders)
+    
+    return NextResponse.json({ 
+      success: true, 
+      deleted_order: deletedOrder,
+      message: `Purchase order ${id} deleted successfully`
+    })
+  } catch (error) {
+    console.error('DELETE /api/admin/purchase-orders error:', error)
+    return NextResponse.json({ error: 'Failed to delete purchase order' }, { status: 500 })
+  }
+}

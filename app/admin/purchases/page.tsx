@@ -34,6 +34,8 @@ export default function PurchasesPage() {
   const [activeTab, setActiveTab] = useState<'orders' | 'shipments'>('orders')
   const [showNewOrderModal, setShowNewOrderModal] = useState(false)
   const [showNewShipmentModal, setShowNewShipmentModal] = useState(false)
+  const [editingOrder, setEditingOrder] = useState<PurchaseOrder | null>(null)
+  const [editingShipment, setEditingShipment] = useState<Shipment | null>(null)
 
   // New Purchase Order Form
   const [newOrder, setNewOrder] = useState(() => ({
@@ -182,6 +184,80 @@ export default function PurchasesPage() {
     }
   }
 
+  const updatePurchaseOrder = async (id: string, updates: any) => {
+    try {
+      const response = await fetch('/api/admin/purchase-orders', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, ...updates })
+      })
+      
+      if (response.ok) {
+        await loadData()
+        setEditingOrder(null)
+      }
+    } catch (error) {
+      console.error('Failed to update purchase order:', error)
+    }
+  }
+
+  const deletePurchaseOrder = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this purchase order? This action cannot be undone.')) {
+      return
+    }
+    
+    try {
+      const response = await fetch('/api/admin/purchase-orders', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      })
+      
+      if (response.ok) {
+        await loadData()
+      }
+    } catch (error) {
+      console.error('Failed to delete purchase order:', error)
+    }
+  }
+
+  const updateShipment = async (id: string, updates: any) => {
+    try {
+      const response = await fetch('/api/admin/shipments', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update', id, ...updates })
+      })
+      
+      if (response.ok) {
+        await loadData()
+        setEditingShipment(null)
+      }
+    } catch (error) {
+      console.error('Failed to update shipment:', error)
+    }
+  }
+
+  const deleteShipment = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this shipment? This action cannot be undone.')) {
+      return
+    }
+    
+    try {
+      const response = await fetch('/api/admin/shipments', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      })
+      
+      if (response.ok) {
+        await loadData()
+      }
+    } catch (error) {
+      console.error('Failed to delete shipment:', error)
+    }
+  }
+
   const logout = () => {
     sessionStorage.removeItem('adminAuth')
     router.push('/admin/login')
@@ -313,6 +389,7 @@ export default function PurchasesPage() {
                       <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Shipping</th>
                       <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
                       <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -334,6 +411,22 @@ export default function PurchasesPage() {
                             {order.status}
                           </span>
                         </td>
+                        <td className="px-6 py-4">
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setEditingOrder(order)}
+                              className="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs hover:bg-blue-200 transition-colors"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => deletePurchaseOrder(order.id)}
+                              className="bg-red-100 text-red-600 px-2 py-1 rounded text-xs hover:bg-red-200 transition-colors"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -349,6 +442,7 @@ export default function PurchasesPage() {
                       <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Shipping Cost</th>
                       <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Tracking</th>
                       <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -364,6 +458,22 @@ export default function PurchasesPage() {
                           }`}>
                             {shipment.allocated ? 'Allocated' : 'Unallocated'}
                           </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setEditingShipment(shipment)}
+                              className="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs hover:bg-blue-200 transition-colors"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => deleteShipment(shipment.id)}
+                              className="bg-red-100 text-red-600 px-2 py-1 rounded text-xs hover:bg-red-200 transition-colors"
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -697,6 +807,160 @@ export default function PurchasesPage() {
                   className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
                 >
                   Record Shipment
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Purchase Order Modal */}
+      {editingOrder && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-2xl w-full">
+            <div className="p-6">
+              <h3 className="text-lg font-semibold mb-4">Edit Purchase Order</h3>
+              
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Purchase Date</label>
+                  <input
+                    type="date"
+                    value={editingOrder.purchase_date}
+                    onChange={(e) => setEditingOrder({...editingOrder, purchase_date: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Supplier</label>
+                  <input
+                    type="text"
+                    value={editingOrder.supplier}
+                    onChange={(e) => setEditingOrder({...editingOrder, supplier: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                  <select
+                    value={editingOrder.status}
+                    onChange={(e) => setEditingOrder({...editingOrder, status: e.target.value as any})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Tracking Number</label>
+                  <input
+                    type="text"
+                    value={editingOrder.tracking_number || ''}
+                    onChange={(e) => setEditingOrder({...editingOrder, tracking_number: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
+                    placeholder="Enter tracking number"
+                  />
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                <textarea
+                  value={editingOrder.notes || ''}
+                  onChange={(e) => setEditingOrder({...editingOrder, notes: e.target.value})}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
+                  placeholder="Order notes..."
+                />
+              </div>
+
+              <div className="flex justify-end gap-4">
+                <button
+                  onClick={() => setEditingOrder(null)}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => updatePurchaseOrder(editingOrder.id, editingOrder)}
+                  className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Shipment Modal */}
+      {editingShipment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-2xl w-full">
+            <div className="p-6">
+              <h3 className="text-lg font-semibold mb-4">Edit Shipment</h3>
+              
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Shipment Date</label>
+                  <input
+                    type="date"
+                    value={editingShipment.shipment_date}
+                    onChange={(e) => setEditingShipment({...editingShipment, shipment_date: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Total Shipping Cost</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={editingShipment.total_shipping_cost}
+                    onChange={(e) => setEditingShipment({...editingShipment, total_shipping_cost: parseFloat(e.target.value) || 0})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Tracking Numbers</label>
+                <input
+                  type="text"
+                  value={editingShipment.tracking_numbers}
+                  onChange={(e) => setEditingShipment({...editingShipment, tracking_numbers: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
+                  placeholder="Comma-separated tracking numbers"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                <textarea
+                  value={editingShipment.notes || ''}
+                  onChange={(e) => setEditingShipment({...editingShipment, notes: e.target.value})}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
+                  placeholder="Shipment notes..."
+                />
+              </div>
+
+              <div className="flex justify-end gap-4">
+                <button
+                  onClick={() => setEditingShipment(null)}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => updateShipment(editingShipment.id, editingShipment)}
+                  className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+                >
+                  Save Changes
                 </button>
               </div>
             </div>
