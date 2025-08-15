@@ -13,6 +13,7 @@ interface PurchaseOrder {
   allocated_shipping_cost: number
   total_cost: number
   notes?: string
+  items?: any[] // Array of purchase items
   created_at: string
 }
 
@@ -36,6 +37,7 @@ export default function PurchasesPage() {
   const [showNewShipmentModal, setShowNewShipmentModal] = useState(false)
   const [editingOrder, setEditingOrder] = useState<PurchaseOrder | null>(null)
   const [editingShipment, setEditingShipment] = useState<Shipment | null>(null)
+  const [editingItems, setEditingItems] = useState<any[]>([])
 
   // New Purchase Order Form
   const [newOrder, setNewOrder] = useState(() => ({
@@ -189,16 +191,103 @@ export default function PurchasesPage() {
       const response = await fetch('/api/admin/purchase-orders', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, ...updates })
+        body: JSON.stringify({ id, ...updates, items: editingItems.length > 0 ? editingItems : undefined })
       })
       
       if (response.ok) {
         await loadData()
         setEditingOrder(null)
+        setEditingItems([])
       }
     } catch (error) {
       console.error('Failed to update purchase order:', error)
     }
+  }
+
+  const startEditingOrder = (order: PurchaseOrder) => {
+    setEditingOrder(order)
+    // If no items exist, keep empty array for legacy orders
+    setEditingItems(order.items || [])
+  }
+
+  const migrateOrderFromNotes = (notes: string) => {
+    if (!notes) return []
+    
+    // Split by commas and try to extract items
+    const itemStrings = notes.split(',').map(s => s.trim())
+    
+    // Parse items WITHOUT pricing - let user add pricing manually
+    return itemStrings.map((itemStr, index) => {
+      // Try to extract quantity and name
+      const match = itemStr.match(/^(\d+)\s+(.+)$/)
+      if (match) {
+        const [, quantityStr, name] = match
+        const quantity = parseInt(quantityStr)
+        const isSet = name.toLowerCase().includes('set')
+        
+        return {
+          id: `migrated-${index}-${Date.now()}`,
+          product_sku: `SKU-${index + 1}`,
+          product_name: name.trim(),
+          quantity: quantity,
+          unit_cost: 0, // User will add pricing manually
+          is_set: isSet,
+          figures_per_set: isSet ? 6 : 1,
+          total_set_price: 0
+        }
+      } else {
+        // Fallback for items without clear quantity
+        return {
+          id: `migrated-${index}-${Date.now()}`,
+          product_sku: `SKU-${index + 1}`,
+          product_name: itemStr,
+          quantity: 1,
+          unit_cost: 0,
+          is_set: false,
+          figures_per_set: 6,
+          total_set_price: 0
+        }
+      }
+    })
+  }
+
+  const addEditingItem = () => {
+    setEditingItems(prev => [...prev, {
+      id: `item-${Date.now()}-${Math.random()}`,
+      product_sku: '',
+      product_name: '',
+      quantity: 1,
+      unit_cost: 0,
+      is_set: false,
+      figures_per_set: 6,
+      total_set_price: 0
+    }])
+  }
+
+  const removeEditingItem = (index: number) => {
+    setEditingItems(prev => {
+      const newItems = prev.filter((_, i) => i !== index)
+      // If no items left, create an empty item
+      if (newItems.length === 0) {
+        return [{
+          id: `item-${Date.now()}`,
+          product_sku: '',
+          product_name: '',
+          quantity: 1,
+          unit_cost: 0,
+          is_set: false,
+          figures_per_set: 6,
+          total_set_price: 0
+        }]
+      }
+      return newItems
+    })
+  }
+
+  const updateEditingItem = (index: number, field: string, value: any) => {
+    setEditingItems(prev => prev.map((item, i) => 
+      i === index ? { ...item, [field]: value } : item
+    ))
   }
 
   const deletePurchaseOrder = async (id: string) => {
@@ -414,7 +503,7 @@ export default function PurchasesPage() {
                         <td className="px-6 py-4">
                           <div className="flex gap-2">
                             <button
-                              onClick={() => setEditingOrder(order)}
+                              onClick={() => startEditingOrder(order)}
                               className="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs hover:bg-blue-200 transition-colors"
                             >
                               Edit
@@ -817,11 +906,11 @@ export default function PurchasesPage() {
       {/* Edit Purchase Order Modal */}
       {editingOrder && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl max-w-2xl w-full">
+          <div className="bg-white rounded-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <h3 className="text-lg font-semibold mb-4">Edit Purchase Order</h3>
               
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-2 gap-4 mb-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Purchase Date</label>
                   <input
@@ -842,7 +931,7 @@ export default function PurchasesPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-2 gap-4 mb-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
                   <select
@@ -868,6 +957,227 @@ export default function PurchasesPage() {
                 </div>
               </div>
 
+              {/* Items Section */}
+              <div className="mb-6">
+                <div className="flex justify-between items-center mb-3">
+                  <h4 className="text-md font-semibold">Items</h4>
+                  <div className="flex gap-2">
+                    {editingItems.length === 0 && editingOrder?.notes && (
+                      <button
+                        onClick={() => setEditingItems(migrateOrderFromNotes(editingOrder.notes || ''))}
+                        className="bg-blue-100 text-blue-600 px-3 py-1 rounded-lg hover:bg-blue-200 transition-colors text-sm"
+                      >
+                        📋 Import Items
+                      </button>
+                    )}
+                    <button
+                      onClick={addEditingItem}
+                      className="bg-green-100 text-green-600 px-3 py-1 rounded-lg hover:bg-green-200 transition-colors text-sm"
+                    >
+                      + Add Item
+                    </button>
+                  </div>
+                </div>
+                
+                {editingItems.length === 0 && editingOrder?.notes && (
+                  <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <h5 className="font-medium text-yellow-800 mb-2">Legacy Order - Items in Notes</h5>
+                    <p className="text-sm text-yellow-700 mb-3">
+                      This order was created before individual item tracking. Items are currently stored as: 
+                      <br />
+                      <strong>"{editingOrder.notes}"</strong>
+                    </p>
+                    <p className="text-sm text-yellow-700">
+                      Click "📋 Import with Pricing" to convert these to editable items with proportional pricing, or "Add Item" to add new items manually.
+                      <br />
+                      <em>The total cost ($${(parseFloat(editingOrder.total_product_cost) || 0).toFixed(2)}) will be distributed among all items proportionally.</em>
+                    </p>
+                  </div>
+                )}
+                
+                {editingItems.map((item, index) => (
+                  <div key={item.id || `item-${index}`} className="mb-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                    {/* Basic Info Row */}
+                    <div className="grid grid-cols-3 gap-4 mb-4">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Product SKU</label>
+                        <input
+                          type="text"
+                          placeholder="SKU123"
+                          value={item.product_sku}
+                          onChange={(e) => updateEditingItem(index, 'product_sku', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent text-sm"
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Product Name</label>
+                        <input
+                          type="text"
+                          placeholder="Product name"
+                          value={item.product_name}
+                          onChange={(e) => updateEditingItem(index, 'product_name', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Type Selection */}
+                    <div className="mb-4">
+                      <label className="block text-xs font-medium text-gray-700 mb-2">Item Type</label>
+                      <div className="flex gap-4">
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            checked={!item.is_set}
+                            onChange={() => updateEditingItem(index, 'is_set', false)}
+                            className="mr-2"
+                          />
+                          <span className="text-sm">Single Item</span>
+                        </label>
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            checked={item.is_set}
+                            onChange={() => updateEditingItem(index, 'is_set', true)}
+                            className="mr-2"
+                          />
+                          <span className="text-sm">Figure Set</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Pricing Section */}
+                    {item.is_set ? (
+                      <div className="grid grid-cols-4 gap-4 mb-4">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Sets Bought</label>
+                          <input
+                            type="number"
+                            min="1"
+                            value={item.quantity}
+                            onChange={(e) => updateEditingItem(index, 'quantity', parseInt(e.target.value) || 1)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Figures per Set</label>
+                          <select
+                            value={item.figures_per_set}
+                            onChange={(e) => {
+                              const figuresPerSet = parseInt(e.target.value)
+                              updateEditingItem(index, 'figures_per_set', figuresPerSet)
+                              if (item.total_set_price > 0) {
+                                updateEditingItem(index, 'unit_cost', item.total_set_price / figuresPerSet)
+                              }
+                            }}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                          >
+                            <option value={6}>6 figures</option>
+                            <option value={7}>7 figures</option>
+                            <option value={8}>8 figures</option>
+                            <option value={9}>9 figures</option>
+                            <option value={10}>10 figures</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Total Set Price ($)</label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={item.total_set_price}
+                            onChange={(e) => {
+                              const setPrice = parseFloat(e.target.value) || 0
+                              updateEditingItem(index, 'total_set_price', setPrice)
+                              updateEditingItem(index, 'unit_cost', setPrice / item.figures_per_set)
+                            }}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Per Figure Cost</label>
+                          <div className="px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg text-sm font-semibold text-blue-800">
+                            ${(item.unit_cost || 0).toFixed(2)}
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-3 gap-4 mb-4">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Quantity</label>
+                          <input
+                            type="number"
+                            min="1"
+                            value={item.quantity}
+                            onChange={(e) => updateEditingItem(index, 'quantity', parseInt(e.target.value) || 1)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Unit Price ($)</label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={item.unit_cost}
+                            onChange={(e) => updateEditingItem(index, 'unit_cost', parseFloat(e.target.value) || 0)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Total Cost</label>
+                          <div className="px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-sm font-semibold text-green-800">
+                            ${(item.quantity * (item.unit_cost || 0)).toFixed(2)}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Remove Button */}
+                    <div className="flex justify-between items-center pt-3 border-t border-gray-300">
+                      <div className="text-sm text-gray-600">
+                        {item.is_set ? (
+                          <span>
+                            <strong>{item.quantity} set(s)</strong> × <strong>{item.figures_per_set} figures</strong> = 
+                            <strong className="text-purple-600"> {item.quantity * item.figures_per_set} total figures</strong> 
+                            @ ${(item.unit_cost || 0).toFixed(2)} each
+                          </span>
+                        ) : (
+                          <span>
+                            <strong>{item.quantity} item(s)</strong> @ ${(item.unit_cost || 0).toFixed(2)} each
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => {
+                          if (confirm('Are you sure you want to remove this item?')) {
+                            removeEditingItem(index)
+                          }
+                        }}
+                        className="bg-red-500 text-white px-4 py-1 rounded-lg hover:bg-red-600 transition-colors text-sm font-medium"
+                      >
+                        🗑️ Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                
+                {/* Total Calculation */}
+                {editingItems.length > 0 && (
+                  <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                    <div className="text-sm font-semibold text-blue-800">
+                      Updated Total: ${editingItems.reduce((sum, item) => {
+                        if (item.is_set) {
+                          return sum + (item.quantity * (item.total_set_price || 0))
+                        } else {
+                          return sum + (item.quantity * (item.unit_cost || 0))
+                        }
+                      }, 0).toFixed(2)}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Notes</label>
                 <textarea
@@ -881,7 +1191,10 @@ export default function PurchasesPage() {
 
               <div className="flex justify-end gap-4">
                 <button
-                  onClick={() => setEditingOrder(null)}
+                  onClick={() => {
+                    setEditingOrder(null)
+                    setEditingItems([])
+                  }}
                   className="px-4 py-2 text-gray-600 hover:text-gray-800"
                 >
                   Cancel

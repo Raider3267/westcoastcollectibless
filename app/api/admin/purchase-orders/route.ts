@@ -18,6 +18,7 @@ interface PurchaseOrder {
   allocated_shipping_cost: number
   total_cost: number
   notes?: string
+  items?: string // JSON string of items array
   created_at: string
 }
 
@@ -62,7 +63,7 @@ async function writeCSV(filePath: string, records: any[]) {
     if (records.length === 0) {
       // Create empty file with headers based on the interface
       const headers = filePath.includes('purchase_orders') 
-        ? ['id', 'purchase_date', 'supplier', 'status', 'tracking_number', 'total_product_cost', 'allocated_shipping_cost', 'total_cost', 'notes', 'created_at']
+        ? ['id', 'purchase_date', 'supplier', 'status', 'tracking_number', 'total_product_cost', 'allocated_shipping_cost', 'total_cost', 'notes', 'items', 'created_at']
         : ['id', 'shipment_date', 'total_shipping_cost', 'tracking_numbers', 'notes', 'allocated']
       
       await fs.writeFile(filePath, headers.join(',') + '\n', 'utf-8')
@@ -88,8 +89,14 @@ export async function GET() {
     const purchaseOrders = await readCSV(PURCHASE_ORDERS_PATH)
     const shipments = await readCSV(SHIPMENTS_PATH)
     
+    // For old orders without items, return empty items array to preserve original data
+    const parsedOrders = purchaseOrders.map((order: any) => ({
+      ...order,
+      items: order.items ? JSON.parse(order.items) : []
+    }))
+    
     return NextResponse.json({ 
-      purchase_orders: purchaseOrders,
+      purchase_orders: parsedOrders,
       shipments: shipments
     })
   } catch (error) {
@@ -140,6 +147,7 @@ export async function POST(request: NextRequest) {
       allocated_shipping_cost: 0, // Will be allocated when shipment is recorded
       total_cost: totalProductCost,
       notes,
+      items: JSON.stringify(items), // Store items as JSON string
       created_at: new Date().toISOString()
     }
     
@@ -163,7 +171,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { id, ...updates } = body
+    const { id, items, ...updates } = body
     
     if (!id) {
       return NextResponse.json({ error: 'Purchase order ID is required' }, { status: 400 })
@@ -176,6 +184,24 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Purchase order not found' }, { status: 404 })
     }
     
+    // If items are being updated, recalculate totals ONLY if items have pricing
+    if (items && items.length > 0) {
+      const totalProductCost = items.reduce((sum: number, item: any) => {
+        if (item.is_set) {
+          return sum + (item.quantity * (item.total_set_price || 0))
+        } else {
+          return sum + (item.quantity * (item.unit_cost || 0))
+        }
+      }, 0)
+      
+      // Only update totals if items have actual pricing (not all zeros)
+      if (totalProductCost > 0) {
+        updates.total_product_cost = totalProductCost
+        updates.total_cost = totalProductCost + (parseFloat(purchaseOrders[orderIndex].allocated_shipping_cost) || 0)
+      }
+      updates.items = JSON.stringify(items)
+    }
+    
     // Update the purchase order
     const updatedOrder = { ...purchaseOrders[orderIndex], ...updates }
     purchaseOrders[orderIndex] = updatedOrder
@@ -184,7 +210,10 @@ export async function PUT(request: NextRequest) {
     
     return NextResponse.json({ 
       success: true, 
-      purchase_order: updatedOrder 
+      purchase_order: {
+        ...updatedOrder,
+        items: items || (updatedOrder.items ? JSON.parse(updatedOrder.items) : [])
+      }
     })
   } catch (error) {
     console.error('PUT /api/admin/purchase-orders error:', error)
