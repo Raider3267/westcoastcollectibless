@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { AuthService, User } from '../lib/auth'
+import { AuthService, User, VIP_TIERS } from '../lib/auth'
 import AuthModal from './AuthModal'
 
 export default function UserNav() {
@@ -24,19 +24,13 @@ export default function UserNav() {
   }
 
   const getTierBadgeColor = (tier: string) => {
-    switch (tier) {
-      case 'early_access': return 'linear-gradient(135deg, #ff6b6b, #feca57)'
-      case 'collectors_club': return 'linear-gradient(135deg, #667eea, #764ba2)'
-      default: return 'linear-gradient(135deg, var(--accent-teal), var(--accent-lilac))'
-    }
+    const tierData = VIP_TIERS.find(t => t.id === tier)
+    return tierData?.badge_color || 'linear-gradient(135deg, #94a3b8, #cbd5e1)'
   }
 
   const getTierName = (tier: string) => {
-    switch (tier) {
-      case 'early_access': return 'Early Access'
-      case 'collectors_club': return "Collector's Club"
-      default: return 'Collector'
-    }
+    const tierData = VIP_TIERS.find(t => t.id === tier)
+    return tierData?.name || 'Collector'
   }
 
   if (!user) {

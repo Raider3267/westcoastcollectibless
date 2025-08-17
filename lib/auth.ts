@@ -36,32 +36,76 @@ export interface VIPTier {
   early_access_hours: number
   discount_percentage: number
   exclusive_access: boolean
+  price_monthly?: number
+  price_yearly?: number
+  badge_color: string
+  description: string
+  featured_benefits: string[]
 }
 
 export const VIP_TIERS: VIPTier[] = [
   {
     id: 'basic',
     name: 'Collector',
-    benefits: ['Email alerts', 'Wishlist', 'Community access'],
+    description: 'Perfect for casual collectors who want to stay in the loop',
+    benefits: [
+      'Email alerts for new drops',
+      'Personal wishlist',
+      'Community access',
+      'Standard customer support',
+      'Drop calendar access'
+    ],
+    featured_benefits: ['Free to join', 'Basic alerts', 'Wishlist'],
     early_access_hours: 0,
     discount_percentage: 0,
-    exclusive_access: false
+    exclusive_access: false,
+    badge_color: 'linear-gradient(135deg, #94a3b8, #cbd5e1)',
+    price_monthly: 0,
+    price_yearly: 0
   },
   {
     id: 'early_access',
     name: 'Early Access',
-    benefits: ['24hr early access', 'Priority alerts', 'Exclusive previews'],
+    description: 'Get ahead of the crowd with exclusive early access to all drops',
+    benefits: [
+      '24-hour early access to all drops',
+      '5% discount on all purchases',
+      'Priority email alerts',
+      'Exclusive drop previews',
+      'Advanced drop notifications',
+      'Priority customer support',
+      'Early access badge'
+    ],
+    featured_benefits: ['24hr early access', '5% discount', 'Priority alerts'],
     early_access_hours: 24,
     discount_percentage: 5,
-    exclusive_access: false
+    exclusive_access: false,
+    badge_color: 'linear-gradient(135deg, #f59e0b, #fbbf24)',
+    price_monthly: 9.99,
+    price_yearly: 99.99
   },
   {
     id: 'collectors_club',
     name: "Collector's Club",
-    benefits: ['48hr early access', '10% discount', 'Exclusive items', 'VIP support'],
+    description: 'The ultimate experience for serious collectors with exclusive perks',
+    benefits: [
+      '48-hour early access to all drops',
+      '10% discount on all purchases',
+      'Exclusive member-only items',
+      'VIP customer support',
+      'Free shipping on all orders',
+      'Monthly exclusive collectible',
+      'Access to limited vault items',
+      'Collector networking events',
+      'Premium badge & profile flair'
+    ],
+    featured_benefits: ['48hr early access', '10% discount', 'Exclusive items', 'Free shipping'],
     early_access_hours: 48,
     discount_percentage: 10,
-    exclusive_access: true
+    exclusive_access: true,
+    badge_color: 'linear-gradient(135deg, #7c3aed, #a855f7)',
+    price_monthly: 19.99,
+    price_yearly: 199.99
   }
 ]
 
