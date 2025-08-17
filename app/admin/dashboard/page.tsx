@@ -15,6 +15,8 @@ interface Product {
   drop_date?: string
   released_date?: string
   show_in_new_releases?: boolean
+  show_in_featured?: boolean
+  show_in_coming_soon?: boolean
   // Cost tracking fields
   purchase_cost?: number
   shipping_cost?: number
@@ -38,6 +40,8 @@ interface ProductForm {
   drop_date?: string
   released_date?: string
   show_in_new_releases?: boolean
+  show_in_featured?: boolean
+  show_in_coming_soon?: boolean
   // Cost tracking fields
   purchase_cost?: number
   shipping_cost?: number
@@ -68,6 +72,9 @@ export default function AdminDashboard() {
     price: 0,
     images: [],
     status: 'live',
+    show_in_new_releases: false,
+    show_in_featured: true,
+    show_in_coming_soon: true,
     purchase_cost: 0,
     shipping_cost: 0,
     total_cost: 0,
@@ -205,6 +212,25 @@ export default function AdminDashboard() {
       }
     } catch (error) {
       console.error('Failed to update new releases visibility:', error)
+    }
+  }
+
+  const updateSectionVisibility = async (sku: string, section: 'featured' | 'coming_soon', visible: boolean) => {
+    try {
+      const fieldName = section === 'featured' ? 'show_in_featured' : 'show_in_coming_soon'
+      const response = await fetch('/api/admin/products', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sku, [fieldName]: visible.toString() })
+      })
+      
+      if (response.ok) {
+        setProducts(prev => prev.map(p => 
+          p.sku === sku ? { ...p, [fieldName]: visible } : p
+        ))
+      }
+    } catch (error) {
+      console.error(`Failed to update ${section} section visibility:`, error)
     }
   }
 
@@ -441,6 +467,9 @@ export default function AdminDashboard() {
                     New Releases
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Section Visibility
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -566,6 +595,45 @@ export default function AdminDashboard() {
                       {!product.released_date && (
                         <span className="text-xs text-gray-400">Not a new release</span>
                       )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col gap-2">
+                        {/* Featured Section Toggle */}
+                        <label className="flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={product.show_in_featured !== false}
+                            onChange={(e) => updateSectionVisibility(product.sku, 'featured', e.target.checked)}
+                            className="sr-only"
+                          />
+                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors mr-2 ${
+                            product.show_in_featured !== false
+                              ? 'bg-blue-500 border-blue-500 text-white' 
+                              : 'border-gray-300 hover:border-blue-400'
+                          }`}>
+                            {product.show_in_featured !== false && '✓'}
+                          </div>
+                          <span className="text-xs text-gray-600">Featured</span>
+                        </label>
+                        
+                        {/* Coming Soon Section Toggle */}
+                        <label className="flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={product.show_in_coming_soon !== false}
+                            onChange={(e) => updateSectionVisibility(product.sku, 'coming_soon', e.target.checked)}
+                            className="sr-only"
+                          />
+                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors mr-2 ${
+                            product.show_in_coming_soon !== false
+                              ? 'bg-purple-500 border-purple-500 text-white' 
+                              : 'border-gray-300 hover:border-purple-400'
+                          }`}>
+                            {product.show_in_coming_soon !== false && '✓'}
+                          </div>
+                          <span className="text-xs text-gray-600">Coming Soon</span>
+                        </label>
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
