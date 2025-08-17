@@ -5,7 +5,126 @@ import { Listing } from '../lib/listings'
 import ProductCard from '../components/ProductCard'
 import CountdownTimer from '../components/CountdownTimer'
 import FilterBar, { FilterOptions } from '../components/FilterBar'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
+
+// Scrollable section with navigation arrows component
+function ScrollableSection({ children, className = "luxury-grid wcc-scroll" }: { children: React.ReactNode, className?: string }) {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(true)
+
+  const checkScroll = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current
+      setCanScrollLeft(scrollLeft > 0)
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1)
+    }
+  }
+
+  useEffect(() => {
+    checkScroll()
+    const scrollElement = scrollRef.current
+    if (scrollElement) {
+      scrollElement.addEventListener('scroll', checkScroll)
+      return () => scrollElement.removeEventListener('scroll', checkScroll)
+    }
+  }, [children])
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const scrollAmount = 320 // Approximate card width + gap
+      const newScrollLeft = scrollRef.current.scrollLeft + (direction === 'right' ? scrollAmount : -scrollAmount)
+      scrollRef.current.scrollTo({ left: newScrollLeft, behavior: 'smooth' })
+    }
+  }
+
+  return (
+    <div style={{ position: 'relative' }}>
+      {/* Left Arrow */}
+      {canScrollLeft && (
+        <button
+          onClick={() => scroll('left')}
+          style={{
+            position: 'absolute',
+            left: '-20px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            zIndex: 10,
+            width: '40px',
+            height: '40px',
+            borderRadius: '50%',
+            border: 'none',
+            background: 'rgba(255,255,255,0.9)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '18px',
+            color: 'var(--ink)',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'white'
+            e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)'
+            e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.2)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'rgba(255,255,255,0.9)'
+            e.currentTarget.style.transform = 'translateY(-50%) scale(1)'
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)'
+          }}
+        >
+          ←
+        </button>
+      )}
+
+      {/* Right Arrow */}
+      {canScrollRight && (
+        <button
+          onClick={() => scroll('right')}
+          style={{
+            position: 'absolute',
+            right: '-20px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            zIndex: 10,
+            width: '40px',
+            height: '40px',
+            borderRadius: '50%',
+            border: 'none',
+            background: 'rgba(255,255,255,0.9)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '18px',
+            color: 'var(--ink)',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'white'
+            e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)'
+            e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.2)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'rgba(255,255,255,0.9)'
+            e.currentTarget.style.transform = 'translateY(-50%) scale(1)'
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)'
+          }}
+        >
+          →
+        </button>
+      )}
+
+      {/* Scrollable Content */}
+      <div ref={scrollRef} className={className}>
+        {children}
+      </div>
+    </div>
+  )
+}
 
 export default function HomePage() {
   const [items, setItems] = useState<Listing[]>([])
@@ -569,7 +688,7 @@ function FeaturedSection({ items, filteredItems, loading, onFiltersChange }: {
           totalItems={filteredItems.length}
         />
         
-        <div className="luxury-grid wcc-scroll">
+        <ScrollableSection>
           {filteredItems.map((product, index) => {
             const cardColor = cardColors[index % cardColors.length]
             const toyEmojis = ['🧸', '🎨', '🎪', '🎭', '🎲', '🚀', '🌟', '💎', '🎯', '⭐']
@@ -584,7 +703,7 @@ function FeaturedSection({ items, filteredItems, loading, onFiltersChange }: {
               />
             )
           })}
-        </div>
+        </ScrollableSection>
       </div>
     </section>
   )
@@ -692,14 +811,7 @@ function NewReleasesSection() {
             ))}
           </div>
         ) : (
-          <div className="luxury-grid wcc-scroll" style={{
-            gridTemplateColumns: newReleases.length === 1 
-              ? 'repeat(1, minmax(280px, 320px))' 
-              : newReleases.length === 2 
-              ? 'repeat(2, minmax(280px, 320px))'
-              : 'repeat(auto-fit, minmax(280px, 1fr))',
-            justifyContent: newReleases.length <= 2 ? 'center' : 'flex-start'
-          }}>
+          <ScrollableSection>
             {newReleases.map((product, index) => {
               const cardColor = cardColors[index % cardColors.length]
               const releaseEmojis = ['🚀', '⭐', '🔥', '✨', '💎', '🎯', '🌟', '💫', '🎪', '🎨']
@@ -731,7 +843,7 @@ function NewReleasesSection() {
                 </div>
               )
             })}
-          </div>
+          </ScrollableSection>
         )}
       </div>
     </section>
