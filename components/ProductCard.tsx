@@ -20,6 +20,8 @@ type Product = {
   drop_date?: string | null
   released_date?: string | null
   show_in_new_releases?: boolean
+  show_in_featured?: boolean
+  show_in_coming_soon?: boolean
 }
 
 interface ProductCardProps {
@@ -105,6 +107,27 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
             zIndex: 15
           }}>
             ✨ NEW
+          </div>
+        )}
+        
+        {/* Out of stock overlay */}
+        {(!product.quantity || product.quantity <= 0) && (
+          <div style={{
+            position: 'absolute',
+            top: '12px',
+            left: '12px',
+            background: 'rgba(220, 53, 69, 0.9)',
+            color: 'white',
+            padding: '6px 12px',
+            borderRadius: '999px',
+            fontSize: '0.8rem',
+            fontWeight: 700,
+            zIndex: 15,
+            backdropFilter: 'blur(4px)',
+            border: '2px solid white',
+            boxShadow: '0 4px 12px rgba(220, 53, 69, 0.3)'
+          }}>
+            🚫 OUT OF STOCK
           </div>
         )}
         
@@ -203,28 +226,51 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
           )}
           
           <div className="wcc-actions" style={{ position: 'relative', zIndex: 10, width: '100%', display: 'flex', gap: '8px' }}>
-            <button
-              className="btn wcc-btn wcc-btn--grad"
-              style={{ 
-                pointerEvents: 'all',
-                cursor: 'pointer',
-                position: 'relative',
-                zIndex: 11,
-                display: 'inline-flex',
-                flex: 1,
-                justifyContent: 'center',
-                fontSize: '0.9rem',
-                fontWeight: 600
-              }}
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                // Add to cart functionality - could integrate with Stripe or cart system
-                alert('Added to cart! (Cart system integration needed)')
-              }}
-            >
-              Add to Cart
-            </button>
+            {(!product.quantity || product.quantity <= 0) ? (
+              <button
+                className="btn wcc-btn"
+                style={{ 
+                  pointerEvents: 'all',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  zIndex: 11,
+                  display: 'inline-flex',
+                  flex: 1,
+                  justifyContent: 'center',
+                  fontSize: '0.9rem',
+                  fontWeight: 600,
+                  background: 'linear-gradient(135deg, #6c757d, #95a5a6)',
+                  color: 'white',
+                  border: 'none'
+                }}
+                onClick={handleCreateAlert}
+              >
+                🔔 Get Alert
+              </button>
+            ) : (
+              <button
+                className="btn wcc-btn wcc-btn--grad"
+                style={{ 
+                  pointerEvents: 'all',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  zIndex: 11,
+                  display: 'inline-flex',
+                  flex: 1,
+                  justifyContent: 'center',
+                  fontSize: '0.9rem',
+                  fontWeight: 600
+                }}
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  // Add to cart functionality - could integrate with Stripe or cart system
+                  alert('Added to cart! (Cart system integration needed)')
+                }}
+              >
+                Add to Cart
+              </button>
+            )}
             <button 
               type="button"
               className="btn wcc-btn"

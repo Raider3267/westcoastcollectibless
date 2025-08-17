@@ -3,8 +3,8 @@ import { getListingsFromCsv } from '../../../../lib/listings'
 
 export async function GET() {
   try {
-    // Get only in-stock products for the public website
-    const products = await getListingsFromCsv('export.csv', false)
+    // Get all live products for the public website (including out of stock)
+    const products = await getListingsFromCsv('export.csv', true)
     
     return NextResponse.json(products)
   } catch (error) {

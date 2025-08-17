@@ -24,6 +24,8 @@ export type Listing = {
   drop_date?: string | null
   released_date?: string | null
   show_in_new_releases?: boolean
+  show_in_featured?: boolean
+  show_in_coming_soon?: boolean
 }
 
 const FIRST = <T>(...vals: (T | undefined | null | false | '' )[]) =>
@@ -134,6 +136,14 @@ export async function getListingsFromCsv(filename = 'export.csv', includeOutOfSt
       
       // Get show_in_new_releases field
       const show_in_new_releases = FIRST<string>(row['show_in_new_releases'], row['Show In New Releases']) === 'true'
+      
+      // Get show_in_featured field (default to true for existing products)
+      const show_in_featured_str = FIRST<string>(row['show_in_featured'], row['Show In Featured'])
+      const show_in_featured = show_in_featured_str ? show_in_featured_str === 'true' : true
+      
+      // Get show_in_coming_soon field (default to true for coming-soon status)
+      const show_in_coming_soon_str = FIRST<string>(row['show_in_coming_soon'], row['Show In Coming Soon'])
+      const show_in_coming_soon = show_in_coming_soon_str ? show_in_coming_soon_str === 'true' : (status === 'coming-soon')
 
       return { 
         id: String(id), 
@@ -148,7 +158,9 @@ export async function getListingsFromCsv(filename = 'export.csv', includeOutOfSt
         status,
         drop_date,
         released_date,
-        show_in_new_releases
+        show_in_new_releases,
+        show_in_featured,
+        show_in_coming_soon
       }
     })
     // Filter based on stock, price, and content quality
@@ -219,6 +231,14 @@ export async function getComingSoonProducts(filename = 'export.csv'): Promise<Li
       
       // Get show_in_new_releases field
       const show_in_new_releases = FIRST<string>(row['show_in_new_releases'], row['Show In New Releases']) === 'true'
+      
+      // Get show_in_featured field (default to true for existing products)
+      const show_in_featured_str = FIRST<string>(row['show_in_featured'], row['Show In Featured'])
+      const show_in_featured = show_in_featured_str ? show_in_featured_str === 'true' : true
+      
+      // Get show_in_coming_soon field (default to true for coming-soon status)
+      const show_in_coming_soon_str = FIRST<string>(row['show_in_coming_soon'], row['Show In Coming Soon'])
+      const show_in_coming_soon = show_in_coming_soon_str ? show_in_coming_soon_str === 'true' : (status === 'coming-soon')
 
       return { 
         id: String(id), 
@@ -233,7 +253,9 @@ export async function getComingSoonProducts(filename = 'export.csv'): Promise<Li
         status,
         drop_date,
         released_date,
-        show_in_new_releases
+        show_in_new_releases,
+        show_in_featured,
+        show_in_coming_soon
       }
     })
     // Filter for coming-soon products only
