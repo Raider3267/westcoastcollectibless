@@ -108,18 +108,28 @@ export default function HomePage() {
             </div>
             <h1 style={{ 
               fontSize: 'clamp(2.5rem, 4vw, 4rem)', 
-              margin: '0.35em 0 0.3em', 
+              margin: '0.35em 0 0.2em', 
               lineHeight: 1.07, 
               fontWeight: 800,
               color: 'white',
               textShadow: '0 4px 8px rgba(0,0,0,0.4)'
             }}>
-              Luxury Designer Toys with Playful Energy
+              <span className="floating-collectible" style={{ display: 'inline-block' }}>🎯</span> Luxury Designer Toys with Playful Energy
             </h1>
             <p style={{ 
-              margin: '0 0 30px', 
-              fontSize: '1.2rem',
+              margin: '0 0 8px', 
+              fontSize: '1.3rem',
               color: 'rgba(255,255,255,0.95)',
+              textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+              lineHeight: 1.4,
+              fontWeight: 600
+            }}>
+              Limited drops. Authentic releases. For serious collectors.
+            </p>
+            <p style={{ 
+              margin: '0 0 30px', 
+              fontSize: '1.1rem',
+              color: 'rgba(255,255,255,0.85)',
               textShadow: '0 2px 4px rgba(0,0,0,0.3)',
               lineHeight: 1.6
             }}>
@@ -191,27 +201,155 @@ export default function HomePage() {
         {/* Coming Soon Section */}
         <ComingSoonSection />
 
-        {/* Trust + Contact */}
-        <section className="luxury-section">
-          <div style={{ maxWidth: '1224px', margin: '0 auto', padding: '0 20px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
-              <div className="luxury-card accent-lilac" style={{ padding: '20px' }}>
-                <div style={{ fontWeight: 800, color: 'var(--ink)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+        {/* Trust & Credibility - Unified Section */}
+        <section className="luxury-section" style={{ 
+          background: 'linear-gradient(135deg, rgba(199,163,255,.08) 0%, rgba(94,208,192,.08) 50%, rgba(247,231,195,.08) 100%)',
+          position: 'relative',
+          overflow: 'hidden',
+          paddingBottom: '60px'
+        }}>
+          {/* Background decorations */}
+          <div style={{
+            position: 'absolute',
+            top: '-10%',
+            left: '-5%',
+            width: '30%',
+            height: '120%',
+            background: 'radial-gradient(circle, rgba(199,163,255,.1) 0%, transparent 70%)',
+            borderRadius: '50%',
+            filter: 'blur(40px)'
+          }} />
+          <div style={{
+            position: 'absolute',
+            bottom: '-10%',
+            right: '-5%',
+            width: '35%',
+            height: '120%',
+            background: 'radial-gradient(circle, rgba(94,208,192,.1) 0%, transparent 70%)',
+            borderRadius: '50%',
+            filter: 'blur(50px)'
+          }} />
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '25%',
+            height: '80%',
+            background: 'radial-gradient(circle, rgba(247,231,195,.08) 0%, transparent 70%)',
+            borderRadius: '50%',
+            filter: 'blur(60px)'
+          }} />
+          
+          <div style={{ maxWidth: '1224px', margin: '0 auto', padding: '0 20px', position: 'relative', zIndex: 2 }}>
+            {/* Header */}
+            <div className="luxury-eyebrow" style={{ textAlign: 'center', marginBottom: '16px' }}>Trusted by Collectors</div>
+            <h2 style={{ 
+              fontSize: 'clamp(1.6rem, 2.5vw, 2rem)', 
+              margin: '0 0 12px', 
+              fontWeight: 800,
+              color: 'var(--ink)',
+              textAlign: 'center'
+            }}>
+              Why Choose West Coast Collectibles
+            </h2>
+            <p style={{ fontSize: '1rem', color: 'var(--muted)', margin: '0 0 40px', maxWidth: '600px', textAlign: 'center', marginLeft: 'auto', marginRight: 'auto' }}>
+              We're passionate collectors ourselves, ensuring every piece meets our high standards.
+            </p>
+            
+            {/* Why Choose Us Cards */}
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+              gap: '20px',
+              marginBottom: '48px'
+            }}>
+              <div className="luxury-card accent-lilac" style={{ padding: '24px', textAlign: 'center' }}>
+                <div style={{ 
+                  width: '64px', 
+                  height: '64px', 
+                  borderRadius: '50%', 
+                  background: 'linear-gradient(135deg, var(--accent-lilac), rgba(199,163,255,0.3))',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 16px',
+                  fontSize: '1.5rem'
+                }}>
+                  ✨
+                </div>
+                <h3 style={{ fontWeight: 800, color: 'var(--ink)', marginBottom: '8px', fontSize: '1.1rem' }}>
+                  100% Authentic
+                </h3>
+                <p style={{ fontSize: '0.9rem', color: 'var(--muted)', margin: 0, lineHeight: 1.5 }}>
+                  Every collectible is carefully verified and authenticated before shipping to ensure you receive genuine products.
+                </p>
+              </div>
+              
+              <div className="luxury-card accent-teal" style={{ padding: '24px', textAlign: 'center' }}>
+                <div style={{ 
+                  width: '64px', 
+                  height: '64px', 
+                  borderRadius: '50%', 
+                  background: 'linear-gradient(135deg, var(--accent-teal), rgba(94,208,192,0.3))',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 16px',
+                  fontSize: '1.5rem'
+                }}>
+                  🚀
+                </div>
+                <h3 style={{ fontWeight: 800, color: 'var(--ink)', marginBottom: '8px', fontSize: '1.1rem' }}>
+                  Lightning Fast
+                </h3>
+                <p style={{ fontSize: '0.9rem', color: 'var(--muted)', margin: 0, lineHeight: 1.5 }}>
+                  Most orders ship within 24 hours with 2-3 day delivery. Your collectibles arrive quickly and safely.
+                </p>
+              </div>
+              
+              <div className="luxury-card accent-gold" style={{ padding: '24px', textAlign: 'center' }}>
+                <div style={{ 
+                  width: '64px', 
+                  height: '64px', 
+                  borderRadius: '50%', 
+                  background: 'linear-gradient(135deg, var(--accent-gold), rgba(201,176,126,0.3))',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 16px',
+                  fontSize: '1.5rem'
+                }}>
+                  🛡️
+                </div>
+                <h3 style={{ fontWeight: 800, color: 'var(--ink)', marginBottom: '8px', fontSize: '1.1rem' }}>
+                  Trusted & Secure
+                </h3>
+                <p style={{ fontSize: '0.9rem', color: 'var(--muted)', margin: 0, lineHeight: 1.5 }}>
+                  U.S.-based seller with secure checkout, buyer protection, and hassle-free returns on all purchases.
+                </p>
+              </div>
+            </div>
+
+            {/* Policies Section */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
+              <div className="luxury-card accent-lilac" style={{ padding: '24px' }}>
+                <div style={{ fontWeight: 800, color: 'var(--ink)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
                   🚀 Shipping
                 </div>
-                <p style={{ fontSize: '0.9rem', color: 'var(--muted)', margin: 0 }}>{SITE.policies.shipping}</p>
+                <p style={{ fontSize: '0.95rem', color: 'var(--muted)', margin: 0, lineHeight: 1.5 }}>{SITE.policies.shipping}</p>
               </div>
-              <div className="luxury-card accent-teal" style={{ padding: '20px' }}>
-                <div style={{ fontWeight: 800, color: 'var(--ink)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <div className="luxury-card accent-teal" style={{ padding: '24px' }}>
+                <div style={{ fontWeight: 800, color: 'var(--ink)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
                   🔄 Returns
                 </div>
-                <p style={{ fontSize: '0.9rem', color: 'var(--muted)', margin: 0 }}>{SITE.policies.returns}</p>
+                <p style={{ fontSize: '0.95rem', color: 'var(--muted)', margin: 0, lineHeight: 1.5 }}>{SITE.policies.returns}</p>
               </div>
-              <div className="luxury-card accent-gold" style={{ padding: '20px' }}>
-                <div style={{ fontWeight: 800, color: 'var(--ink)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <div className="luxury-card accent-gold" style={{ padding: '24px' }}>
+                <div style={{ fontWeight: 800, color: 'var(--ink)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
                   💬 Support
                 </div>
-                <p style={{ fontSize: '0.9rem', color: 'var(--muted)', margin: 0 }}>
+                <p style={{ fontSize: '0.95rem', color: 'var(--muted)', margin: 0, lineHeight: 1.5 }}>
                   Questions? Email{' '}
                   <a style={{ color: 'var(--accent-teal)', textDecoration: 'underline' }} href="mailto:support@westcoastcollectibless.com">
                     support@westcoastcollectibless.com
@@ -283,12 +421,41 @@ function FeaturedSection({ items, loading }: { items: Listing[], loading: boolea
   ]
 
   return (
-    <section className="luxury-section">
-      <div style={{ maxWidth: '1224px', margin: '0 auto', padding: '0 20px' }}>
+    <section className="luxury-section" style={{ 
+      background: 'linear-gradient(135deg, rgba(199,163,255,.08) 0%, rgba(94,208,192,.08) 50%, rgba(247,231,195,.08) 100%)',
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      {/* Background decoration */}
+      <div style={{
+        position: 'absolute',
+        top: '-15%',
+        left: '-10%',
+        width: '40%',
+        height: '130%',
+        background: 'radial-gradient(circle, rgba(199,163,255,.08) 0%, transparent 70%)',
+        borderRadius: '50%',
+        filter: 'blur(50px)'
+      }} />
+      <div style={{
+        position: 'absolute',
+        bottom: '-15%',
+        right: '-10%',
+        width: '35%',
+        height: '130%',
+        background: 'radial-gradient(circle, rgba(94,208,192,.08) 0%, transparent 70%)',
+        borderRadius: '50%',
+        filter: 'blur(50px)'
+      }} />
+      
+      <div style={{ maxWidth: '1224px', margin: '0 auto', padding: '0 20px', position: 'relative', zIndex: 2 }}>
         <div className="luxury-eyebrow">Featured Collection</div>
-        <h2 style={{ fontSize: '1.6rem', margin: '0 0 16px', fontWeight: 800 }}>
+        <h2 style={{ fontSize: '1.8rem', margin: '0 0 12px', fontWeight: 800 }}>
           Featured Treasures
         </h2>
+        <p style={{ fontSize: '1rem', color: 'var(--muted)', margin: '0 0 24px', maxWidth: '600px' }}>
+          Handpicked premium collectibles from top designers. Each piece is authenticated and carefully curated for discerning collectors.
+        </p>
         <div className="luxury-grid wcc-scroll">
           {items.map((product, index) => {
             const cardColor = cardColors[index % cardColors.length]
@@ -367,8 +534,8 @@ function NewReleasesSection() {
       <div style={{ maxWidth: '1224px', margin: '0 auto', padding: '0 20px', position: 'relative', zIndex: 2 }}>
         <div className="luxury-eyebrow" style={{ marginBottom: '8px' }}>🔥 Fresh Drops</div>
         <h2 style={{ 
-          fontSize: 'clamp(1.5rem, 2.5vw, 2rem)', 
-          margin: '0 0 20px', 
+          fontSize: 'clamp(1.6rem, 2.5vw, 2.1rem)', 
+          margin: '0 0 12px', 
           fontWeight: 800,
           color: 'var(--wcc-ink)',
           display: 'flex',
@@ -389,6 +556,9 @@ function NewReleasesSection() {
             </span>
           )}
         </h2>
+        <p style={{ fontSize: '1rem', color: 'var(--wcc-muted)', margin: '0 0 24px', maxWidth: '600px' }}>
+          The latest releases from your favorite designers. Get them before they're gone!
+        </p>
         
         {loading ? (
           <div className="luxury-grid wcc-scroll">
@@ -558,7 +728,17 @@ function ComingSoonSection() {
         right: '-10%',
         width: '40%',
         height: '140%',
-        background: 'radial-gradient(circle, rgba(199,163,255,.15) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(199,163,255,.1) 0%, transparent 70%)',
+        borderRadius: '50%',
+        filter: 'blur(60px)'
+      }} />
+      <div style={{
+        position: 'absolute',
+        bottom: '-20%',
+        left: '-10%',
+        width: '35%',
+        height: '140%',
+        background: 'radial-gradient(circle, rgba(247,231,195,.08) 0%, transparent 70%)',
         borderRadius: '50%',
         filter: 'blur(60px)'
       }} />
@@ -570,7 +750,7 @@ function ComingSoonSection() {
           </div>
           <h2 style={{ 
             fontSize: 'clamp(2rem, 3vw, 2.5rem)', 
-            margin: '0 0 20px', 
+            margin: '0 0 12px', 
             fontWeight: 800,
             color: 'var(--wcc-ink)',
             lineHeight: 1.2
@@ -631,17 +811,21 @@ function ComingSoonSection() {
         }}>
           {/* Left: Preview Cards */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div className="luxury-eyebrow" style={{ marginBottom: '8px' }}>Exclusive Preview</div>
             <h3 style={{ 
-              fontSize: '1.3rem', 
+              fontSize: '1.4rem', 
               fontWeight: 800, 
               color: 'var(--wcc-ink)', 
-              margin: '0 0 16px',
+              margin: '0 0 12px',
               display: 'flex',
               alignItems: 'center',
               gap: '8px'
             }}>
               👀 Sneak Peek
             </h3>
+            <p style={{ fontSize: '0.95rem', color: 'var(--wcc-muted)', margin: '0 0 16px' }}>
+              Upcoming releases teased just for you.
+            </p>
             
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
               {comingSoonItems.length > 0 ? (
@@ -765,11 +949,12 @@ function ComingSoonSection() {
             background: 'linear-gradient(#fff,#fff) padding-box, linear-gradient(135deg,var(--wcc-grad-a),var(--wcc-grad-b),var(--wcc-grad-c)) border-box',
             border: '2px solid transparent'
           }}>
+            <div className="luxury-eyebrow" style={{ marginBottom: '8px', textAlign: 'center' }}>VIP Access</div>
             <h3 style={{ 
-              fontSize: '1.4rem', 
+              fontSize: '1.5rem', 
               fontWeight: 800, 
               color: 'var(--wcc-ink)', 
-              margin: '0 0 16px',
+              margin: '0 0 12px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',

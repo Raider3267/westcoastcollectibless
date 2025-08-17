@@ -59,6 +59,18 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
   return (
     <>
       <article className={`product-card wcc-card ${accentClass} group`}>
+        {/* Enhanced badge for featured/new items */}
+        {product.show_in_new_releases && (
+          <div className="luxury-badge featured" style={{
+            position: 'absolute',
+            top: '12px',
+            right: '12px',
+            zIndex: 15
+          }}>
+            ✨ NEW
+          </div>
+        )}
+        
         <div className="product-thumb wcc-thumb">
           {(product.images && product.images.length > 0) || product.image ? (
             <ImageCarousel
@@ -90,7 +102,7 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
             <span className="product-price wcc-price">Price Available</span>
           )}
           
-          <div className="wcc-actions" style={{ position: 'relative', zIndex: 10 }}>
+          <div className="wcc-actions" style={{ position: 'relative', zIndex: 10, width: '100%' }}>
             <a
               className="btn wcc-btn wcc-btn--grad"
               href={product.ebayUrl || 'https://www.ebay.com/usr/westcoastcollectibless'}
