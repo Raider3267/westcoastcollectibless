@@ -87,6 +87,9 @@ export default function AdminDashboard() {
   const productToForm = (product: Product): ProductForm => ({
     ...product,
     images: product.images ? product.images.split(',').map(img => img.trim()).filter(img => img) : [],
+    show_in_new_releases: product.show_in_new_releases || false,
+    show_in_featured: product.show_in_featured !== false, // Default to true
+    show_in_coming_soon: product.show_in_coming_soon !== false, // Default to true
     purchase_cost: product.purchase_cost || 0,
     shipping_cost: product.shipping_cost || 0,
     total_cost: product.total_cost || 0,
@@ -98,6 +101,9 @@ export default function AdminDashboard() {
   const formToProduct = (form: ProductForm): Product => ({
     ...form,
     images: form.images.join(', '),
+    show_in_new_releases: form.show_in_new_releases || false,
+    show_in_featured: form.show_in_featured !== false,
+    show_in_coming_soon: form.show_in_coming_soon !== false,
     total_cost: (form.purchase_cost || 0) + (form.shipping_cost || 0)
   })
 
@@ -801,6 +807,63 @@ export default function AdminDashboard() {
                             : 0}%
                         </div>
                       </div>
+                    </div>
+                  </div>
+                
+                  {/* Section Visibility Controls */}
+                  <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-700 mb-3">Section Visibility</h4>
+                    <div className="space-y-3">
+                      <label className="flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={editingProduct.show_in_new_releases || false}
+                          onChange={(e) => setEditingProduct(prev => prev ? {...prev, show_in_new_releases: e.target.checked} : null)}
+                          className="sr-only"
+                        />
+                        <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors mr-3 ${
+                          editingProduct.show_in_new_releases 
+                            ? 'bg-green-500 border-green-500 text-white' 
+                            : 'border-gray-300 hover:border-green-400'
+                        }`}>
+                          {editingProduct.show_in_new_releases && '✓'}
+                        </div>
+                        <span className="text-sm text-gray-700">Show in New Releases</span>
+                      </label>
+                      
+                      <label className="flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={editingProduct.show_in_featured !== false}
+                          onChange={(e) => setEditingProduct(prev => prev ? {...prev, show_in_featured: e.target.checked} : null)}
+                          className="sr-only"
+                        />
+                        <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors mr-3 ${
+                          editingProduct.show_in_featured !== false
+                            ? 'bg-blue-500 border-blue-500 text-white' 
+                            : 'border-gray-300 hover:border-blue-400'
+                        }`}>
+                          {editingProduct.show_in_featured !== false && '✓'}
+                        </div>
+                        <span className="text-sm text-gray-700">Show in Featured Section</span>
+                      </label>
+                      
+                      <label className="flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={editingProduct.show_in_coming_soon !== false}
+                          onChange={(e) => setEditingProduct(prev => prev ? {...prev, show_in_coming_soon: e.target.checked} : null)}
+                          className="sr-only"
+                        />
+                        <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors mr-3 ${
+                          editingProduct.show_in_coming_soon !== false
+                            ? 'bg-purple-500 border-purple-500 text-white' 
+                            : 'border-gray-300 hover:border-purple-400'
+                        }`}>
+                          {editingProduct.show_in_coming_soon !== false && '✓'}
+                        </div>
+                        <span className="text-sm text-gray-700">Show in Coming Soon Section</span>
+                      </label>
                     </div>
                   </div>
                 </div>
