@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useState, useEffect } from 'react'
 import { VIP_TIERS, AuthService } from '../../lib/auth'
