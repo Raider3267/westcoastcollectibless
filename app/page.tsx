@@ -3,12 +3,21 @@
 import { SITE } from '../lib/products'
 import { Listing } from '../lib/listings'
 import ProductCard from '../components/ProductCard'
+import CountdownTimer from '../components/CountdownTimer'
+import FilterBar, { FilterOptions } from '../components/FilterBar'
 import { useEffect, useState } from 'react'
 
 export default function HomePage() {
   const [items, setItems] = useState<Listing[]>([])
+  const [filteredItems, setFilteredItems] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [showNewReleases, setShowNewReleases] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('showNewReleasesSection') === 'true'
+    }
+    return false
+  })
 
   const loadProducts = async () => {
     try {
@@ -16,12 +25,63 @@ export default function HomePage() {
       if (response.ok) {
         const data = await response.json()
         setItems(data)
+        setFilteredItems(data)
       }
     } catch (error) {
       console.error('Failed to load products:', error)
     } finally {
       setLoading(false)
     }
+  }
+  
+  const handleFiltersChange = (filters: FilterOptions) => {
+    let filtered = [...items]
+    
+    // Filter by series
+    if (filters.series.length > 0) {
+      filtered = filtered.filter(item => 
+        filters.series.some(series => 
+          item.name.toLowerCase().includes(series.toLowerCase())
+        )
+      )
+    }
+    
+    // Filter by price range
+    if (filters.priceRange.min > 0 || filters.priceRange.max < 1000) {
+      filtered = filtered.filter(item => {
+        const price = item.price || 0
+        return price >= filters.priceRange.min && price <= filters.priceRange.max
+      })
+    }
+    
+    // Filter by rarity (could be enhanced with actual rarity data)
+    if (filters.rarity.length > 0) {
+      filtered = filtered.filter(item => 
+        filters.rarity.some(rarity => 
+          item.name.toLowerCase().includes(rarity.toLowerCase()) ||
+          item.description?.toLowerCase().includes(rarity.toLowerCase())
+        )
+      )
+    }
+    
+    // Sort items
+    switch (filters.sortBy) {
+      case 'price_low':
+        filtered.sort((a, b) => (a.price || 0) - (b.price || 0))
+        break
+      case 'price_high':
+        filtered.sort((a, b) => (b.price || 0) - (a.price || 0))
+        break
+      case 'name':
+        filtered.sort((a, b) => a.name.localeCompare(b.name))
+        break
+      case 'date':
+      default:
+        filtered.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
+        break
+    }
+    
+    setFilteredItems(filtered)
   }
 
   useEffect(() => {
@@ -39,9 +99,19 @@ export default function HomePage() {
       }
     }, 60000) // Check every minute
     
+    // Listen for localStorage changes to sync with admin panel
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'showNewReleasesSection') {
+        setShowNewReleases(e.newValue === 'true')
+      }
+    }
+    
+    window.addEventListener('storage', handleStorageChange)
+    
     return () => {
       clearInterval(interval)
       clearInterval(schedulerInterval)
+      window.removeEventListener('storage', handleStorageChange)
     }
   }, [])
 
@@ -192,11 +262,11 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* New Releases Section */}
-        <NewReleasesSection />
+        {/* New Releases Section (toggleable) */}
+        {showNewReleases && <NewReleasesSection />}
 
         {/* Featured Listings */}
-        <FeaturedSection items={items} loading={loading} />
+        <FeaturedSection items={items} filteredItems={filteredItems} loading={loading} onFiltersChange={handleFiltersChange} />
 
         {/* Coming Soon Section */}
         <ComingSoonSection />
@@ -365,7 +435,12 @@ export default function HomePage() {
 }
 
 
-function FeaturedSection({ items, loading }: { items: Listing[], loading: boolean }) {
+function FeaturedSection({ items, filteredItems, loading, onFiltersChange }: { 
+  items: Listing[], 
+  filteredItems: Listing[], 
+  loading: boolean, 
+  onFiltersChange: (filters: FilterOptions) => void 
+}) {
   if (loading) {
     return (
       <section className="luxury-section">
@@ -398,14 +473,45 @@ function FeaturedSection({ items, loading }: { items: Listing[], loading: boolea
 
   if (!items || items.length === 0) {
     return (
-      <section className="mt-10">
-        <h2 className="text-3xl font-bold text-center mb-8">
-          <span className="bg-gradient-to-r from-pop-teal to-pop-purple bg-clip-text text-transparent">
+      <section className="luxury-section" style={{ 
+        background: 'linear-gradient(135deg, rgba(199,163,255,.08) 0%, rgba(94,208,192,.08) 50%, rgba(247,231,195,.08) 100%)',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div style={{ maxWidth: '1224px', margin: '0 auto', padding: '0 20px', position: 'relative', zIndex: 2 }}>
+          <div className="luxury-eyebrow">Featured Collection</div>
+          <h2 style={{ fontSize: '1.8rem', margin: '0 0 12px', fontWeight: 800 }}>
             Featured Treasures
-          </span>
-        </h2>
-        <div className="text-center py-12">
-          <p className="text-gray-500">No products in stock at the moment. Check back soon!</p>
+          </h2>
+          <div className="text-center py-12">
+            <p className="text-gray-500">No products in stock at the moment. Check back soon!</p>
+          </div>
+        </div>
+      </section>
+    )
+  }
+  
+  if (filteredItems.length === 0) {
+    return (
+      <section className="luxury-section" style={{ 
+        background: 'linear-gradient(135deg, rgba(199,163,255,.08) 0%, rgba(94,208,192,.08) 50%, rgba(247,231,195,.08) 100%)',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div style={{ maxWidth: '1224px', margin: '0 auto', padding: '0 20px', position: 'relative', zIndex: 2 }}>
+          <div className="luxury-eyebrow">Featured Collection</div>
+          <h2 style={{ fontSize: '1.8rem', margin: '0 0 12px', fontWeight: 800 }}>
+            Featured Treasures
+          </h2>
+          <FilterBar 
+            onFiltersChange={onFiltersChange}
+            totalItems={filteredItems.length}
+          />
+          <div className="text-center py-12">
+            <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🔍</div>
+            <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--ink)', marginBottom: '8px' }}>No matches found</h3>
+            <p style={{ color: 'var(--muted)' }}>Try adjusting your filters to see more products.</p>
+          </div>
         </div>
       </section>
     )
@@ -456,8 +562,15 @@ function FeaturedSection({ items, loading }: { items: Listing[], loading: boolea
         <p style={{ fontSize: '1rem', color: 'var(--muted)', margin: '0 0 24px', maxWidth: '600px' }}>
           Handpicked premium collectibles from top designers. Each piece is authenticated and carefully curated for discerning collectors.
         </p>
+        
+        {/* Filter Bar */}
+        <FilterBar 
+          onFiltersChange={onFiltersChange}
+          totalItems={filteredItems.length}
+        />
+        
         <div className="luxury-grid wcc-scroll">
-          {items.map((product, index) => {
+          {filteredItems.map((product, index) => {
             const cardColor = cardColors[index % cardColors.length]
             const toyEmojis = ['🧸', '🎨', '🎪', '🎭', '🎲', '🚀', '🌟', '💎', '🎯', '⭐']
             const randomEmoji = toyEmojis[index % toyEmojis.length]
@@ -783,22 +896,16 @@ function ComingSoonSection() {
             </p>
           )}
           
-          {/* Countdown */}
+          {/* Enhanced Countdown Timer */}
           {nextDropDate && (
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '12px',
-              padding: '16px 24px',
-              background: 'linear-gradient(135deg, var(--wcc-lilac), var(--wcc-teal))',
-              borderRadius: '999px',
-              color: 'white',
-              fontWeight: 700,
-              fontSize: '1.1rem',
-              marginBottom: '40px',
-              boxShadow: '0 8px 24px rgba(199,163,255,.3)'
-            }}>
-              ⏰ {timeUntilDrop() === 'Now available!' ? 'Latest drops now live!' : `Next drop in ${timeUntilDrop()}`}
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <CountdownTimer 
+                targetDate={nextDropDate}
+                onComplete={() => {
+                  // Refresh the page or update coming soon items when countdown completes
+                  window.location.reload()
+                }}
+              />
             </div>
           )}
         </div>
@@ -832,13 +939,23 @@ function ComingSoonSection() {
                 comingSoonItems.slice(0, 3).map((item, i) => (
                   <div 
                     key={item.id}
-                    className="luxury-card accent-teal"
                     style={{ 
                       padding: '12px',
-                      background: 'linear-gradient(#fff,#fff) padding-box, linear-gradient(135deg,var(--wcc-grad-a),var(--wcc-grad-b),var(--wcc-grad-c)) border-box',
+                      borderRadius: '18px',
+                      background: 'linear-gradient(#fff,#fff) padding-box, linear-gradient(135deg, var(--accent-teal), var(--accent-lilac), var(--accent-gold)) border-box',
                       border: '2px solid transparent',
+                      boxShadow: `0 8px 24px rgba(0, 0, 0, 0.08), 0 0 20px ${['rgba(94,208,192,0.3)', 'rgba(199,163,255,0.3)', 'rgba(247,231,195,0.3)'][i % 3]}`,
                       position: 'relative',
-                      overflow: 'hidden'
+                      overflow: 'hidden',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-6px)'
+                      e.currentTarget.style.boxShadow = `0 16px 40px rgba(0, 0, 0, 0.12), 0 0 32px ${['rgba(94,208,192,0.5)', 'rgba(199,163,255,0.5)', 'rgba(247,231,195,0.5)'][i % 3]}`
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)'
+                      e.currentTarget.style.boxShadow = `0 8px 24px rgba(0, 0, 0, 0.08), 0 0 20px ${['rgba(94,208,192,0.3)', 'rgba(199,163,255,0.3)', 'rgba(247,231,195,0.3)'][i % 3]}`
                     }}
                   >
                     <div style={{ 
@@ -894,13 +1011,23 @@ function ComingSoonSection() {
                 [1, 2, 3].map((i) => (
                   <div 
                     key={i}
-                    className="luxury-card accent-teal"
                     style={{ 
                       padding: '12px',
-                      background: 'linear-gradient(#fff,#fff) padding-box, linear-gradient(135deg,var(--wcc-grad-a),var(--wcc-grad-b),var(--wcc-grad-c)) border-box',
+                      borderRadius: '18px',
+                      background: 'linear-gradient(#fff,#fff) padding-box, linear-gradient(135deg, var(--accent-teal), var(--accent-lilac), var(--accent-gold)) border-box',
                       border: '2px solid transparent',
+                      boxShadow: `0 8px 24px rgba(0, 0, 0, 0.08), 0 0 20px ${['rgba(94,208,192,0.3)', 'rgba(199,163,255,0.3)', 'rgba(247,231,195,0.3)'][(i - 1) % 3]}`,
                       position: 'relative',
-                      overflow: 'hidden'
+                      overflow: 'hidden',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-6px)'
+                      e.currentTarget.style.boxShadow = `0 16px 40px rgba(0, 0, 0, 0.12), 0 0 32px ${['rgba(94,208,192,0.5)', 'rgba(199,163,255,0.5)', 'rgba(247,231,195,0.5)'][(i - 1) % 3]}`
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)'
+                      e.currentTarget.style.boxShadow = `0 8px 24px rgba(0, 0, 0, 0.08), 0 0 20px ${['rgba(94,208,192,0.3)', 'rgba(199,163,255,0.3)', 'rgba(247,231,195,0.3)'][(i - 1) % 3]}`
                     }}
                   >
                     <div style={{ 

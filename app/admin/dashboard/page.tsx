@@ -54,6 +54,12 @@ export default function AdminDashboard() {
   const [filter, setFilter] = useState<'all' | 'in-stock' | 'out-of-stock' | 'coming-soon'>('all')
   const [editingProduct, setEditingProduct] = useState<ProductForm | null>(null)
   const [showAddProduct, setShowAddProduct] = useState(false)
+  const [showNewReleasesSection, setShowNewReleasesSection] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('showNewReleasesSection') === 'true'
+    }
+    return false
+  })
   const [newProduct, setNewProduct] = useState<Partial<ProductForm>>({
     sku: '',
     title: '',
@@ -115,6 +121,12 @@ export default function AdminDashboard() {
   const logout = () => {
     sessionStorage.removeItem('adminAuth')
     router.push('/admin/login')
+  }
+
+  const toggleNewReleasesSection = () => {
+    const newValue = !showNewReleasesSection
+    setShowNewReleasesSection(newValue)
+    localStorage.setItem('showNewReleasesSection', newValue.toString())
   }
 
   const filteredProducts = products.filter(product => {
@@ -279,6 +291,17 @@ export default function AdminDashboard() {
               className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
             >
               📦 Purchase Management
+            </button>
+            <button
+              onClick={toggleNewReleasesSection}
+              className={`px-4 py-2 rounded-lg transition-colors font-medium text-sm ${
+                showNewReleasesSection
+                  ? 'bg-green-500 text-white hover:bg-green-600'
+                  : 'bg-gray-500 text-white hover:bg-gray-600'
+              }`}
+              title="Toggle New Releases Section on Homepage"
+            >
+              {showNewReleasesSection ? '✅ New Releases ON' : '❌ New Releases OFF'}
             </button>
             <span className="text-sm text-gray-600">Welcome back!</span>
             <button
