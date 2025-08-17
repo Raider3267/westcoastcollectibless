@@ -568,7 +568,7 @@ function FeaturedSection({ items, filteredItems, loading, onFiltersChange }: {
           <h2 style={{ fontSize: '1.6rem', margin: '0 0 16px', fontWeight: 800 }}>
             Featured Treasures
           </h2>
-          <div className="luxury-grid wcc-scroll">
+          <ScrollableSection>
             {[1, 2, 3].map((i) => (
               <div key={i} className="luxury-card accent-teal" style={{ opacity: 0.6 }}>
                 <div className="luxury-thumb">
@@ -584,7 +584,7 @@ function FeaturedSection({ items, filteredItems, loading, onFiltersChange }: {
                 </div>
               </div>
             ))}
-          </div>
+          </ScrollableSection>
         </div>
       </section>
     )
@@ -793,7 +793,7 @@ function NewReleasesSection() {
         </p>
         
         {loading ? (
-          <div className="luxury-grid wcc-scroll">
+          <ScrollableSection>
             {[1, 2, 3].map((i) => (
               <div key={i} className="luxury-card accent-teal" style={{ opacity: 0.6 }}>
                 <div className="luxury-thumb">
@@ -809,7 +809,7 @@ function NewReleasesSection() {
                 </div>
               </div>
             ))}
-          </div>
+          </ScrollableSection>
         ) : (
           <ScrollableSection>
             {newReleases.map((product, index) => {
