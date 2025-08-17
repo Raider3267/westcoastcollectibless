@@ -97,7 +97,7 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
 
   return (
     <>
-      <article className={`product-card wcc-card ${accentClass} group`}>
+      <article className={`product-card wcc-card ${accentClass} group`} style={{ overflow: 'hidden' }}>
         {/* Enhanced badge for featured/new items */}
         {product.show_in_new_releases && (
           <div className="luxury-badge featured" style={{
@@ -132,68 +132,6 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
         )}
         
         <div className="product-thumb wcc-thumb" style={{ position: 'relative' }}>
-          {/* Wishlist & Alert buttons overlay */}
-          <div style={{
-            position: 'absolute',
-            top: '12px',
-            right: '12px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '8px',
-            zIndex: 20
-          }}>
-            <button
-              onClick={handleWishlistToggle}
-              title={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
-              style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
-                border: 'none',
-                background: isInWishlist ? 'rgba(255, 107, 107, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-                color: isInWishlist ? 'white' : 'var(--ink)',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                backdropFilter: 'blur(10px)',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                transition: 'all 0.3s ease',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-            >
-              {isInWishlist ? '❤️' : '🤍'}
-            </button>
-            
-            <button
-              onClick={handleCreateAlert}
-              title="Get notified when restocked"
-              style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
-                border: 'none',
-                background: 'rgba(255, 255, 255, 0.95)',
-                color: 'var(--ink)',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                backdropFilter: 'blur(10px)',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                transition: 'all 0.3s ease',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-            >
-              🔔
-            </button>
-          </div>
 
           {(product.images && product.images.length > 0) || product.image ? (
             <ImageCarousel
@@ -245,7 +183,7 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
                 }}
                 onClick={handleCreateAlert}
               >
-                🔔 Get Alert
+                Get Alert
               </button>
             ) : (
               <button

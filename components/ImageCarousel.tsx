@@ -20,9 +20,11 @@ export default function ImageCarousel({
   const [currentIndex, setCurrentIndex] = useState(0)
   const [imageError, setImageError] = useState<Set<number>>(new Set())
 
-  // Filter out broken images
-  const validImages = images.filter((_, index) => !imageError.has(index))
+  // Filter out broken images - TEMPORARILY DISABLED FOR DEBUGGING
+  const validImages = images // Don't filter anything for now
   const currentImage = validImages[currentIndex] || images[0]
+  
+  
 
   const goToNext = () => {
     setCurrentIndex((prev) => (prev + 1) % validImages.length)
@@ -57,11 +59,11 @@ export default function ImageCarousel({
   // Single image - no carousel needed
   if (validImages.length === 1) {
     return (
-      <div className={`relative ${className}`}>
+      <div className={`relative group w-full h-full ${className}`}>
         <img
           src={currentImage}
           alt={productName}
-          className={`w-full object-cover rounded-lg ${autoHeight ? 'h-auto' : 'aspect-square'}`}
+          className="wcc-zoom"
           onError={() => handleImageError(0)}
         />
       </div>
@@ -69,43 +71,41 @@ export default function ImageCarousel({
   }
 
   return (
-    <div className={`relative ${className}`}>
-      {/* Main Image */}
-      <div className="relative overflow-hidden rounded-lg">
-        <img
-          src={currentImage}
-          alt={`${productName} - Image ${currentIndex + 1}`}
-          className={`w-full object-cover transition-opacity duration-300 ${autoHeight ? 'h-auto' : 'aspect-square'}`}
-          onError={() => handleImageError(currentIndex)}
-        />
-        
-        {/* Navigation Arrows */}
-        {validImages.length > 1 && (
-          <>
-            <button
-              onClick={goToPrevious}
-              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full w-8 h-8 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
-              aria-label="Previous image"
-            >
-              ←
-            </button>
-            <button
-              onClick={goToNext}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full w-8 h-8 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
-              aria-label="Next image"
-            >
-              →
-            </button>
-          </>
-        )}
-
-        {/* Image Counter */}
-        {validImages.length > 1 && (
-          <div className="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
-            {currentIndex + 1}/{validImages.length}
-          </div>
-        )}
-      </div>
+    <div className={`relative group w-full h-full ${className}`}>
+      <img
+        src={currentImage}
+        alt={`${productName} - Image ${currentIndex + 1}`}
+        className="wcc-zoom"
+        onError={() => handleImageError(currentIndex)}
+      />
+      
+      {/* Small Navigation Arrows for individual cards - positioned inside at edges */}
+      {validImages.length > 1 && (
+        <>
+          <button
+            onClick={goToPrevious}
+            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-700 rounded-full w-7 h-7 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 shadow-lg z-50 text-sm"
+            aria-label="Previous image"
+            style={{
+              border: '1px solid rgba(0,0,0,0.1)',
+              backdropFilter: 'blur(4px)'
+            }}
+          >
+            ←
+          </button>
+          <button
+            onClick={goToNext}
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-700 rounded-full w-7 h-7 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 shadow-lg z-50 text-sm"
+            aria-label="Next image"
+            style={{
+              border: '1px solid rgba(0,0,0,0.1)',
+              backdropFilter: 'blur(4px)'
+            }}
+          >
+            →
+          </button>
+        </>
+      )}
 
       {/* Thumbnail Navigation */}
       {showThumbnails && validImages.length > 1 && validImages.length <= 6 && (

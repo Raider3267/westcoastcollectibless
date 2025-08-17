@@ -8,10 +8,10 @@ import FilterBar, { FilterOptions } from '../components/FilterBar'
 import { useEffect, useState, useRef } from 'react'
 
 // Scrollable section with navigation arrows component
-function ScrollableSection({ children, className = "luxury-grid wcc-scroll" }: { children: React.ReactNode, className?: string }) {
+function ScrollableSection({ children, className = "wcc-scroll" }: { children: React.ReactNode, className?: string }) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
-  const [canScrollRight, setCanScrollRight] = useState(true)
+  const [canScrollRight, setCanScrollRight] = useState(false)
 
   const checkScroll = () => {
     if (scrollRef.current) {
@@ -22,17 +22,42 @@ function ScrollableSection({ children, className = "luxury-grid wcc-scroll" }: {
   }
 
   useEffect(() => {
-    checkScroll()
+    // Use setTimeout to ensure content is rendered before checking scroll
+    const timer = setTimeout(() => {
+      checkScroll()
+    }, 100)
+    
     const scrollElement = scrollRef.current
     if (scrollElement) {
       scrollElement.addEventListener('scroll', checkScroll)
-      return () => scrollElement.removeEventListener('scroll', checkScroll)
+      
+      // Also check on window resize
+      const handleResize = () => checkScroll()
+      window.addEventListener('resize', handleResize)
+      
+      return () => {
+        clearTimeout(timer)
+        scrollElement.removeEventListener('scroll', checkScroll)
+        window.removeEventListener('resize', handleResize)
+      }
     }
+    
+    return () => clearTimeout(timer)
   }, [children])
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
-      const scrollAmount = 320 // Approximate card width + gap
+      // Responsive scroll amounts based on screen size
+      const isTablet = window.innerWidth <= 1024 && window.innerWidth > 768
+      const isMobile = window.innerWidth <= 768
+      
+      let scrollAmount = 352 // Desktop: 350px + 2px gap
+      if (isTablet) {
+        scrollAmount = 331 // Tablet: 330px + 1px gap
+      } else if (isMobile) {
+        scrollAmount = 291 // Mobile: 290px + 1px gap
+      }
+      
       const newScrollLeft = scrollRef.current.scrollLeft + (direction === 'right' ? scrollAmount : -scrollAmount)
       scrollRef.current.scrollTo({ left: newScrollLeft, behavior: 'smooth' })
     }
@@ -40,7 +65,7 @@ function ScrollableSection({ children, className = "luxury-grid wcc-scroll" }: {
 
   return (
     <div style={{ position: 'relative' }}>
-      {/* Left Arrow */}
+      {/* Left Arrow - small circular positioned outside */}
       {canScrollLeft && (
         <button
           onClick={() => scroll('left')}
@@ -49,28 +74,28 @@ function ScrollableSection({ children, className = "luxury-grid wcc-scroll" }: {
             left: '-20px',
             top: '50%',
             transform: 'translateY(-50%)',
-            zIndex: 10,
-            width: '40px',
-            height: '40px',
+            zIndex: 100,
+            width: '32px',
+            height: '32px',
             borderRadius: '50%',
             border: 'none',
-            background: 'rgba(255,255,255,0.9)',
+            background: 'rgba(255,255,255,0.95)',
             boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '18px',
+            fontSize: '16px',
             color: 'var(--ink)',
             transition: 'all 0.3s ease'
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.background = 'white'
             e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)'
-            e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.2)'
+            e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.2)'
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'rgba(255,255,255,0.9)'
+            e.currentTarget.style.background = 'rgba(255,255,255,0.95)'
             e.currentTarget.style.transform = 'translateY(-50%) scale(1)'
             e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)'
           }}
@@ -79,7 +104,7 @@ function ScrollableSection({ children, className = "luxury-grid wcc-scroll" }: {
         </button>
       )}
 
-      {/* Right Arrow */}
+      {/* Right Arrow - small circular positioned outside */}
       {canScrollRight && (
         <button
           onClick={() => scroll('right')}
@@ -88,28 +113,28 @@ function ScrollableSection({ children, className = "luxury-grid wcc-scroll" }: {
             right: '-20px',
             top: '50%',
             transform: 'translateY(-50%)',
-            zIndex: 10,
-            width: '40px',
-            height: '40px',
+            zIndex: 100,
+            width: '32px',
+            height: '32px',
             borderRadius: '50%',
             border: 'none',
-            background: 'rgba(255,255,255,0.9)',
+            background: 'rgba(255,255,255,0.95)',
             boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '18px',
+            fontSize: '16px',
             color: 'var(--ink)',
             transition: 'all 0.3s ease'
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.background = 'white'
             e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)'
-            e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.2)'
+            e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.2)'
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'rgba(255,255,255,0.9)'
+            e.currentTarget.style.background = 'rgba(255,255,255,0.95)'
             e.currentTarget.style.transform = 'translateY(-50%) scale(1)'
             e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)'
           }}
