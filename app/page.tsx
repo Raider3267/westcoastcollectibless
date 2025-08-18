@@ -5,6 +5,7 @@ import { Listing } from '../lib/listings'
 import ProductCard from '../components/ProductCard'
 import CountdownTimer from '../components/CountdownTimer'
 import FilterBar, { FilterOptions } from '../components/FilterBar'
+import RecentlySoldBanner from '../components/RecentlySoldBanner'
 import { useEffect, useState, useRef } from 'react'
 
 // Scrollable section with navigation arrows component
@@ -262,6 +263,9 @@ export default function HomePage() {
   return (
     <div>      
       <main>
+        {/* Recently Sold Banner */}
+        <RecentlySoldBanner />
+
         {/* Hero Video Section */}
         <section style={{ 
           position: 'relative', 
@@ -411,6 +415,12 @@ export default function HomePage() {
 
         {/* Featured Listings */}
         <FeaturedSection items={items} filteredItems={filteredItems} loading={loading} onFiltersChange={handleFiltersChange} />
+
+        {/* Staff Picks Section */}
+        <StaffPicksSection />
+
+        {/* Limited Editions Section */}
+        <LimitedEditionsSection />
 
         {/* Coming Soon Section */}
         <ComingSoonSection />
@@ -1067,9 +1077,23 @@ function ComingSoonSection() {
             }}>
               👀 Sneak Peek
             </h3>
-            <p style={{ fontSize: '0.95rem', color: 'var(--wcc-muted)', margin: '0 0 16px' }}>
-              Upcoming releases teased just for you.
+            <p style={{ fontSize: '0.95rem', color: 'var(--wcc-muted)', margin: '0 0 8px' }}>
+              Want to see exactly what's coming? 
             </p>
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(124,58,237,.1), rgba(168,85,247,.1))',
+              padding: '12px 16px',
+              borderRadius: '12px',
+              border: '2px solid rgba(124,58,237,.2)',
+              marginBottom: '16px'
+            }}>
+              <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--wcc-ink)', marginBottom: '4px' }}>
+                🆓 Free VIP Access
+              </div>
+              <div style={{ fontSize: '0.85rem', color: 'var(--wcc-muted)' }}>
+                Sign up below to unlock clear images and details of all upcoming drops!
+              </div>
+            </div>
             
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
               {comingSoonItems.length > 0 ? (
@@ -1206,14 +1230,14 @@ function ComingSoonSection() {
             </div>
           </div>
 
-          {/* Right: Email Signup */}
+          {/* Right: VIP Signup */}
           <div className="luxury-card accent-lilac" style={{ 
             padding: '32px',
             textAlign: 'center',
             background: 'linear-gradient(#fff,#fff) padding-box, linear-gradient(135deg,var(--wcc-grad-a),var(--wcc-grad-b),var(--wcc-grad-c)) border-box',
             border: '2px solid transparent'
           }}>
-            <div className="luxury-eyebrow" style={{ marginBottom: '8px', textAlign: 'center' }}>VIP Access</div>
+            <div className="luxury-eyebrow" style={{ marginBottom: '8px', textAlign: 'center' }}>Free VIP Membership</div>
             <h3 style={{ 
               fontSize: '1.5rem', 
               fontWeight: 800, 
@@ -1224,16 +1248,56 @@ function ComingSoonSection() {
               justifyContent: 'center',
               gap: '8px'
             }}>
-              📧 Join the VIP List
+              👤 Become a Collector
             </h3>
             
-            <p style={{ 
-              fontSize: '0.95rem', 
-              color: 'var(--wcc-muted)', 
-              margin: '0 0 24px',
-              lineHeight: 1.5
+            {/* VIP Benefits List */}
+            <div style={{ 
+              background: 'rgba(124,58,237,.05)',
+              padding: '16px',
+              borderRadius: '12px',
+              marginBottom: '20px',
+              textAlign: 'left'
             }}>
-              Be the first to know about new drops, get exclusive previews, and secure early access before items go public.
+              <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--wcc-ink)', marginBottom: '8px', textAlign: 'center' }}>
+                🆓 What you get for FREE:
+              </div>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '0.85rem', color: 'var(--wcc-muted)' }}>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                  <span style={{ color: '#10b981', fontSize: '0.9rem' }}>✓</span>
+                  See all upcoming drops (no more blurred images!)
+                </li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                  <span style={{ color: '#10b981', fontSize: '0.9rem' }}>✓</span>
+                  Email alerts for new releases
+                </li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                  <span style={{ color: '#10b981', fontSize: '0.9rem' }}>✓</span>
+                  Personal wishlist & alerts
+                </li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                  <span style={{ color: '#10b981', fontSize: '0.9rem' }}>✓</span>
+                  Drop calendar access
+                </li>
+              </ul>
+              <div style={{ 
+                fontSize: '0.8rem', 
+                color: 'var(--accent-teal)', 
+                fontWeight: 600, 
+                marginTop: '8px',
+                textAlign: 'center'
+              }}>
+                Want more? <a href="/vip" style={{ textDecoration: 'underline' }}>Upgrade for early access & discounts!</a>
+              </div>
+            </div>
+            
+            <p style={{ 
+              fontSize: '0.9rem', 
+              color: 'var(--wcc-muted)', 
+              margin: '0 0 20px',
+              lineHeight: 1.4
+            }}>
+              Join thousands of collectors who never miss a drop.
             </p>
 
             {!isSubmitted ? (
@@ -1274,7 +1338,7 @@ function ComingSoonSection() {
                   onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
                   onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
                 >
-                  🚀 Get Early Access
+                  🆓 Join Free VIP
                 </button>
               </form>
             ) : (
@@ -1286,10 +1350,10 @@ function ComingSoonSection() {
               }}>
                 <div style={{ fontSize: '2rem', marginBottom: '8px' }}>🎉</div>
                 <div style={{ fontWeight: 700, color: 'var(--wcc-teal)', marginBottom: '4px' }}>
-                  Welcome to the VIP List!
+                  Welcome to VIP Collector Status!
                 </div>
                 <div style={{ fontSize: '0.9rem', color: 'var(--wcc-muted)' }}>
-                  You'll be the first to know about our next drop!
+                  You can now see all upcoming drops and get early notifications!
                 </div>
               </div>
             )}
@@ -1308,6 +1372,275 @@ function ComingSoonSection() {
             </div>
           </div>
         </div>
+      </div>
+    </section>
+  )
+}
+
+function StaffPicksSection() {
+  const [staffPicks, setStaffPicks] = useState<Listing[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchStaffPicks = async () => {
+      try {
+        const response = await fetch('/api/staff-picks')
+        if (response.ok) {
+          const data = await response.json()
+          setStaffPicks(data)
+        }
+      } catch (error) {
+        console.error('Failed to load staff picks:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchStaffPicks()
+  }, [])
+
+  // Don't show section if no staff picks
+  if (!loading && staffPicks.length === 0) {
+    return null
+  }
+
+  const cardColors = [
+    'from-pop-pink/20 to-pop-orange/20',
+    'from-pop-teal/20 to-pop-blue/20', 
+    'from-pop-lime/20 to-pop-yellow/20',
+    'from-pop-purple/20 to-pop-pink/20',
+    'from-pop-orange/20 to-pop-teal/20',
+    'from-pop-blue/20 to-pop-purple/20'
+  ]
+
+  return (
+    <section className="luxury-section" style={{
+      position: 'relative'
+    }}>
+      
+      <div style={{ maxWidth: '1224px', margin: '0 auto', padding: '0 20px', position: 'relative', zIndex: 2 }}>
+        <div className="luxury-eyebrow" style={{ marginBottom: '8px' }}>⭐ Curator's Choice</div>
+        <h2 style={{ 
+          fontSize: 'clamp(1.6rem, 2.5vw, 2.1rem)', 
+          margin: '0 0 12px', 
+          fontWeight: 800,
+          color: 'var(--wcc-ink)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          👨‍💼 Staff Picks
+          {staffPicks.length > 0 && (
+            <span style={{
+              fontSize: '0.7rem',
+              background: 'linear-gradient(135deg, #ffc107, #ffeb3b)',
+              color: '#333',
+              padding: '4px 8px',
+              borderRadius: '999px',
+              fontWeight: 600
+            }}>
+              {staffPicks.length} SELECTED
+            </span>
+          )}
+        </h2>
+        <p style={{ fontSize: '1rem', color: 'var(--wcc-muted)', margin: '0 0 24px', maxWidth: '600px' }}>
+          Our team's personal favorites and hidden gems. These are the pieces we'd buy for our own collections.
+        </p>
+        
+        {loading ? (
+          <ScrollableSection>
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="luxury-card accent-teal" style={{ opacity: 0.6 }}>
+                <div className="luxury-thumb">
+                  <div className="luxury-thumb-inner" style={{ background: '#f0f0f0' }}></div>
+                </div>
+                <div className="luxury-body">
+                  <div style={{ background: '#f0f0f0', height: '20px', borderRadius: '4px', marginBottom: '8px' }}></div>
+                  <div style={{ background: '#f0f0f0', height: '16px', borderRadius: '4px', width: '60%' }}></div>
+                </div>
+                <div className="luxury-foot">
+                  <div style={{ background: '#f0f0f0', height: '20px', width: '40px', borderRadius: '4px' }}></div>
+                  <div style={{ background: '#f0f0f0', height: '32px', width: '60px', borderRadius: '999px' }}></div>
+                </div>
+              </div>
+            ))}
+          </ScrollableSection>
+        ) : (
+          <ScrollableSection>
+            {staffPicks.map((product, index) => {
+              const cardColor = cardColors[index % cardColors.length]
+              const staffEmojis = ['⭐', '👑', '💎', '🏆', '🌟', '✨', '🥇', '💫', '🎯', '🔥']
+              const randomEmoji = staffEmojis[index % staffEmojis.length]
+
+              return (
+                <div key={product.id} style={{ position: 'relative' }}>
+                  {/* "STAFF PICK" Badge */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '8px',
+                    right: '8px',
+                    background: 'linear-gradient(135deg, #ffc107, #ffeb3b)',
+                    color: '#333',
+                    padding: '4px 8px',
+                    borderRadius: '999px',
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    zIndex: 10,
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+                  }}>
+                    STAFF PICK
+                  </div>
+                  <ProductCard
+                    product={product}
+                    cardColor={cardColor}
+                    randomEmoji={randomEmoji}
+                  />
+                </div>
+              )
+            })}
+          </ScrollableSection>
+        )}
+      </div>
+    </section>
+  )
+}
+
+function LimitedEditionsSection() {
+  const [limitedEditions, setLimitedEditions] = useState<Listing[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchLimitedEditions = async () => {
+      try {
+        const response = await fetch('/api/limited-editions')
+        if (response.ok) {
+          const data = await response.json()
+          setLimitedEditions(data)
+        }
+      } catch (error) {
+        console.error('Failed to load limited editions:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchLimitedEditions()
+  }, [])
+
+  // Don't show section if no limited editions
+  if (!loading && limitedEditions.length === 0) {
+    return null
+  }
+
+  const cardColors = [
+    'from-pop-pink/20 to-pop-orange/20',
+    'from-pop-teal/20 to-pop-blue/20', 
+    'from-pop-lime/20 to-pop-yellow/20',
+    'from-pop-purple/20 to-pop-pink/20',
+    'from-pop-orange/20 to-pop-teal/20',
+    'from-pop-blue/20 to-pop-purple/20'
+  ]
+
+  return (
+    <section className="luxury-section" style={{ 
+      background: 'linear-gradient(135deg, rgba(220,20,60,.05) 0%, rgba(255,69,0,.05) 50%, rgba(220,20,60,.05) 100%)',
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      {/* Background decoration */}
+      <div style={{
+        position: 'absolute',
+        top: '-20%',
+        right: '-10%',
+        width: '40%',
+        height: '140%',
+        background: 'radial-gradient(circle, rgba(220,20,60,.1) 0%, transparent 70%)',
+        borderRadius: '50%',
+        filter: 'blur(60px)'
+      }} />
+      
+      <div style={{ maxWidth: '1224px', margin: '0 auto', padding: '0 20px', position: 'relative', zIndex: 2 }}>
+        <div className="luxury-eyebrow" style={{ marginBottom: '8px' }}>🔥 Ultra Rare</div>
+        <h2 style={{ 
+          fontSize: 'clamp(1.6rem, 2.5vw, 2.1rem)', 
+          margin: '0 0 12px', 
+          fontWeight: 800,
+          color: 'var(--wcc-ink)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          💎 Limited Editions
+          {limitedEditions.length > 0 && (
+            <span style={{
+              fontSize: '0.7rem',
+              background: 'linear-gradient(135deg, #dc143c, #ff4500)',
+              color: 'white',
+              padding: '4px 8px',
+              borderRadius: '999px',
+              fontWeight: 600
+            }}>
+              {limitedEditions.length} RARE
+            </span>
+          )}
+        </h2>
+        <p style={{ fontSize: '1rem', color: 'var(--wcc-muted)', margin: '0 0 24px', maxWidth: '600px' }}>
+          Exclusive pieces with limited production runs. Once they're gone, they're gone forever.
+        </p>
+        
+        {loading ? (
+          <ScrollableSection>
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="luxury-card accent-teal" style={{ opacity: 0.6 }}>
+                <div className="luxury-thumb">
+                  <div className="luxury-thumb-inner" style={{ background: '#f0f0f0' }}></div>
+                </div>
+                <div className="luxury-body">
+                  <div style={{ background: '#f0f0f0', height: '20px', borderRadius: '4px', marginBottom: '8px' }}></div>
+                  <div style={{ background: '#f0f0f0', height: '16px', borderRadius: '4px', width: '60%' }}></div>
+                </div>
+                <div className="luxury-foot">
+                  <div style={{ background: '#f0f0f0', height: '20px', width: '40px', borderRadius: '4px' }}></div>
+                  <div style={{ background: '#f0f0f0', height: '32px', width: '60px', borderRadius: '999px' }}></div>
+                </div>
+              </div>
+            ))}
+          </ScrollableSection>
+        ) : (
+          <ScrollableSection>
+            {limitedEditions.map((product, index) => {
+              const cardColor = cardColors[index % cardColors.length]
+              const limitedEmojis = ['💎', '👑', '🏆', '⚡', '🔥', '💫', '✨', '🌟', '🚀', '💯']
+              const randomEmoji = limitedEmojis[index % limitedEmojis.length]
+
+              return (
+                <div key={product.id} style={{ position: 'relative' }}>
+                  {/* "LIMITED" Badge */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '8px',
+                    right: '8px',
+                    background: 'linear-gradient(135deg, #dc143c, #ff4500)',
+                    color: 'white',
+                    padding: '4px 8px',
+                    borderRadius: '999px',
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    zIndex: 10,
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+                  }}>
+                    LIMITED
+                  </div>
+                  <ProductCard
+                    product={product}
+                    cardColor={cardColor}
+                    randomEmoji={randomEmoji}
+                  />
+                </div>
+              )
+            })}
+          </ScrollableSection>
+        )}
       </div>
     </section>
   )

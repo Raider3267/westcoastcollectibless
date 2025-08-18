@@ -26,7 +26,10 @@ export type Listing = {
   show_in_new_releases?: boolean
   show_in_featured?: boolean
   show_in_coming_soon?: boolean
+  show_in_staff_picks?: boolean
+  show_in_limited_editions?: boolean
   out_of_stock?: boolean
+  show_in_featured_while_coming_soon?: boolean
 }
 
 const FIRST = <T>(...vals: (T | undefined | null | false | '' )[]) =>
@@ -146,8 +149,11 @@ export async function getListingsFromCsv(filename = 'export.csv', includeOutOfSt
       const show_in_coming_soon_str = FIRST<string>(row['show_in_coming_soon'], row['Show In Coming Soon'])
       const show_in_coming_soon = show_in_coming_soon_str ? show_in_coming_soon_str === 'true' : (status === 'coming-soon')
 
-      // Get out_of_stock field
+      // Get special section fields
+      const show_in_staff_picks = FIRST<string>(row['show_in_staff_picks'], row['Show In Staff Picks']) === 'true'
+      const show_in_limited_editions = FIRST<string>(row['show_in_limited_editions'], row['Show In Limited Editions']) === 'true'
       const out_of_stock = FIRST<string>(row['out_of_stock'], row['Out Of Stock']) === 'true'
+      const show_in_featured_while_coming_soon = FIRST<string>(row['show_in_featured_while_coming_soon'], row['Show In Featured While Coming Soon']) === 'true'
 
       return { 
         id: String(id), 
@@ -165,7 +171,10 @@ export async function getListingsFromCsv(filename = 'export.csv', includeOutOfSt
         show_in_new_releases,
         show_in_featured,
         show_in_coming_soon,
-        out_of_stock
+        show_in_staff_picks,
+        show_in_limited_editions,
+        out_of_stock,
+        show_in_featured_while_coming_soon
       }
     })
     // Filter based on stock, price, and content quality
@@ -173,8 +182,15 @@ export async function getListingsFromCsv(filename = 'export.csv', includeOutOfSt
       // Filter out items without basic required fields
       if (!item.name || item.name.trim() === '' || item.name === 'Item 1' || item.name.includes('Item ')) return false
       
-      // Only show 'live' products in main feed (not coming-soon or draft)
-      if (item.status !== 'live') return false
+      // Include live products OR coming-soon products with featured toggle enabled
+      if (item.status === 'live') {
+        // Live products are included
+      } else if (item.status === 'coming-soon' && item.show_in_featured_while_coming_soon) {
+        // Coming-soon products with featured toggle are included
+      } else {
+        // Skip draft products and coming-soon without featured toggle
+        return false
+      }
       
       // Always require a price
       if (!item.price || item.price <= 0) return false
@@ -186,6 +202,28 @@ export async function getListingsFromCsv(filename = 'export.csv', includeOutOfSt
       if (!item.image || item.image.trim() === '') return false
       
       return true
+    })
+    // Mark coming-soon products as out of stock when they appear in Featured
+    .map(item => {
+      if (item.status === 'coming-soon' && item.show_in_featured_while_coming_soon) {
+        return {
+          ...item,
+          out_of_stock: true  // Force coming-soon items to show as out of stock in Featured
+        }
+      }
+      return item
+    })
+    // Sort products: in-stock items first, then out-of-stock items last
+    .sort((a, b) => {
+      const aOutOfStock = a.out_of_stock || (!a.quantity || a.quantity <= 0)
+      const bOutOfStock = b.out_of_stock || (!b.quantity || b.quantity <= 0)
+      
+      // If only one is out of stock, put it last
+      if (aOutOfStock && !bOutOfStock) return 1
+      if (!aOutOfStock && bOutOfStock) return -1
+      
+      // If both have same stock status, maintain original order
+      return 0
     })
 
   return items
@@ -245,8 +283,11 @@ export async function getComingSoonProducts(filename = 'export.csv'): Promise<Li
       const show_in_coming_soon_str = FIRST<string>(row['show_in_coming_soon'], row['Show In Coming Soon'])
       const show_in_coming_soon = show_in_coming_soon_str ? show_in_coming_soon_str === 'true' : (status === 'coming-soon')
 
-      // Get out_of_stock field
+      // Get special section fields
+      const show_in_staff_picks = FIRST<string>(row['show_in_staff_picks'], row['Show In Staff Picks']) === 'true'
+      const show_in_limited_editions = FIRST<string>(row['show_in_limited_editions'], row['Show In Limited Editions']) === 'true'
       const out_of_stock = FIRST<string>(row['out_of_stock'], row['Out Of Stock']) === 'true'
+      const show_in_featured_while_coming_soon = FIRST<string>(row['show_in_featured_while_coming_soon'], row['Show In Featured While Coming Soon']) === 'true'
 
       return { 
         id: String(id), 
@@ -264,7 +305,10 @@ export async function getComingSoonProducts(filename = 'export.csv'): Promise<Li
         show_in_new_releases,
         show_in_featured,
         show_in_coming_soon,
-        out_of_stock
+        show_in_staff_picks,
+        show_in_limited_editions,
+        out_of_stock,
+        show_in_featured_while_coming_soon
       }
     })
     // Filter for coming-soon products only
@@ -272,8 +316,8 @@ export async function getComingSoonProducts(filename = 'export.csv'): Promise<Li
       // Filter out items without basic required fields
       if (!item.name || item.name.trim() === '' || item.name === 'Item 1' || item.name.includes('Item ')) return false
       
-      // Must be coming-soon status
-      if (item.status !== 'coming-soon') return false
+      // Must be coming-soon status OR have show_in_coming_soon set to true
+      if (item.status !== 'coming-soon' && !item.show_in_coming_soon) return false
       
       // Filter out items without images
       if (!item.image || item.image.trim() === '') return false

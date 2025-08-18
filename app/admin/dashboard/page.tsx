@@ -17,7 +17,10 @@ interface Product {
   show_in_new_releases?: boolean
   show_in_featured?: boolean
   show_in_coming_soon?: boolean
+  show_in_staff_picks?: boolean
+  show_in_limited_editions?: boolean
   out_of_stock?: boolean
+  show_in_featured_while_coming_soon?: boolean
   // Cost tracking fields
   purchase_cost?: number
   shipping_cost?: number
@@ -43,7 +46,10 @@ interface ProductForm {
   show_in_new_releases?: boolean
   show_in_featured?: boolean
   show_in_coming_soon?: boolean
+  show_in_staff_picks?: boolean
+  show_in_limited_editions?: boolean
   out_of_stock?: boolean
+  show_in_featured_while_coming_soon?: boolean
   // Cost tracking fields
   purchase_cost?: number
   shipping_cost?: number
@@ -77,7 +83,10 @@ export default function AdminDashboard() {
     show_in_new_releases: false,
     show_in_featured: true,
     show_in_coming_soon: true,
+    show_in_staff_picks: false,
+    show_in_limited_editions: false,
     out_of_stock: false,
+    show_in_featured_while_coming_soon: false,
     purchase_cost: 0,
     shipping_cost: 0,
     total_cost: 0,
@@ -93,7 +102,10 @@ export default function AdminDashboard() {
     show_in_new_releases: product.show_in_new_releases || false,
     show_in_featured: product.show_in_featured !== false, // Default to true
     show_in_coming_soon: product.show_in_coming_soon !== false, // Default to true
+    show_in_staff_picks: product.show_in_staff_picks || false,
+    show_in_limited_editions: product.show_in_limited_editions || false,
     out_of_stock: product.out_of_stock || false,
+    show_in_featured_while_coming_soon: product.show_in_featured_while_coming_soon || false,
     purchase_cost: product.purchase_cost || 0,
     shipping_cost: product.shipping_cost || 0,
     total_cost: product.total_cost || 0,
@@ -108,7 +120,10 @@ export default function AdminDashboard() {
     show_in_new_releases: form.show_in_new_releases || false,
     show_in_featured: form.show_in_featured !== false,
     show_in_coming_soon: form.show_in_coming_soon !== false,
+    show_in_staff_picks: form.show_in_staff_picks || false,
+    show_in_limited_editions: form.show_in_limited_editions || false,
     out_of_stock: form.out_of_stock || false,
+    show_in_featured_while_coming_soon: form.show_in_featured_while_coming_soon || false,
     total_cost: (form.purchase_cost || 0) + (form.shipping_cost || 0)
   })
 
@@ -263,6 +278,42 @@ export default function AdminDashboard() {
     }
   }
 
+  const updateStaffPicksStatus = async (sku: string, showInStaffPicks: boolean) => {
+    try {
+      const response = await fetch('/api/admin/products', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sku, show_in_staff_picks: showInStaffPicks.toString() })
+      })
+      
+      if (response.ok) {
+        setProducts(prev => prev.map(p => 
+          p.sku === sku ? { ...p, show_in_staff_picks: showInStaffPicks } : p
+        ))
+      }
+    } catch (error) {
+      console.error('Failed to update staff picks status:', error)
+    }
+  }
+
+  const updateLimitedEditionsStatus = async (sku: string, showInLimitedEditions: boolean) => {
+    try {
+      const response = await fetch('/api/admin/products', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sku, show_in_limited_editions: showInLimitedEditions.toString() })
+      })
+      
+      if (response.ok) {
+        setProducts(prev => prev.map(p => 
+          p.sku === sku ? { ...p, show_in_limited_editions: showInLimitedEditions } : p
+        ))
+      }
+    } catch (error) {
+      console.error('Failed to update limited editions status:', error)
+    }
+  }
+
   const deleteProduct = async (sku: string) => {
     if (!confirm('Are you sure you want to delete this product?')) return
     
@@ -303,6 +354,8 @@ export default function AdminDashboard() {
           quantity: 1,
           price: 0,
           images: [],
+          show_in_staff_picks: false,
+          show_in_limited_editions: false,
           out_of_stock: false,
           purchase_cost: 0,
           shipping_cost: 0,
@@ -497,10 +550,10 @@ export default function AdminDashboard() {
                     New Releases
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Section Visibility
+                    Homepage Sections
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Out of Stock
+                    Stock Status
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
@@ -630,63 +683,65 @@ export default function AdminDashboard() {
                       )}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex flex-col gap-2">
-                        {/* Featured Section Toggle */}
-                        <label className="flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={product.show_in_featured !== false}
-                            onChange={(e) => updateSectionVisibility(product.sku, 'featured', e.target.checked)}
-                            className="sr-only"
-                          />
-                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors mr-2 ${
-                            product.show_in_featured !== false
-                              ? 'bg-blue-500 border-blue-500 text-white' 
-                              : 'border-gray-300 hover:border-blue-400'
-                          }`}>
-                            {product.show_in_featured !== false && '✓'}
-                          </div>
-                          <span className="text-xs text-gray-600">Featured</span>
-                        </label>
-                        
-                        {/* Coming Soon Section Toggle */}
-                        <label className="flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={product.show_in_coming_soon !== false}
-                            onChange={(e) => updateSectionVisibility(product.sku, 'coming_soon', e.target.checked)}
-                            className="sr-only"
-                          />
-                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors mr-2 ${
-                            product.show_in_coming_soon !== false
-                              ? 'bg-purple-500 border-purple-500 text-white' 
-                              : 'border-gray-300 hover:border-purple-400'
-                          }`}>
-                            {product.show_in_coming_soon !== false && '✓'}
-                          </div>
-                          <span className="text-xs text-gray-600">Coming Soon</span>
-                        </label>
+                      <div className="flex flex-wrap gap-1">
+                        {/* Show active sections as colored tags */}
+                        {(product.status === 'coming-soon' ? 
+                          product.show_in_featured_while_coming_soon : 
+                          product.show_in_featured !== false) && 
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            Featured
+                          </span>
+                        }
+                        {product.show_in_coming_soon !== false && 
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                            Coming Soon
+                          </span>
+                        }
+                        {product.show_in_staff_picks && 
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            Staff Picks
+                          </span>
+                        }
+                        {product.show_in_limited_editions && 
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            Limited Ed
+                          </span>
+                        }
+                        {product.show_in_new_releases && 
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            New Release
+                          </span>
+                        }
+                        {/* Show empty state if no sections selected */}
+                        {!(product.status === 'coming-soon' ? 
+                          product.show_in_featured_while_coming_soon : 
+                          product.show_in_featured !== false) && 
+                         !product.show_in_coming_soon && 
+                         !product.show_in_staff_picks && 
+                         !product.show_in_limited_editions && 
+                         !product.show_in_new_releases && 
+                          <span className="text-xs text-gray-400 italic">None selected</span>
+                        }
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <label className="flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={product.out_of_stock || false}
-                          onChange={(e) => updateOutOfStockStatus(product.sku, e.target.checked)}
-                          className="sr-only"
-                        />
-                        <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors ${
-                          product.out_of_stock 
-                            ? 'bg-red-500 border-red-500 text-white' 
-                            : 'border-gray-300 hover:border-red-400'
-                        }`}>
-                          {product.out_of_stock && '✓'}
-                        </div>
-                        <span className="text-xs text-gray-600 ml-2">
-                          {product.out_of_stock ? 'Out of Stock' : 'In Stock'}
-                        </span>
-                      </label>
+                      <div className="flex items-center">
+                        {product.out_of_stock && 
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            Out of Stock
+                          </span>
+                        }
+                        {product.quantity === 0 && !product.out_of_stock && 
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                            Qty: 0
+                          </span>
+                        }
+                        {product.quantity > 0 && !product.out_of_stock && 
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            In Stock ({product.quantity})
+                          </span>
+                        }
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
@@ -878,56 +933,185 @@ export default function AdminDashboard() {
                         <span className="text-sm text-gray-700">Show in New Releases</span>
                       </label>
                       
-                      <label className="flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={editingProduct.show_in_featured !== false}
-                          onChange={(e) => setEditingProduct(prev => prev ? {...prev, show_in_featured: e.target.checked} : null)}
-                          className="sr-only"
-                        />
-                        <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors mr-3 ${
-                          editingProduct.show_in_featured !== false
-                            ? 'bg-blue-500 border-blue-500 text-white' 
-                            : 'border-gray-300 hover:border-blue-400'
-                        }`}>
-                          {editingProduct.show_in_featured !== false && '✓'}
+                      {/* Homepage Sections */}
+                      <div className="mb-6">
+                        <h4 className="text-sm font-semibold text-gray-800 mb-4 flex items-center">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                          Homepage Sections
+                        </h4>
+                        <div className="grid grid-cols-2 gap-3">
+                          {/* Featured Section */}
+                          <div 
+                            onClick={() => {
+                              if (editingProduct.status === 'coming-soon') {
+                                setEditingProduct(prev => prev ? {
+                                  ...prev, 
+                                  show_in_featured_while_coming_soon: !prev.show_in_featured_while_coming_soon
+                                } : null)
+                              } else {
+                                setEditingProduct(prev => prev ? {
+                                  ...prev, 
+                                  show_in_featured: !prev.show_in_featured
+                                } : null)
+                              }
+                            }}
+                            className="cursor-pointer group"
+                          >
+                            <div className={`p-3 rounded-lg border-2 transition-all ${
+                              (editingProduct.status === 'coming-soon' ? 
+                                editingProduct.show_in_featured_while_coming_soon : 
+                                editingProduct.show_in_featured !== false)
+                                ? 'border-blue-500 bg-blue-50' 
+                                : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-25'
+                            }`}>
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-medium text-sm text-gray-800">Featured</span>
+                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                                  (editingProduct.status === 'coming-soon' ? 
+                                    editingProduct.show_in_featured_while_coming_soon : 
+                                    editingProduct.show_in_featured !== false)
+                                    ? 'border-blue-500 bg-blue-500' 
+                                    : 'border-gray-300'
+                                }`}>
+                                  {(editingProduct.status === 'coming-soon' ? 
+                                    editingProduct.show_in_featured_while_coming_soon : 
+                                    editingProduct.show_in_featured !== false) && 
+                                    <span className="text-white text-xs">✓</span>
+                                  }
+                                </div>
+                              </div>
+                              <p className="text-xs text-gray-600">
+                                {editingProduct.status === 'coming-soon' 
+                                  ? 'Show as "coming soon" in main collection' 
+                                  : 'Main homepage collection'
+                                }
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Coming Soon Section */}
+                          <div 
+                            onClick={() => setEditingProduct(prev => prev ? {
+                              ...prev, 
+                              show_in_coming_soon: !prev.show_in_coming_soon
+                            } : null)}
+                            className="cursor-pointer group"
+                          >
+                            <div className={`p-3 rounded-lg border-2 transition-all ${
+                              editingProduct.show_in_coming_soon !== false
+                                ? 'border-purple-500 bg-purple-50' 
+                                : 'border-gray-200 bg-white hover:border-purple-300 hover:bg-purple-25'
+                            }`}>
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-medium text-sm text-gray-800">Coming Soon</span>
+                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                                  editingProduct.show_in_coming_soon !== false
+                                    ? 'border-purple-500 bg-purple-500' 
+                                    : 'border-gray-300'
+                                }`}>
+                                  {editingProduct.show_in_coming_soon !== false && 
+                                    <span className="text-white text-xs">✓</span>
+                                  }
+                                </div>
+                              </div>
+                              <p className="text-xs text-gray-600">Exclusive preview section</p>
+                            </div>
+                          </div>
+
+                          {/* Staff Picks Section */}
+                          <div 
+                            onClick={() => setEditingProduct(prev => prev ? {
+                              ...prev, 
+                              show_in_staff_picks: !prev.show_in_staff_picks
+                            } : null)}
+                            className="cursor-pointer group"
+                          >
+                            <div className={`p-3 rounded-lg border-2 transition-all ${
+                              editingProduct.show_in_staff_picks
+                                ? 'border-yellow-500 bg-yellow-50' 
+                                : 'border-gray-200 bg-white hover:border-yellow-300 hover:bg-yellow-25'
+                            }`}>
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-medium text-sm text-gray-800">Staff Picks</span>
+                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                                  editingProduct.show_in_staff_picks
+                                    ? 'border-yellow-500 bg-yellow-500' 
+                                    : 'border-gray-300'
+                                }`}>
+                                  {editingProduct.show_in_staff_picks && 
+                                    <span className="text-white text-xs">✓</span>
+                                  }
+                                </div>
+                              </div>
+                              <p className="text-xs text-gray-600">Curated team favorites</p>
+                            </div>
+                          </div>
+
+                          {/* Limited Editions Section */}
+                          <div 
+                            onClick={() => setEditingProduct(prev => prev ? {
+                              ...prev, 
+                              show_in_limited_editions: !prev.show_in_limited_editions
+                            } : null)}
+                            className="cursor-pointer group"
+                          >
+                            <div className={`p-3 rounded-lg border-2 transition-all ${
+                              editingProduct.show_in_limited_editions
+                                ? 'border-red-500 bg-red-50' 
+                                : 'border-gray-200 bg-white hover:border-red-300 hover:bg-red-25'
+                            }`}>
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-medium text-sm text-gray-800">Limited Editions</span>
+                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                                  editingProduct.show_in_limited_editions
+                                    ? 'border-red-500 bg-red-500' 
+                                    : 'border-gray-300'
+                                }`}>
+                                  {editingProduct.show_in_limited_editions && 
+                                    <span className="text-white text-xs">✓</span>
+                                  }
+                                </div>
+                              </div>
+                              <p className="text-xs text-gray-600">Rare & exclusive items</p>
+                            </div>
+                          </div>
                         </div>
-                        <span className="text-sm text-gray-700">Show in Featured Section</span>
-                      </label>
-                      
-                      <label className="flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={editingProduct.show_in_coming_soon !== false}
-                          onChange={(e) => setEditingProduct(prev => prev ? {...prev, show_in_coming_soon: e.target.checked} : null)}
-                          className="sr-only"
-                        />
-                        <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors mr-3 ${
-                          editingProduct.show_in_coming_soon !== false
-                            ? 'bg-purple-500 border-purple-500 text-white' 
-                            : 'border-gray-300 hover:border-purple-400'
-                        }`}>
-                          {editingProduct.show_in_coming_soon !== false && '✓'}
+                      </div>
+
+                      {/* Stock Status */}
+                      <div className="mb-6">
+                        <h4 className="text-sm font-semibold text-gray-800 mb-4 flex items-center">
+                          <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
+                          Stock Status
+                        </h4>
+                        <div 
+                          onClick={() => setEditingProduct(prev => prev ? {
+                            ...prev, 
+                            out_of_stock: !prev.out_of_stock
+                          } : null)}
+                          className="cursor-pointer group w-fit"
+                        >
+                          <div className={`p-3 rounded-lg border-2 transition-all ${
+                            editingProduct.out_of_stock
+                              ? 'border-red-500 bg-red-50' 
+                              : 'border-gray-200 bg-white hover:border-red-300 hover:bg-red-25'
+                          }`}>
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="font-medium text-sm text-gray-800">Out of Stock</span>
+                              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                                editingProduct.out_of_stock
+                                  ? 'border-red-500 bg-red-500' 
+                                  : 'border-gray-300'
+                              }`}>
+                                {editingProduct.out_of_stock && 
+                                  <span className="text-white text-xs">✓</span>
+                                }
+                              </div>
+                            </div>
+                            <p className="text-xs text-gray-600">Override quantity-based stock status</p>
+                          </div>
                         </div>
-                        <span className="text-sm text-gray-700">Show in Coming Soon Section</span>
-                      </label>
-                      
-                      <label className="flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={editingProduct.out_of_stock || false}
-                          onChange={(e) => setEditingProduct(prev => prev ? {...prev, out_of_stock: e.target.checked} : null)}
-                          className="sr-only"
-                        />
-                        <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors mr-3 ${
-                          editingProduct.out_of_stock 
-                            ? 'bg-red-500 border-red-500 text-white' 
-                            : 'border-gray-300 hover:border-red-400'
-                        }`}>
-                          {editingProduct.out_of_stock && '✓'}
-                        </div>
-                        <span className="text-sm text-gray-700">Mark as Out of Stock</span>
-                      </label>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -945,6 +1129,15 @@ export default function AdminDashboard() {
                       // Convert form data to product format before sending
                       const productData = formToProduct(editingProduct)
                       
+                      // Debug logging
+                      console.log('Saving product data:', {
+                        sku: productData.sku,
+                        show_in_staff_picks: productData.show_in_staff_picks,
+                        show_in_limited_editions: productData.show_in_limited_editions,
+                        show_in_featured_while_coming_soon: productData.show_in_featured_while_coming_soon,
+                        out_of_stock: productData.out_of_stock
+                      })
+                      
                       const response = await fetch('/api/admin/products', {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
@@ -952,10 +1145,18 @@ export default function AdminDashboard() {
                       })
                       
                       if (response.ok) {
+                        const responseData = await response.json()
+                        console.log('Server response:', responseData)
+                        
                         setProducts(prev => prev.map(p => 
                           p.sku === editingProduct.sku ? productData : p
                         ))
                         setEditingProduct(null)
+                        
+                        // Reload the products to get fresh data from server
+                        loadProducts()
+                      } else {
+                        console.error('Save failed with status:', response.status)
                       }
                     } catch (error) {
                       console.error('Failed to update product:', error)
@@ -1141,6 +1342,8 @@ export default function AdminDashboard() {
                       quantity: 1,
                       price: 0,
                       images: [],
+                      show_in_staff_picks: false,
+                      show_in_limited_editions: false,
                       out_of_stock: false,
                       purchase_cost: 0,
                       shipping_cost: 0,
