@@ -26,6 +26,7 @@ export type Listing = {
   show_in_new_releases?: boolean
   show_in_featured?: boolean
   show_in_coming_soon?: boolean
+  out_of_stock?: boolean
 }
 
 const FIRST = <T>(...vals: (T | undefined | null | false | '' )[]) =>
@@ -145,6 +146,9 @@ export async function getListingsFromCsv(filename = 'export.csv', includeOutOfSt
       const show_in_coming_soon_str = FIRST<string>(row['show_in_coming_soon'], row['Show In Coming Soon'])
       const show_in_coming_soon = show_in_coming_soon_str ? show_in_coming_soon_str === 'true' : (status === 'coming-soon')
 
+      // Get out_of_stock field
+      const out_of_stock = FIRST<string>(row['out_of_stock'], row['Out Of Stock']) === 'true'
+
       return { 
         id: String(id), 
         name, 
@@ -160,7 +164,8 @@ export async function getListingsFromCsv(filename = 'export.csv', includeOutOfSt
         released_date,
         show_in_new_releases,
         show_in_featured,
-        show_in_coming_soon
+        show_in_coming_soon,
+        out_of_stock
       }
     })
     // Filter based on stock, price, and content quality
@@ -175,7 +180,7 @@ export async function getListingsFromCsv(filename = 'export.csv', includeOutOfSt
       if (!item.price || item.price <= 0) return false
       
       // Filter by stock unless out-of-stock items are specifically requested
-      if (!includeOutOfStock && (!item.quantity || item.quantity <= 0)) return false
+      if (!includeOutOfStock && (item.out_of_stock || (!item.quantity || item.quantity <= 0))) return false
       
       // Filter out items without images
       if (!item.image || item.image.trim() === '') return false
@@ -240,6 +245,9 @@ export async function getComingSoonProducts(filename = 'export.csv'): Promise<Li
       const show_in_coming_soon_str = FIRST<string>(row['show_in_coming_soon'], row['Show In Coming Soon'])
       const show_in_coming_soon = show_in_coming_soon_str ? show_in_coming_soon_str === 'true' : (status === 'coming-soon')
 
+      // Get out_of_stock field
+      const out_of_stock = FIRST<string>(row['out_of_stock'], row['Out Of Stock']) === 'true'
+
       return { 
         id: String(id), 
         name, 
@@ -255,7 +263,8 @@ export async function getComingSoonProducts(filename = 'export.csv'): Promise<Li
         released_date,
         show_in_new_releases,
         show_in_featured,
-        show_in_coming_soon
+        show_in_coming_soon,
+        out_of_stock
       }
     })
     // Filter for coming-soon products only

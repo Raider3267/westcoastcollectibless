@@ -22,6 +22,7 @@ type Product = {
   show_in_new_releases?: boolean
   show_in_featured?: boolean
   show_in_coming_soon?: boolean
+  out_of_stock?: boolean
 }
 
 interface ProductCardProps {
@@ -111,7 +112,7 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
         )}
         
         {/* Out of stock overlay */}
-        {(!product.quantity || product.quantity <= 0) && (
+        {(product.out_of_stock || (!product.quantity || product.quantity <= 0)) && (
           <div style={{
             position: 'absolute',
             top: '12px',
@@ -164,7 +165,7 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
           )}
           
           <div className="wcc-actions" style={{ position: 'relative', zIndex: 10, width: '100%', display: 'flex', gap: '8px' }}>
-            {(!product.quantity || product.quantity <= 0) ? (
+            {(product.out_of_stock || (!product.quantity || product.quantity <= 0)) ? (
               <button
                 className="btn wcc-btn"
                 style={{ 

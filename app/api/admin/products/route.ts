@@ -57,6 +57,9 @@ export async function GET() {
       drop_date: product.drop_date || '',
       released_date: product.released_date || '',
       show_in_new_releases: product.show_in_new_releases === 'true',
+      show_in_featured: product.show_in_featured !== 'false',
+      show_in_coming_soon: product.show_in_coming_soon !== 'false',
+      out_of_stock: product.out_of_stock === 'true',
       // Cost tracking fields
       purchase_cost: parseFloat(product.purchase_cost) || 0,
       shipping_cost: parseFloat(product.shipping_cost) || 0,
@@ -141,6 +144,7 @@ export async function POST(request: NextRequest) {
       quantity = 0, 
       price = 0, 
       images = '',
+      out_of_stock = false,
       purchase_cost = 0,
       shipping_cost = 0,
       purchase_date = '',
@@ -189,6 +193,9 @@ export async function POST(request: NextRequest) {
       drop_date: '',
       released_date: '',
       show_in_new_releases: 'false',
+      show_in_featured: 'true',
+      show_in_coming_soon: 'true',
+      out_of_stock: out_of_stock.toString(),
       // Cost tracking fields
       purchase_cost: purchase_cost.toString(),
       shipping_cost: shipping_cost.toString(),

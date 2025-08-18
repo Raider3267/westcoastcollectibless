@@ -17,6 +17,7 @@ interface Product {
   show_in_new_releases?: boolean
   show_in_featured?: boolean
   show_in_coming_soon?: boolean
+  out_of_stock?: boolean
   // Cost tracking fields
   purchase_cost?: number
   shipping_cost?: number
@@ -42,6 +43,7 @@ interface ProductForm {
   show_in_new_releases?: boolean
   show_in_featured?: boolean
   show_in_coming_soon?: boolean
+  out_of_stock?: boolean
   // Cost tracking fields
   purchase_cost?: number
   shipping_cost?: number
@@ -75,6 +77,7 @@ export default function AdminDashboard() {
     show_in_new_releases: false,
     show_in_featured: true,
     show_in_coming_soon: true,
+    out_of_stock: false,
     purchase_cost: 0,
     shipping_cost: 0,
     total_cost: 0,
@@ -90,6 +93,7 @@ export default function AdminDashboard() {
     show_in_new_releases: product.show_in_new_releases || false,
     show_in_featured: product.show_in_featured !== false, // Default to true
     show_in_coming_soon: product.show_in_coming_soon !== false, // Default to true
+    out_of_stock: product.out_of_stock || false,
     purchase_cost: product.purchase_cost || 0,
     shipping_cost: product.shipping_cost || 0,
     total_cost: product.total_cost || 0,
@@ -104,6 +108,7 @@ export default function AdminDashboard() {
     show_in_new_releases: form.show_in_new_releases || false,
     show_in_featured: form.show_in_featured !== false,
     show_in_coming_soon: form.show_in_coming_soon !== false,
+    out_of_stock: form.out_of_stock || false,
     total_cost: (form.purchase_cost || 0) + (form.shipping_cost || 0)
   })
 
@@ -240,6 +245,24 @@ export default function AdminDashboard() {
     }
   }
 
+  const updateOutOfStockStatus = async (sku: string, outOfStock: boolean) => {
+    try {
+      const response = await fetch('/api/admin/products', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sku, out_of_stock: outOfStock.toString() })
+      })
+      
+      if (response.ok) {
+        setProducts(prev => prev.map(p => 
+          p.sku === sku ? { ...p, out_of_stock: outOfStock } : p
+        ))
+      }
+    } catch (error) {
+      console.error('Failed to update out of stock status:', error)
+    }
+  }
+
   const deleteProduct = async (sku: string) => {
     if (!confirm('Are you sure you want to delete this product?')) return
     
@@ -280,6 +303,7 @@ export default function AdminDashboard() {
           quantity: 1,
           price: 0,
           images: [],
+          out_of_stock: false,
           purchase_cost: 0,
           shipping_cost: 0,
           total_cost: 0,
@@ -476,6 +500,9 @@ export default function AdminDashboard() {
                     Section Visibility
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Out of Stock
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -640,6 +667,26 @@ export default function AdminDashboard() {
                           <span className="text-xs text-gray-600">Coming Soon</span>
                         </label>
                       </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <label className="flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={product.out_of_stock || false}
+                          onChange={(e) => updateOutOfStockStatus(product.sku, e.target.checked)}
+                          className="sr-only"
+                        />
+                        <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors ${
+                          product.out_of_stock 
+                            ? 'bg-red-500 border-red-500 text-white' 
+                            : 'border-gray-300 hover:border-red-400'
+                        }`}>
+                          {product.out_of_stock && '✓'}
+                        </div>
+                        <span className="text-xs text-gray-600 ml-2">
+                          {product.out_of_stock ? 'Out of Stock' : 'In Stock'}
+                        </span>
+                      </label>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
@@ -864,6 +911,23 @@ export default function AdminDashboard() {
                         </div>
                         <span className="text-sm text-gray-700">Show in Coming Soon Section</span>
                       </label>
+                      
+                      <label className="flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={editingProduct.out_of_stock || false}
+                          onChange={(e) => setEditingProduct(prev => prev ? {...prev, out_of_stock: e.target.checked} : null)}
+                          className="sr-only"
+                        />
+                        <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors mr-3 ${
+                          editingProduct.out_of_stock 
+                            ? 'bg-red-500 border-red-500 text-white' 
+                            : 'border-gray-300 hover:border-red-400'
+                        }`}>
+                          {editingProduct.out_of_stock && '✓'}
+                        </div>
+                        <span className="text-sm text-gray-700">Mark as Out of Stock</span>
+                      </label>
                     </div>
                   </div>
                 </div>
@@ -1077,6 +1141,7 @@ export default function AdminDashboard() {
                       quantity: 1,
                       price: 0,
                       images: [],
+                      out_of_stock: false,
                       purchase_cost: 0,
                       shipping_cost: 0,
                       total_cost: 0,
