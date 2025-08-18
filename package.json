@@ -17,9 +17,12 @@
     "papaparse": "^5.5.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "resend": "^6.0.1"
+    "react-square-web-payments-sdk": "^3.2.4-beta.1",
+    "resend": "^6.0.1",
+    "square": "^43.0.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.54.2",
     "@types/node": "^24.2.1",
     "@types/papaparse": "^5.3.16",
     "@types/react": "^19.1.9",

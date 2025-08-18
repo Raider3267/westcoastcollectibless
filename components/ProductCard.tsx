@@ -5,6 +5,7 @@ import ProductModal from './ProductModal'
 import DetailsButton from './DetailsButton'
 import ImageCarousel from './ImageCarousel'
 import { AuthService } from '../lib/auth'
+import { useCart } from '../lib/cart'
 
 type Product = {
   id: string
@@ -35,6 +36,7 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isInWishlist, setIsInWishlist] = useState(false)
   const [user, setUser] = useState(AuthService.getCurrentUser())
+  const { addItem } = useCart()
   
   useEffect(() => {
     setUser(AuthService.getCurrentUser())
@@ -203,8 +205,12 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
                 onClick={(e) => {
                   e.preventDefault()
                   e.stopPropagation()
-                  // Add to cart functionality - could integrate with Stripe or cart system
-                  alert('Added to cart! (Cart system integration needed)')
+                  addItem({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price || 0,
+                    image: product.image || undefined,
+                  })
                 }}
               >
                 Add to Cart

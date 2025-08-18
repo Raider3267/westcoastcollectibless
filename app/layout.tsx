@@ -2,6 +2,9 @@ import './globals.css'
 import type { Metadata } from 'next'
 import React from 'react'
 import UserNav from '../components/UserNav'
+import { CartProvider } from '../lib/cart'
+import Cart from '../components/Cart'
+import CartIcon from '../components/CartIcon'
 
 export const metadata: Metadata = {
   title: 'WestCoastCollectibless',
@@ -12,6 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
+        <CartProvider>
         <header style={{ position: 'sticky', top: 0, zIndex: 40, background: 'rgba(255,255,255,.75)', backdropFilter: 'saturate(140%) blur(14px)', borderBottom: '1px solid var(--line)' }}>
           <div style={{ maxWidth: '1224px', margin: '0 auto', padding: '0 20px' }}>
             <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0' }}>
@@ -38,6 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <a href="/" style={{ padding: '11px 16px', borderRadius: '999px', border: '1px solid var(--line)', background: '#fff', boxShadow: '0 6px 18px rgba(0,0,0,.05)', textDecoration: 'none', color: 'inherit' }}>Home</a>
                 <a href="/drops/calendar" style={{ padding: '11px 16px', borderRadius: '999px', border: '1px solid var(--line)', background: '#fff', boxShadow: '0 6px 18px rgba(0,0,0,.05)', textDecoration: 'none', color: 'inherit' }}>Drops</a>
                 <a href="/vip" style={{ padding: '11px 16px', borderRadius: '999px', border: '1px solid var(--line)', background: 'linear-gradient(135deg, #7c3aed, #a855f7)', color: 'white', boxShadow: '0 6px 18px rgba(124,58,237,.3)', textDecoration: 'none', fontWeight: 600 }}>👑 VIP</a>
+                <CartIcon />
                 <UserNav />
                 <a href="/admin/login" style={{ padding: '11px 16px', borderRadius: '999px', border: 'none', position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg,var(--accent-start), var(--accent-mid) 55%, var(--accent-end))', boxShadow: 'var(--shadow-soft)', textDecoration: 'none', color: '#0b0b0f' }}>Admin</a>
               </div>
@@ -48,6 +53,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <footer style={{ padding: '16px 24px', borderTop: '1px solid #eee', marginTop: 40, fontSize: 12, color: '#555' }}>
           © {new Date().getFullYear()} WestCoastCollectibless • Santa Monica, CA
         </footer>
+        
+        <Cart />
         
 <style id="wcc-dropin" dangerouslySetInnerHTML={{__html: `
   :root{
@@ -119,6 +126,7 @@ document.addEventListener('DOMContentLoaded', function(){
   addFloaters('top',12); addFloaters('bottom',12);
 });
 `}} />
+        </CartProvider>
       </body>
     </html>
   )
