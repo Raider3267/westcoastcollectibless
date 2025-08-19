@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useCart } from '../lib/cart'
+import { createSquareOrder } from '../app/actions/fast-checkout'
 import SquarePayment from './SquarePayment'
-import { verifyCartStock } from '../app/actions/verify-stock'
 
 export default function Cart() {
   const { state, removeItem, updateQuantity, clearCart, closeCart } = useCart()
@@ -12,6 +12,8 @@ export default function Cart() {
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [orderDetails, setOrderDetails] = useState<any>(null)
   const [paymentError, setPaymentError] = useState('')
+  const [squareOrderId, setSquareOrderId] = useState('')
+  const [isCreatingOrder, setIsCreatingOrder] = useState(false)
   
   // Billing Information
   const [billingInfo, setBillingInfo] = useState({
@@ -55,23 +57,39 @@ export default function Cart() {
   const handleCheckout = async () => {
     setIsCheckingOut(true)
     setPaymentError('') // Clear any previous payment errors
+  }
+
+  const handleCreateOrder = async () => {
+    setPaymentError('')
+    setIsCreatingOrder(true)
     
-    // Verify stock with Square before proceeding to payment
+    // Basic form validation
+    if (!billingInfo.firstName || !billingInfo.lastName || !billingInfo.email) {
+      setPaymentError('Please fill in all required billing information.')
+      setIsCreatingOrder(false)
+      return
+    }
+
     try {
-      const cartItems = state.items.map(item => ({ id: item.id, quantity: item.quantity }))
-      const stockCheck = await verifyCartStock(cartItems)
-      
-      if (!stockCheck.valid) {
-        setPaymentError(`Stock Error: ${stockCheck.errors.join(', ')}`)
-        setIsCheckingOut(false)
-        return
+      const result = await createSquareOrder({
+        items: state.items,
+        customerEmail: billingInfo.email,
+        billingInfo,
+        shippingInfo: sameAsBilling ? billingInfo : shippingInfo
+      })
+
+      if (result.success && result.orderId) {
+        setSquareOrderId(result.orderId)
+        setIsCreatingOrder(false)
+        // Now the SquarePayment component will be shown
+      } else {
+        setPaymentError(result.error || 'Failed to create order.')
+        setIsCreatingOrder(false)
       }
-      
-      // Stock is valid, proceed to payment
-    } catch (error) {
-      console.error('Stock verification failed:', error)
-      setPaymentError('Unable to verify stock. Please try again.')
-      setIsCheckingOut(false)
+    } catch (error: any) {
+      console.error('Order creation error:', error)
+      setPaymentError('Failed to create order. Please try again.')
+      setIsCreatingOrder(false)
     }
   }
 
@@ -392,21 +410,40 @@ export default function Cart() {
                 </div>
               )}
 
-              {/* Payment Form */}
+              {/* Payment Section */}
               <div className="p-4">
-                <SquarePayment
-                  amount={(() => {
-                    const amount = Math.round(state.totalPrice * 100);
-                    console.log('Cart total price:', state.totalPrice, 'Amount in cents:', amount);
-                    return amount;
-                  })()} // Convert to cents
-                  currency="USD"
-                  productName={`Order (${state.totalItems} items)`}
-                  productSku={`cart-${Date.now()}`}
-                  customerEmail={billingInfo.email || customerEmail}
-                  onSuccess={handlePaymentSuccess}
-                  onError={handlePaymentError}
-                />
+                {!squareOrderId ? (
+                  <>
+                    <button
+                      onClick={handleCreateOrder}
+                      disabled={isCreatingOrder}
+                      className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
+                    >
+                      {isCreatingOrder ? 'Creating Order...' : `Continue to Payment - $${state.totalPrice.toFixed(2)}`}
+                    </button>
+                    <p className="text-xs text-gray-500 mt-2 text-center">
+                      Next step: Complete payment with Square
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-sm text-green-800">
+                        ✓ Order created successfully! Complete your payment below.
+                      </p>
+                    </div>
+                    <SquarePayment
+                      amount={Math.round(state.totalPrice * 100)} // Convert to cents
+                      currency="USD"
+                      productName={`Order (${state.totalItems} items)`}
+                      productSku={`cart-${Date.now()}`}
+                      customerEmail={billingInfo.email}
+                      orderId={squareOrderId}
+                      onSuccess={handlePaymentSuccess}
+                      onError={handlePaymentError}
+                    />
+                  </>
+                )}
               </div>
             </>
           ) : (

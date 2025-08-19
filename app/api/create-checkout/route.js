@@ -3,12 +3,25 @@ import { randomUUID } from "crypto"
 export async function POST(request) {
   try {
     const body = await request.json()
-    const { name, unitAmountCents, quantity, redirectUrl } = body
+    const { lineItems, customerEmail, successUrl, cancelUrl, metadata } = body
+
+    // Support both single item and line items formats
+    let items = []
+    if (lineItems && Array.isArray(lineItems)) {
+      items = lineItems
+    } else if (body.name && body.unitAmountCents) {
+      // Legacy single item format
+      items = [{
+        name: body.name,
+        quantity: body.quantity || 1,
+        unitAmountCents: body.unitAmountCents
+      }]
+    }
 
     // Validate required fields
-    if (!name || !unitAmountCents) {
+    if (!items.length) {
       return Response.json(
-        { error: "Missing required fields: name and unitAmountCents" },
+        { error: "Missing required fields: lineItems or name/unitAmountCents" },
         { status: 400 }
       )
     }
@@ -18,7 +31,7 @@ export async function POST(request) {
     const idempotencyKey = randomUUID()
     
     // Determine base URL for Square API
-    const baseUrl = process.env.SQUARE_ENV === "production" 
+    const baseUrl = process.env.SQUARE_ENVIRONMENT === "production" 
       ? "https://connect.squareup.com"
       : "https://connect.squareupsandbox.com"
 
@@ -27,15 +40,20 @@ export async function POST(request) {
       idempotency_key: idempotencyKey,
       order: {
         location_id: locationId,
-        line_items: [{
-          name,
-          quantity: String(quantity || 1),
+        line_items: items.map(item => ({
+          name: item.name,
+          quantity: String(item.quantity || 1),
           base_price_money: {
-            amount: parseInt(unitAmountCents),
+            amount: parseInt(item.unitAmountCents),
             currency: "USD"
           }
-        }]
+        }))
       }
+    }
+
+    // Add customer email as reference (not fulfillment)
+    if (customerEmail) {
+      orderData.order.reference_id = `email_${customerEmail.replace('@', '_at_')}_${Date.now()}`
     }
 
     const orderResponse = await fetch(`${baseUrl}/v2/orders`, {
@@ -58,17 +76,11 @@ export async function POST(request) {
       )
     }
 
-    // For demo purposes, return success URL
-    // In production, you'd integrate with Square's hosted checkout
-    const checkoutUrl = redirectUrl || (
-      process.env.NEXT_PUBLIC_SITE_URL 
-        ? process.env.NEXT_PUBLIC_SITE_URL + "/success"
-        : "http://localhost:3000/success"
-    )
-
+    // Return order data for client-side payment processing
     return Response.json({ 
-      url: checkoutUrl,
+      success: true,
       orderId: orderResult.order?.id,
+      order: orderResult.order,
       message: "Order created successfully via Square API"
     })
 

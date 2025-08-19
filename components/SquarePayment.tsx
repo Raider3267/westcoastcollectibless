@@ -9,7 +9,6 @@ import {
   type TokenResult
 } from 'react-square-web-payments-sdk'
 import { submitPayment, getSquareConfig } from '../app/actions/square'
-import { verifyStockBeforeCheckout } from '../lib/square-inventory'
 
 interface SquarePaymentProps {
   amount: number // Amount in cents
@@ -19,6 +18,7 @@ interface SquarePaymentProps {
   onSuccess?: (receipt: any) => void
   onError?: (error: any) => void
   customerEmail?: string
+  orderId?: string
 }
 
 export default function SquarePayment({ 
@@ -28,7 +28,8 @@ export default function SquarePayment({
   productSku,
   onSuccess,
   onError,
-  customerEmail 
+  customerEmail,
+  orderId
 }: SquarePaymentProps) {
   const [isProcessing, setIsProcessing] = useState(false)
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'success' | 'error'>('idle')
