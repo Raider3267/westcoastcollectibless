@@ -9,6 +9,7 @@ import {
   type TokenResult
 } from 'react-square-web-payments-sdk'
 import { submitPayment, getSquareConfig } from '../app/actions/square'
+import { verifyStockBeforeCheckout } from '../lib/square-inventory'
 
 interface SquarePaymentProps {
   amount: number // Amount in cents

@@ -6,11 +6,13 @@ import { randomUUID } from 'crypto'
 // Initialize Square Client
 const client = new SquareClient({
   token: process.env.SQUARE_ACCESS_TOKEN!,
-  environment: SquareEnvironment.Sandbox,
+  environment: process.env.SQUARE_ENVIRONMENT === 'production' ? SquareEnvironment.Production : SquareEnvironment.Sandbox,
 })
 
 export const paymentsApi = client.payments
 export const customersApi = client.customers
+export const catalogApi = client.catalog
+export const inventoryApi = client.inventory
 
 export interface PaymentRequest {
   sourceId: string
@@ -118,6 +120,167 @@ export async function createCustomer(customerData: {
     return {
       success: false,
       error: error.errors ? error.errors[0] : { detail: 'Customer creation failed' },
+    }
+  }
+}
+
+// Square Catalog API functions
+export interface SquareProduct {
+  id: string
+  name: string
+  description?: string
+  price: number
+  currency: string
+  imageUrl?: string
+  sku?: string
+  quantity?: number
+  isAvailable: boolean
+  categoryId?: string
+  variations?: SquareProductVariation[]
+}
+
+export interface SquareProductVariation {
+  id: string
+  name: string
+  price: number
+  sku?: string
+  quantity?: number
+}
+
+export async function getSquareProducts(): Promise<{ success: boolean; products?: SquareProduct[]; error?: any }> {
+  try {
+    console.log('Fetching products from Square Catalog API...')
+    
+    const response = await catalogApi.list({
+      types: ['ITEM']
+    })
+    
+    console.log('Square catalog response:', JSON.stringify(response, null, 2))
+    
+    const result = response.result
+    if (!result || !result.objects) {
+      console.log('No objects found in Square catalog response')
+      return { success: true, products: [] }
+    }
+    
+    const products: SquareProduct[] = []
+    
+    for (const catalogObject of result.objects) {
+      if (catalogObject.type === 'ITEM' && catalogObject.itemData) {
+        const item = catalogObject.itemData
+        const variations = item.variations || []
+        
+        // Get the primary variation (usually the first one) for main price
+        const primaryVariation = variations[0]
+        const basePrice = primaryVariation?.itemVariationData?.priceMoney?.amount || 0
+        const currency = primaryVariation?.itemVariationData?.priceMoney?.currency || 'USD'
+        
+        // Get inventory for the primary variation if it exists
+        let quantity = 0
+        if (primaryVariation?.id) {
+          try {
+            const inventoryResult = await inventoryApi.retrieveInventoryCount({
+              catalogObjectId: primaryVariation.id,
+              locationIds: [process.env.SQUARE_LOCATION_ID!]
+            })
+            quantity = Number(inventoryResult.result.counts?.[0]?.quantity) || 0
+          } catch (inventoryError) {
+            console.log('Could not fetch inventory for item:', primaryVariation.id)
+          }
+        }
+        
+        const product: SquareProduct = {
+          id: catalogObject.id!,
+          name: item.name || 'Unnamed Product',
+          description: item.description,
+          price: Number(basePrice) / 100, // Convert from cents to dollars
+          currency,
+          imageUrl: item.imageIds?.[0] ? undefined : undefined, // We'll handle images separately
+          sku: primaryVariation?.itemVariationData?.sku,
+          quantity,
+          isAvailable: quantity > 0,
+          variations: variations.map(v => ({
+            id: v.id!,
+            name: v.itemVariationData?.name || item.name || 'Variation',
+            price: Number(v.itemVariationData?.priceMoney?.amount || 0) / 100,
+            sku: v.itemVariationData?.sku,
+            quantity: 0 // We'd need separate inventory calls for each variation
+          }))
+        }
+        
+        products.push(product)
+      }
+    }
+    
+    console.log(`Successfully fetched ${products.length} products from Square`)
+    return { success: true, products }
+    
+  } catch (error: any) {
+    console.error('Error fetching Square products:', error)
+    return {
+      success: false,
+      error: error.errors ? error.errors[0] : { detail: 'Failed to fetch products from Square' }
+    }
+  }
+}
+
+export async function getSquareProductById(productId: string): Promise<{ success: boolean; product?: SquareProduct; error?: any }> {
+  try {
+    const { result } = await catalogApi.retrieveObject({
+      objectId: productId,
+      includeRelatedObjects: true
+    })
+    
+    const catalogObject = result.object
+    if (!catalogObject || catalogObject.type !== 'ITEM' || !catalogObject.itemData) {
+      return { success: false, error: { detail: 'Product not found' } }
+    }
+    
+    const item = catalogObject.itemData
+    const variations = item.variations || []
+    const primaryVariation = variations[0]
+    const basePrice = primaryVariation?.itemVariationData?.priceMoney?.amount || 0
+    const currency = primaryVariation?.itemVariationData?.priceMoney?.currency || 'USD'
+    
+    // Get inventory
+    let quantity = 0
+    if (primaryVariation?.id) {
+      try {
+        const inventoryResult = await inventoryApi.retrieveInventoryCount({
+          catalogObjectId: primaryVariation.id,
+          locationIds: [process.env.SQUARE_LOCATION_ID!]
+        })
+        quantity = Number(inventoryResult.result.counts?.[0]?.quantity) || 0
+      } catch (inventoryError) {
+        console.log('Could not fetch inventory for item:', primaryVariation.id)
+      }
+    }
+    
+    const product: SquareProduct = {
+      id: catalogObject.id!,
+      name: item.name || 'Unnamed Product',
+      description: item.description,
+      price: Number(basePrice) / 100,
+      currency,
+      sku: primaryVariation?.itemVariationData?.sku,
+      quantity,
+      isAvailable: quantity > 0,
+      variations: variations.map(v => ({
+        id: v.id!,
+        name: v.itemVariationData?.name || item.name || 'Variation',
+        price: Number(v.itemVariationData?.priceMoney?.amount || 0) / 100,
+        sku: v.itemVariationData?.sku,
+        quantity: 0
+      }))
+    }
+    
+    return { success: true, product }
+    
+  } catch (error: any) {
+    console.error('Error fetching Square product:', error)
+    return {
+      success: false,
+      error: error.errors ? error.errors[0] : { detail: 'Failed to fetch product from Square' }
     }
   }
 }
