@@ -19,7 +19,8 @@
     "react-dom": "^18.2.0",
     "react-square-web-payments-sdk": "^3.2.4-beta.1",
     "resend": "^6.0.1",
-    "square": "^43.0.1"
+    "square": "^43.0.1",
+    "squareup": "^1.0.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.54.2",

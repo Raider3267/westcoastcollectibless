@@ -37,3 +37,33 @@ Ignore patterns:
 Notes:
 - Commit messages should be concise and descriptive in plain English.
 - Prefer rebase pulls (git pull --rebase) to maintain a linear history.
+
+## Square Checkout Integration
+
+### Setup
+1. Copy `.env.local.example` to `.env.local`
+2. Fill in your Square credentials:
+   - `SQUARE_ENV=sandbox` (or `production`)
+   - `SQUARE_ACCESS_TOKEN=your_access_token`
+   - `SQUARE_LOCATION_ID=your_location_id` 
+   - `NEXT_PUBLIC_SQUARE_APPLICATION_ID=your_app_id`
+
+### Development
+```bash
+npm install
+npm run dev
+```
+
+### Testing Square Checkout
+1. Visit `/sandbox-buy` for a test checkout page
+2. Click "Buy Now with Square" → redirected to Square hosted checkout
+3. Complete payment using test card: `4111 1111 1111 1111`
+   - Any future expiry date (e.g., 12/25)
+   - Any CVV (e.g., 123)
+   - Any ZIP code (e.g., 12345)
+4. Should redirect to `/success` page after completion
+
+### Production Mode
+- Set `SQUARE_ENV=production` in `.env.local`
+- Use your Production Access Token, Location ID, and Application ID
+- **Warning**: Production mode processes real payments
