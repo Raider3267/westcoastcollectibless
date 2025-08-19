@@ -171,7 +171,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Calculate total cost
-    const totalCost = parseFloat(purchase_cost) + parseFloat(shipping_cost)
+    const totalCost = (parseFloat(purchase_cost) || 0) + (parseFloat(shipping_cost) || 0)
     
     // Create new product with all required CSV columns
     const newProduct = {
