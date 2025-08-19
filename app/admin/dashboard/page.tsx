@@ -439,7 +439,7 @@ export default function AdminDashboard() {
           <div className="bg-white p-6 rounded-xl shadow-sm">
             <h3 className="text-sm font-medium text-gray-500">Inventory Value</h3>
             <p className="text-2xl font-bold text-blue-600">
-              ${products.reduce((sum, p) => sum + ((p.total_cost || 0) * p.quantity), 0).toFixed(2)}
+              ${products.reduce((sum, p) => sum + ((typeof p.total_cost === 'number' ? p.total_cost : parseFloat(p.total_cost) || 0) * p.quantity), 0).toFixed(2)}
             </p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm">
@@ -451,7 +451,7 @@ export default function AdminDashboard() {
           <div className="bg-white p-6 rounded-xl shadow-sm">
             <h3 className="text-sm font-medium text-gray-500">Potential Profit</h3>
             <p className="text-2xl font-bold text-emerald-600">
-              ${products.reduce((sum, p) => sum + (((p.price && typeof p.price === 'number' ? p.price : 0) - (p.total_cost || 0)) * p.quantity), 0).toFixed(2)}
+              ${products.reduce((sum, p) => sum + (((p.price && typeof p.price === 'number' ? p.price : 0) - (typeof p.total_cost === 'number' ? p.total_cost : parseFloat(p.total_cost) || 0)) * p.quantity), 0).toFixed(2)}
             </p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm">
@@ -589,7 +589,7 @@ export default function AdminDashboard() {
                           💰 ${product.price && typeof product.price === 'number' ? product.price.toFixed(2) : '0.00'}
                         </div>
                         <div className="text-xs text-gray-500">
-                          Cost: ${(product.total_cost || 0).toFixed(2)}
+                          Cost: ${(typeof product.total_cost === 'number' ? product.total_cost : parseFloat(product.total_cost) || 0).toFixed(2)}
                         </div>
                       </div>
                     </td>
@@ -616,15 +616,15 @@ export default function AdminDashboard() {
                     <td className="px-6 py-4 text-sm">
                       <div className="space-y-1">
                         <div className={`font-semibold ${
-                          ((product.price && typeof product.price === 'number' ? product.price : 0) - (product.total_cost || 0)) >= 0 
+                          ((product.price && typeof product.price === 'number' ? product.price : 0) - (typeof product.total_cost === 'number' ? product.total_cost : parseFloat(product.total_cost) || 0)) >= 0 
                             ? 'text-green-600' 
                             : 'text-red-600'
                         }`}>
-                          ${((product.price && typeof product.price === 'number' ? product.price : 0) - (product.total_cost || 0)).toFixed(2)}
+                          ${((product.price && typeof product.price === 'number' ? product.price : 0) - (typeof product.total_cost === 'number' ? product.total_cost : parseFloat(product.total_cost) || 0)).toFixed(2)}
                         </div>
                         <div className="text-xs text-gray-500">
                           {product.price && typeof product.price === 'number' && product.price > 0 ? 
-                            (((product.price - (product.total_cost || 0)) / product.price) * 100).toFixed(1) : 0}% margin
+                            (((product.price - (typeof product.total_cost === 'number' ? product.total_cost : parseFloat(product.total_cost) || 0)) / product.price) * 100).toFixed(1) : 0}% margin
                         </div>
                       </div>
                     </td>
