@@ -116,6 +116,10 @@ export async function getNewReleases(filename = 'export.csv', daysBack = 7): Pro
       const drop_date = FIRST<string>(row['drop_date'], row['Drop Date']) || null
       const released_date = FIRST<string>(row['released_date'], row['Released Date']) || null
       const show_in_new_releases = FIRST<string>(row['show_in_new_releases'], row['Show In New Releases']) === 'true'
+      
+      // Get show_in_coming_soon field for priority filtering
+      const show_in_coming_soon_val = FIRST<string>(row['show_in_coming_soon'], row['Show In Coming Soon'])
+      const show_in_coming_soon = show_in_coming_soon_val === 'true' || show_in_coming_soon_val === '1' || show_in_coming_soon_val === 1
 
       return { 
         id: String(id), 
@@ -129,7 +133,8 @@ export async function getNewReleases(filename = 'export.csv', daysBack = 7): Pro
         status,
         drop_date,
         released_date,
-        show_in_new_releases
+        show_in_new_releases,
+        show_in_coming_soon
       }
     })
     // Filter for new releases
@@ -148,6 +153,10 @@ export async function getNewReleases(filename = 'export.csv', daysBack = 7): Pro
       
       // Must be explicitly marked to show in new releases
       if (!item.show_in_new_releases) return false
+      
+      // PRIORITY RULE: Exclude items that are marked for Coming Soon section
+      // Coming Soon section gets first priority
+      if (item.show_in_coming_soon) return false
       
       // Always require a price
       if (!item.price || item.price <= 0) return false

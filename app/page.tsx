@@ -152,6 +152,171 @@ function ScrollableSection({ children, className = "wcc-scroll" }: { children: R
   )
 }
 
+function ComingSoonProductsSection() {
+  const [comingSoonProducts, setComingSoonProducts] = useState<Listing[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let isMounted = true
+    
+    const fetchComingSoonProducts = async () => {
+      try {
+        console.log('ComingSoon: Starting fetch...')
+        const response = await fetch('/api/coming-soon/products')
+        console.log('ComingSoon: Response received:', response.status)
+        
+        if (response.ok) {
+          const data = await response.json()
+          console.log('ComingSoon: Data parsed:', data.length, 'products')
+          
+          if (isMounted) {
+            setComingSoonProducts(data)
+            setLoading(false)
+            console.log('ComingSoon: State updated')
+          }
+        } else {
+          console.error('ComingSoon: Response not ok:', response.status)
+          if (isMounted) {
+            setLoading(false)
+          }
+        }
+      } catch (error) {
+        console.error('ComingSoon: Fetch failed:', error)
+        if (isMounted) {
+          setLoading(false)
+        }
+      }
+    }
+    
+    // Add a small delay to ensure component is mounted
+    const timer = setTimeout(() => {
+      fetchComingSoonProducts()
+    }, 100)
+    
+    return () => {
+      isMounted = false
+      clearTimeout(timer)
+    }
+  }, [])
+
+  // Don't show section if no coming soon products
+  if (!loading && comingSoonProducts.length === 0) {
+    return null
+  }
+
+  const cardColors = [
+    'from-pop-pink/20 to-pop-orange/20',
+    'from-pop-teal/20 to-pop-blue/20', 
+    'from-pop-lime/20 to-pop-yellow/20',
+    'from-pop-purple/20 to-pop-pink/20',
+    'from-pop-orange/20 to-pop-teal/20',
+    'from-pop-blue/20 to-pop-purple/20'
+  ]
+
+  return (
+    <section className="luxury-section" style={{ 
+      background: 'linear-gradient(135deg, rgba(138,43,226,.05) 0%, rgba(75,0,130,.05) 50%, rgba(138,43,226,.05) 100%)',
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      {/* Background decoration */}
+      <div style={{
+        position: 'absolute',
+        top: '-20%',
+        left: '-10%',
+        width: '40%',
+        height: '140%',
+        background: 'radial-gradient(circle, rgba(138,43,226,.1) 0%, transparent 70%)',
+        borderRadius: '50%',
+        filter: 'blur(60px)'
+      }} />
+      
+      <div style={{ maxWidth: '1224px', margin: '0 auto', padding: '0 20px', position: 'relative', zIndex: 2 }}>
+        <div className="luxury-eyebrow" style={{ marginBottom: '8px' }}>🚀 Preview</div>
+        <h2 style={{ 
+          fontSize: 'clamp(1.6rem, 2.5vw, 2.1rem)', 
+          margin: '0 0 12px', 
+          fontWeight: 800,
+          color: 'var(--wcc-ink)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          ⏰ Coming Soon
+          {comingSoonProducts.length > 0 && (
+            <span style={{
+              fontSize: '0.7rem',
+              background: 'linear-gradient(135deg, #8a2be2, #4b0082)',
+              color: 'white',
+              padding: '4px 8px',
+              borderRadius: '999px',
+              fontWeight: 600
+            }}>
+              {comingSoonProducts.length} PREVIEW
+            </span>
+          )}
+        </h2>
+        <p style={{ fontSize: '1rem', color: 'var(--wcc-muted)', margin: '0 0 24px', maxWidth: '600px' }}>
+          Get early access to these upcoming releases. Add them to your wishlist and be notified when they launch!
+        </p>
+        {loading ? (
+          <ScrollableSection>
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="luxury-card accent-teal" style={{ opacity: 0.6 }}>
+                <div className="luxury-thumb">
+                  <div className="luxury-thumb-inner" style={{ background: '#f0f0f0' }}></div>
+                </div>
+                <div className="luxury-body">
+                  <div style={{ background: '#f0f0f0', height: '20px', borderRadius: '4px', marginBottom: '8px' }}></div>
+                  <div style={{ background: '#f0f0f0', height: '16px', borderRadius: '4px', width: '60%' }}></div>
+                </div>
+                <div className="luxury-foot">
+                  <div style={{ background: '#f0f0f0', height: '20px', width: '40px', borderRadius: '4px' }}></div>
+                  <div style={{ background: '#f0f0f0', height: '32px', width: '60px', borderRadius: '999px' }}></div>
+                </div>
+              </div>
+            ))}
+          </ScrollableSection>
+        ) : (
+          <ScrollableSection>
+            {comingSoonProducts.map((product, index) => {
+              const cardColor = cardColors[index % cardColors.length]
+              const comingSoonEmojis = ['⏰', '🚀', '🔜', '✨', '🌟', '⭐', '💫', '🎯', '🎪', '🎨']
+              const randomEmoji = comingSoonEmojis[index % comingSoonEmojis.length]
+
+              return (
+                <div key={product.id} style={{ position: 'relative' }}>
+                  {/* "COMING SOON" Badge */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '8px',
+                    right: '8px',
+                    background: 'linear-gradient(135deg, #8a2be2, #4b0082)',
+                    color: 'white',
+                    padding: '4px 8px',
+                    borderRadius: '999px',
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    zIndex: 10,
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+                  }}>
+                    COMING SOON
+                  </div>
+                  <ProductCard
+                    product={product}
+                    cardColor={cardColor}
+                    randomEmoji={randomEmoji}
+                  />
+                </div>
+              )
+            })}
+          </ScrollableSection>
+        )}
+      </div>
+    </section>
+  )
+}
+
 export default function HomePage() {
   const [items, setItems] = useState<Listing[]>([])
   const [filteredItems, setFilteredItems] = useState<Listing[]>([])
@@ -422,7 +587,10 @@ export default function HomePage() {
         {/* Limited Editions Section */}
         <LimitedEditionsSection />
 
-        {/* Coming Soon Section */}
+        {/* Coming Soon Products Section */}
+        <ComingSoonProductsSection />
+
+        {/* Get Notified / VIP Email Signup Section */}
         <ComingSoonSection />
 
         {/* Trust & Credibility - Unified Section */}
@@ -1015,7 +1183,7 @@ function ComingSoonSection() {
             color: 'var(--wcc-ink)',
             lineHeight: 1.2
           }}>
-            🔥 Next Drop Coming Soon
+            🔔 Get Notified - Early Access
           </h2>
           {comingSoonItems.length > 0 ? (
             <p style={{ 

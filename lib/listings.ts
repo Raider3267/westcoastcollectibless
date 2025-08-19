@@ -326,8 +326,9 @@ export async function getComingSoonProducts(filename = 'export.csv'): Promise<Li
       // Filter out items without basic required fields
       if (!item.name || item.name.trim() === '' || item.name === 'Item 1' || item.name.includes('Item ')) return false
       
-      // Must be coming-soon status OR have show_in_coming_soon set to true
-      if (item.status !== 'coming-soon' && !item.show_in_coming_soon) return false
+      // PRIORITY RULE: Must have show_in_coming_soon set to true
+      // This ensures Coming Soon section gets exclusive products
+      if (!item.show_in_coming_soon) return false
       
       // Filter out items without images
       if (!item.image || item.image.trim() === '') return false
