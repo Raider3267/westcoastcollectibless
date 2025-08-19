@@ -70,6 +70,11 @@ export async function GET() {
       purchase_date: product.purchase_date || '',
       supplier: product.supplier || '',
       tracking_number: product.tracking_number || '',
+      // Shipping information fields
+      weight: parseFloat(product.weight) || 0.3,
+      length: parseFloat(product.length) || 4,
+      width: parseFloat(product.width) || 3,
+      height: parseFloat(product.height) || 5,
       // Calculated fields
       profit_per_unit: (parseFloat(product.price) || 0) - (parseFloat(product.total_cost) || 0),
       total_inventory_value: (parseInt(product.quantity) || 0) * (parseFloat(product.total_cost) || 0),
@@ -167,7 +172,11 @@ export async function POST(request: NextRequest) {
       shipping_cost = 0,
       purchase_date = '',
       supplier = '',
-      tracking_number = ''
+      tracking_number = '',
+      weight = 0.3,
+      length = 4,
+      width = 3,
+      height = 5
     } = body
     
     if (!sku || !title) {
@@ -223,7 +232,12 @@ export async function POST(request: NextRequest) {
       total_cost: totalCost.toString(),
       purchase_date,
       supplier,
-      tracking_number
+      tracking_number,
+      // Shipping information fields
+      weight: weight.toString(),
+      length: length.toString(),
+      width: width.toString(),
+      height: height.toString()
     }
     
     products.push(newProduct)

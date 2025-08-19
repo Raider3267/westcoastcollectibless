@@ -28,6 +28,10 @@ export type Listing = {
   show_in_coming_soon?: boolean
   show_in_staff_picks?: boolean
   show_in_limited_editions?: boolean
+  weight?: number // in lbs
+  length?: number // in inches
+  width?: number // in inches  
+  height?: number // in inches
   out_of_stock?: boolean
   show_in_featured_while_coming_soon?: boolean
 }
@@ -160,6 +164,19 @@ export async function getListingsFromCsv(filename = 'export.csv', includeOutOfSt
       const show_in_featured_while_coming_soon_val = FIRST<string>(row['show_in_featured_while_coming_soon'], row['Show In Featured While Coming Soon'])
       const show_in_featured_while_coming_soon = show_in_featured_while_coming_soon_val === 'true' || show_in_featured_while_coming_soon_val === '1' || show_in_featured_while_coming_soon_val === 1
 
+      // Get weight and dimensions
+      const weightStr = FIRST<string>(row['weight'], row['Weight'])
+      const weight = weightStr ? Number(String(weightStr).replace(/[^0-9.]/g, '')) : 0.3 // Default 0.3 lbs for collectibles
+      
+      const lengthStr = FIRST<string>(row['length'], row['Length'])
+      const length = lengthStr ? Number(String(lengthStr).replace(/[^0-9.]/g, '')) : 4 // Default 4 inches
+      
+      const widthStr = FIRST<string>(row['width'], row['Width'])
+      const width = widthStr ? Number(String(widthStr).replace(/[^0-9.]/g, '')) : 3 // Default 3 inches
+      
+      const heightStr = FIRST<string>(row['height'], row['Height'])
+      const height = heightStr ? Number(String(heightStr).replace(/[^0-9.]/g, '')) : 5 // Default 5 inches
+
       return { 
         id: String(id), 
         name, 
@@ -179,7 +196,11 @@ export async function getListingsFromCsv(filename = 'export.csv', includeOutOfSt
         show_in_staff_picks,
         show_in_limited_editions,
         out_of_stock,
-        show_in_featured_while_coming_soon
+        show_in_featured_while_coming_soon,
+        weight,
+        length,
+        width,
+        height
       }
     })
     // Filter based on stock, price, and content quality
@@ -299,6 +320,19 @@ export async function getComingSoonProducts(filename = 'export.csv'): Promise<Li
       const show_in_featured_while_coming_soon_val = FIRST<string>(row['show_in_featured_while_coming_soon'], row['Show In Featured While Coming Soon'])
       const show_in_featured_while_coming_soon = show_in_featured_while_coming_soon_val === 'true' || show_in_featured_while_coming_soon_val === '1' || show_in_featured_while_coming_soon_val === 1
 
+      // Get weight and dimensions
+      const weightStr = FIRST<string>(row['weight'], row['Weight'])
+      const weight = weightStr ? Number(String(weightStr).replace(/[^0-9.]/g, '')) : 0.3 // Default 0.3 lbs for collectibles
+      
+      const lengthStr = FIRST<string>(row['length'], row['Length'])
+      const length = lengthStr ? Number(String(lengthStr).replace(/[^0-9.]/g, '')) : 4 // Default 4 inches
+      
+      const widthStr = FIRST<string>(row['width'], row['Width'])
+      const width = widthStr ? Number(String(widthStr).replace(/[^0-9.]/g, '')) : 3 // Default 3 inches
+      
+      const heightStr = FIRST<string>(row['height'], row['Height'])
+      const height = heightStr ? Number(String(heightStr).replace(/[^0-9.]/g, '')) : 5 // Default 5 inches
+
       return { 
         id: String(id), 
         name, 
@@ -318,7 +352,11 @@ export async function getComingSoonProducts(filename = 'export.csv'): Promise<Li
         show_in_staff_picks,
         show_in_limited_editions,
         out_of_stock,
-        show_in_featured_while_coming_soon
+        show_in_featured_while_coming_soon,
+        weight,
+        length,
+        width,
+        height
       }
     })
     // Filter for coming-soon products only
