@@ -177,7 +177,7 @@ export default function Cart() {
                         {item.name} × {item.quantity}
                       </span>
                       <span className="text-gray-900">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        ${item.price && typeof item.price === 'number' ? (item.price * item.quantity).toFixed(2) : '0.00'}
                       </span>
                     </div>
                   ))}
@@ -244,7 +244,7 @@ export default function Cart() {
                         {item.name} × {item.quantity}
                       </span>
                       <span className="text-gray-900">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        ${item.price && typeof item.price === 'number' ? (item.price * item.quantity).toFixed(2) : '0.00'}
                       </span>
                     </div>
                   ))}
@@ -478,7 +478,7 @@ export default function Cart() {
                             {item.name}
                           </h4>
                           <p className="text-sm text-gray-600 mt-1">
-                            ${item.price.toFixed(2)}
+                            ${item.price && typeof item.price === 'number' ? item.price.toFixed(2) : '0.00'}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">

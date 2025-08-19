@@ -130,7 +130,7 @@ export default function SquareProductsPage() {
                   
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-xl font-bold text-gray-900">
-                      ${product.price.toFixed(2)}
+                      ${product.price && typeof product.price === 'number' ? product.price.toFixed(2) : '0.00'}
                     </span>
                     
                     <div className="flex items-center space-x-2">
@@ -173,7 +173,7 @@ export default function SquareProductsPage() {
                         {product.variations.slice(0, 3).map((variation) => (
                           <div key={variation.id} className="flex justify-between text-xs text-gray-600">
                             <span>{variation.name}</span>
-                            <span>${variation.price.toFixed(2)}</span>
+                            <span>${variation.price && typeof variation.price === 'number' ? variation.price.toFixed(2) : '0.00'}</span>
                           </div>
                         ))}
                         {product.variations.length > 3 && (
