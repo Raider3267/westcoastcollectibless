@@ -67,7 +67,6 @@ export default function SquarePayment({
         } : undefined,
         {
           note: `Purchase of ${productName} (SKU: ${productSku})`,
-          orderId: `${productSku}-${Date.now()}`,
         }
       )
 

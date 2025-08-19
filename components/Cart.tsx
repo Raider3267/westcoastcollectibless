@@ -10,6 +10,7 @@ export default function Cart() {
   const [customerEmail, setCustomerEmail] = useState('')
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [orderDetails, setOrderDetails] = useState<any>(null)
+  const [paymentError, setPaymentError] = useState('')
   
   // Billing Information
   const [billingInfo, setBillingInfo] = useState({
@@ -52,10 +53,12 @@ export default function Cart() {
 
   const handleCheckout = () => {
     setIsCheckingOut(true)
+    setPaymentError('') // Clear any previous payment errors
   }
 
   const handlePaymentSuccess = (receipt: any) => {
-    console.log('Cart payment successful:', receipt)
+    console.log('Cart payment successful, receipt:', receipt)
+    setPaymentError('') // Clear any previous errors
     setOrderDetails({
       receipt,
       items: [...state.items],
@@ -66,12 +69,14 @@ export default function Cart() {
     })
     setShowConfirmation(true)
     setIsCheckingOut(false)
+    console.log('Should now show confirmation screen')
   }
 
   const handlePaymentError = (error: any) => {
     console.error('Cart payment error:', error)
-    setIsCheckingOut(false)
-    // Show error message but keep cart open
+    setPaymentError('Payment failed. Please try again.')
+    // Keep in checkout mode but show error
+    // setIsCheckingOut(false) // Don't go back to cart, stay in checkout with error
   }
 
   const handleBackToCart = () => {
@@ -360,10 +365,22 @@ export default function Cart() {
                 )}
               </div>
 
+              {/* Payment Error Display */}
+              {paymentError && (
+                <div className="p-4 mx-4 mb-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                  <p className="font-semibold">Payment Error</p>
+                  <p>{paymentError}</p>
+                </div>
+              )}
+
               {/* Payment Form */}
               <div className="p-4">
                 <SquarePayment
-                  amount={Math.round(state.totalPrice * 100)} // Convert to cents
+                  amount={(() => {
+                    const amount = Math.round(state.totalPrice * 100);
+                    console.log('Cart total price:', state.totalPrice, 'Amount in cents:', amount);
+                    return amount;
+                  })()} // Convert to cents
                   currency="USD"
                   productName={`Order (${state.totalItems} items)`}
                   productSku={`cart-${Date.now()}`}
