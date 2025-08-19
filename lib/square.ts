@@ -55,7 +55,12 @@ export async function createPayment(paymentRequest: PaymentRequest) {
     
     console.log('Clean payment data:', JSON.stringify(paymentData, null, 2))
     
-    const response = await fetch('https://connect.squareupsandbox.com/v2/payments', {
+    // Use environment-aware endpoint
+    const baseUrl = process.env.SQUARE_ENVIRONMENT === 'production' 
+      ? 'https://connect.squareup.com' 
+      : 'https://connect.squareupsandbox.com'
+    
+    const response = await fetch(`${baseUrl}/v2/payments`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.SQUARE_ACCESS_TOKEN}`,
