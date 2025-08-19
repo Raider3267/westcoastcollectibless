@@ -141,26 +141,15 @@ export default function SquarePayment({
       >
         <div className="space-y-4">
           <CreditCard 
-            buttonProps={{
-              isLoading: isProcessing,
-            }}
             includeInputLabels
           />
           
           <div className="flex gap-3">
             <div className="flex-1">
-              <ApplePay 
-                buttonProps={{
-                  isLoading: isProcessing,
-                }}
-              />
+              <ApplePay />
             </div>
             <div className="flex-1">
-              <GooglePay 
-                buttonProps={{
-                  isLoading: isProcessing,
-                }}
-              />
+              <GooglePay />
             </div>
           </div>
         </div>
