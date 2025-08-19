@@ -40,7 +40,7 @@ export default function SquareProductsPage() {
       name: product.name,
       price: product.price,
       image: product.imageUrl,
-      quantity: 1
+      weight: 0.3 // Default weight for Square products
     }
     addItem(cartItem)
   }

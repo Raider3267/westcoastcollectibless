@@ -210,6 +210,7 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
                     name: product.name,
                     price: product.price || 0,
                     image: product.image || undefined,
+                    weight: product.weight || 0.3 // Default weight for collectibles
                   })
                 }}
               >

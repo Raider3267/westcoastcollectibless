@@ -6,6 +6,7 @@ export async function createSquareOrder(cartData: {
     name: string
     price: number
     quantity: number
+    weight?: number
   }>
   customerEmail: string
   billingInfo: any
@@ -14,13 +15,48 @@ export async function createSquareOrder(cartData: {
   try {
     // Import and call the API route handler directly
     const { randomUUID } = await import('crypto')
+    const { calculateShippingRates, calculateCartWeight } = await import('../lib/shipping')
     
-    // Create line items for Square order
-    const lineItems = cartData.items.map(item => ({
+    // Calculate shipping costs
+    const shippingAddress = {
+      name: `${cartData.shippingInfo.firstName} ${cartData.shippingInfo.lastName}`,
+      address: cartData.shippingInfo.address,
+      city: cartData.shippingInfo.city,
+      state: cartData.shippingInfo.state,
+      zipCode: cartData.shippingInfo.zipCode,
+      country: cartData.shippingInfo.country || 'US'
+    }
+    
+    // Calculate cart weight and shipping cost
+    const cartItems = cartData.items.map(item => ({
+      sku: item.id,
+      name: item.name,
+      quantity: item.quantity,
+      price: item.price,
+      weight: item.weight || 0.3 // Default weight for collectibles
+    }))
+    
+    const totalWeight = calculateCartWeight(cartItems)
+    const orderSubtotal = Math.round(cartData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0) * 100) // in cents
+    const shippingRates = calculateShippingRates(shippingAddress, orderSubtotal, totalWeight)
+    const cheapestShipping = shippingRates.length > 0 ? shippingRates[0] : { cost: 0, service: 'Free', description: 'No shipping cost' }
+    
+    // Create line items for Square order (products + shipping)
+    const productLineItems = cartData.items.map(item => ({
       name: item.name,
       quantity: item.quantity,
       unitAmountCents: Math.round(item.price * 100)
     }))
+    
+    // Add shipping as a line item if there's a cost
+    const lineItems = [...productLineItems]
+    if (cheapestShipping.cost > 0) {
+      lineItems.push({
+        name: `Shipping (${cheapestShipping.service})`,
+        quantity: 1,
+        unitAmountCents: cheapestShipping.cost
+      })
+    }
 
     const accessToken = process.env.SQUARE_ACCESS_TOKEN
     const locationId = process.env.SQUARE_LOCATION_ID
@@ -77,7 +113,10 @@ export async function createSquareOrder(cartData: {
     return {
       success: true,
       orderId: result.order?.id,
-      order: result.order
+      order: result.order,
+      shippingCost: cheapestShipping.cost,
+      shippingAddress: shippingAddress,
+      totalWeight: totalWeight
     }
   } catch (error: any) {
     console.error('Create order error:', error)

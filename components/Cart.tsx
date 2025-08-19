@@ -70,6 +70,15 @@ export default function Cart() {
       return
     }
 
+    // Validate shipping information if using separate shipping address
+    if (!sameAsBilling) {
+      if (!shippingInfo.firstName || !shippingInfo.lastName || !shippingInfo.address || !shippingInfo.city || !shippingInfo.state || !shippingInfo.zipCode) {
+        setPaymentError('Please fill in all required shipping information.')
+        setIsCreatingOrder(false)
+        return
+      }
+    }
+
     try {
       const result = await createSquareOrder({
         items: state.items,
