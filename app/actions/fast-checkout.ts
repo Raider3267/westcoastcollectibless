@@ -37,7 +37,7 @@ export async function createSquareOrder(cartData: {
       order: {
         location_id: locationId,
         line_items: lineItems.map(item => ({
-          name: item.name,
+          name: item.name.length > 60 ? item.name.slice(0, 57) + '...' : item.name, // Truncate long names
           quantity: String(item.quantity || 1),
           base_price_money: {
             amount: parseInt(item.unitAmountCents),
@@ -47,9 +47,11 @@ export async function createSquareOrder(cartData: {
       }
     }
 
-    // Add customer email as reference (not fulfillment)
+    // Add customer email as reference (not fulfillment) - keep under 40 chars
     if (cartData.customerEmail) {
-      orderData.order.reference_id = `email_${cartData.customerEmail.replace('@', '_at_')}_${Date.now()}`
+      const timestamp = Date.now().toString().slice(-6) // Last 6 digits
+      const emailHash = cartData.customerEmail.slice(0, 20) // First 20 chars of email
+      orderData.order.reference_id = `${emailHash}_${timestamp}`.slice(0, 40)
     }
 
     const response = await fetch(`${baseUrl}/v2/orders`, {
