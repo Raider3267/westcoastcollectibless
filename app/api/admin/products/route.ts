@@ -56,13 +56,13 @@ export async function GET() {
       status: product.status || 'live',
       drop_date: product.drop_date || '',
       released_date: product.released_date || '',
-      show_in_new_releases: product.show_in_new_releases === 'true',
-      show_in_featured: product.show_in_featured !== 'false',
-      show_in_coming_soon: product.show_in_coming_soon !== 'false',
-      show_in_staff_picks: product.show_in_staff_picks === 'true',
-      show_in_limited_editions: product.show_in_limited_editions === 'true',
-      out_of_stock: product.out_of_stock === 'true',
-      show_in_featured_while_coming_soon: product.show_in_featured_while_coming_soon === 'true',
+      show_in_new_releases: product.show_in_new_releases === 'true' || product.show_in_new_releases === 1 || product.show_in_new_releases === '1',
+      show_in_featured: product.show_in_featured === 'true' || product.show_in_featured === 1 || product.show_in_featured === '1',
+      show_in_coming_soon: product.show_in_coming_soon === 'true' || product.show_in_coming_soon === 1 || product.show_in_coming_soon === '1',
+      show_in_staff_picks: product.show_in_staff_picks === 'true' || product.show_in_staff_picks === 1 || product.show_in_staff_picks === '1',
+      show_in_limited_editions: product.show_in_limited_editions === 'true' || product.show_in_limited_editions === 1 || product.show_in_limited_editions === '1',
+      out_of_stock: product.out_of_stock === 'true' || product.out_of_stock === 1 || product.out_of_stock === '1',
+      show_in_featured_while_coming_soon: product.show_in_featured_while_coming_soon === 'true' || product.show_in_featured_while_coming_soon === 1 || product.show_in_featured_while_coming_soon === '1',
       // Cost tracking fields
       purchase_cost: parseFloat(product.purchase_cost) || 0,
       shipping_cost: parseFloat(product.shipping_cost) || 0,
@@ -99,8 +99,20 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 })
     }
     
-    // Update the product with new data
-    const updatedProduct = { ...products[productIndex], ...body }
+    // Update the product with new data, ensuring booleans are converted to strings for CSV
+    const updatedProduct = { 
+      ...products[productIndex], 
+      ...body,
+      // Convert boolean feature flags to strings for CSV storage
+      // Handle both boolean and existing string/number values
+      show_in_new_releases: (body.show_in_new_releases === true || body.show_in_new_releases === 'true' || body.show_in_new_releases === 1 || body.show_in_new_releases === '1') ? 'true' : 'false',
+      show_in_featured: (body.show_in_featured === true || body.show_in_featured === 'true' || body.show_in_featured === 1 || body.show_in_featured === '1') ? 'true' : 'false',
+      show_in_coming_soon: (body.show_in_coming_soon === true || body.show_in_coming_soon === 'true' || body.show_in_coming_soon === 1 || body.show_in_coming_soon === '1') ? 'true' : 'false',
+      show_in_staff_picks: (body.show_in_staff_picks === true || body.show_in_staff_picks === 'true' || body.show_in_staff_picks === 1 || body.show_in_staff_picks === '1') ? 'true' : 'false',
+      show_in_limited_editions: (body.show_in_limited_editions === true || body.show_in_limited_editions === 'true' || body.show_in_limited_editions === 1 || body.show_in_limited_editions === '1') ? 'true' : 'false',
+      out_of_stock: (body.out_of_stock === true || body.out_of_stock === 'true' || body.out_of_stock === 1 || body.out_of_stock === '1') ? 'true' : 'false',
+      show_in_featured_while_coming_soon: (body.show_in_featured_while_coming_soon === true || body.show_in_featured_while_coming_soon === 'true' || body.show_in_featured_while_coming_soon === 1 || body.show_in_featured_while_coming_soon === '1') ? 'true' : 'false'
+    }
     products[productIndex] = updatedProduct
     
     await writeCSV(products)

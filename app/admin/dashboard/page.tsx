@@ -106,9 +106,9 @@ export default function AdminDashboard() {
     show_in_limited_editions: product.show_in_limited_editions || false,
     out_of_stock: product.out_of_stock || false,
     show_in_featured_while_coming_soon: product.show_in_featured_while_coming_soon || false,
-    purchase_cost: product.purchase_cost || 0,
-    shipping_cost: product.shipping_cost || 0,
-    total_cost: product.total_cost || 0,
+    purchase_cost: parseFloat(product.purchase_cost) || 0,
+    shipping_cost: parseFloat(product.shipping_cost) || 0,
+    total_cost: parseFloat(product.total_cost) || 0,
     purchase_date: product.purchase_date || '',
     supplier: product.supplier || '',
     tracking_number: product.tracking_number || ''
@@ -888,7 +888,7 @@ export default function AdminDashboard() {
                       <div>
                         <span className="text-gray-600">Total Cost:</span>
                         <div className="font-semibold text-blue-600">
-                          ${((editingProduct.purchase_cost || 0) + (editingProduct.shipping_cost || 0)).toFixed(2)}
+                          ${((parseFloat(editingProduct.purchase_cost) || 0) + (parseFloat(editingProduct.shipping_cost) || 0)).toFixed(2)}
                         </div>
                       </div>
                       <div>
@@ -898,14 +898,14 @@ export default function AdminDashboard() {
                             ? 'text-green-600' 
                             : 'text-red-600'
                         }`}>
-                          ${((editingProduct.price || 0) - ((editingProduct.purchase_cost || 0) + (editingProduct.shipping_cost || 0))).toFixed(2)}
+                          ${((parseFloat(editingProduct.price) || 0) - ((parseFloat(editingProduct.purchase_cost) || 0) + (parseFloat(editingProduct.shipping_cost) || 0))).toFixed(2)}
                         </div>
                       </div>
                       <div>
                         <span className="text-gray-600">Profit Margin:</span>
                         <div className="font-semibold text-purple-600">
                           {(editingProduct.price || 0) > 0 ? 
-                            (((editingProduct.price || 0) - ((editingProduct.purchase_cost || 0) + (editingProduct.shipping_cost || 0))) / (editingProduct.price || 0) * 100).toFixed(1) 
+                            (((parseFloat(editingProduct.price) || 0) - ((parseFloat(editingProduct.purchase_cost) || 0) + (parseFloat(editingProduct.shipping_cost) || 0))) / (parseFloat(editingProduct.price) || 0) * 100).toFixed(1) 
                             : 0}%
                         </div>
                       </div>
@@ -1306,7 +1306,7 @@ export default function AdminDashboard() {
                       <div>
                         <span className="text-gray-600">Total Cost:</span>
                         <div className="font-semibold text-blue-600">
-                          ${((newProduct.purchase_cost || 0) + (newProduct.shipping_cost || 0)).toFixed(2)}
+                          ${((parseFloat(newProduct.purchase_cost) || 0) + (parseFloat(newProduct.shipping_cost) || 0)).toFixed(2)}
                         </div>
                       </div>
                       <div>
@@ -1316,15 +1316,140 @@ export default function AdminDashboard() {
                             ? 'text-green-600' 
                             : 'text-red-600'
                         }`}>
-                          ${((newProduct.price || 0) - ((newProduct.purchase_cost || 0) + (newProduct.shipping_cost || 0))).toFixed(2)}
+                          ${((parseFloat(newProduct.price) || 0) - ((parseFloat(newProduct.purchase_cost) || 0) + (parseFloat(newProduct.shipping_cost) || 0))).toFixed(2)}
                         </div>
                       </div>
                       <div>
                         <span className="text-gray-600">Profit Margin:</span>
                         <div className="font-semibold text-purple-600">
                           {(newProduct.price || 0) > 0 ? 
-                            (((newProduct.price || 0) - ((newProduct.purchase_cost || 0) + (newProduct.shipping_cost || 0))) / (newProduct.price || 0) * 100).toFixed(1) 
+                            (((parseFloat(newProduct.price) || 0) - ((parseFloat(newProduct.purchase_cost) || 0) + (parseFloat(newProduct.shipping_cost) || 0))) / (parseFloat(newProduct.price) || 0) * 100).toFixed(1) 
                             : 0}%
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Homepage Sections for New Product */}
+                  <div className="mt-6">
+                    <h4 className="text-sm font-semibold text-gray-800 mb-4 flex items-center">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                      Homepage Sections
+                    </h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      {/* Featured Section */}
+                      <div 
+                        onClick={() => setNewProduct(prev => ({
+                          ...prev, 
+                          show_in_featured: !prev.show_in_featured
+                        }))}
+                        className="cursor-pointer group"
+                      >
+                        <div className={`p-3 rounded-lg border-2 transition-all ${
+                          newProduct.show_in_featured
+                            ? 'border-blue-500 bg-blue-50' 
+                            : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-25'
+                        }`}>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium text-sm text-gray-800">Featured</span>
+                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                              newProduct.show_in_featured
+                                ? 'border-blue-500 bg-blue-500' 
+                                : 'border-gray-300'
+                            }`}>
+                              {newProduct.show_in_featured && 
+                                <span className="text-white text-xs">✓</span>
+                              }
+                            </div>
+                          </div>
+                          <p className="text-xs text-gray-600">Main homepage collection</p>
+                        </div>
+                      </div>
+
+                      {/* Coming Soon Section */}
+                      <div 
+                        onClick={() => setNewProduct(prev => ({
+                          ...prev, 
+                          show_in_coming_soon: !prev.show_in_coming_soon
+                        }))}
+                        className="cursor-pointer group"
+                      >
+                        <div className={`p-3 rounded-lg border-2 transition-all ${
+                          newProduct.show_in_coming_soon
+                            ? 'border-purple-500 bg-purple-50' 
+                            : 'border-gray-200 bg-white hover:border-purple-300 hover:bg-purple-25'
+                        }`}>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium text-sm text-gray-800">Coming Soon</span>
+                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                              newProduct.show_in_coming_soon
+                                ? 'border-purple-500 bg-purple-500' 
+                                : 'border-gray-300'
+                            }`}>
+                              {newProduct.show_in_coming_soon && 
+                                <span className="text-white text-xs">✓</span>
+                              }
+                            </div>
+                          </div>
+                          <p className="text-xs text-gray-600">Exclusive preview section</p>
+                        </div>
+                      </div>
+
+                      {/* Staff Picks Section */}
+                      <div 
+                        onClick={() => setNewProduct(prev => ({
+                          ...prev, 
+                          show_in_staff_picks: !prev.show_in_staff_picks
+                        }))}
+                        className="cursor-pointer group"
+                      >
+                        <div className={`p-3 rounded-lg border-2 transition-all ${
+                          newProduct.show_in_staff_picks
+                            ? 'border-yellow-500 bg-yellow-50' 
+                            : 'border-gray-200 bg-white hover:border-yellow-300 hover:bg-yellow-25'
+                        }`}>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium text-sm text-gray-800">Staff Picks</span>
+                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                              newProduct.show_in_staff_picks
+                                ? 'border-yellow-500 bg-yellow-500' 
+                                : 'border-gray-300'
+                            }`}>
+                              {newProduct.show_in_staff_picks && 
+                                <span className="text-white text-xs">✓</span>
+                              }
+                            </div>
+                          </div>
+                          <p className="text-xs text-gray-600">Curated team favorites</p>
+                        </div>
+                      </div>
+
+                      {/* Limited Editions Section */}
+                      <div 
+                        onClick={() => setNewProduct(prev => ({
+                          ...prev, 
+                          show_in_limited_editions: !prev.show_in_limited_editions
+                        }))}
+                        className="cursor-pointer group"
+                      >
+                        <div className={`p-3 rounded-lg border-2 transition-all ${
+                          newProduct.show_in_limited_editions
+                            ? 'border-red-500 bg-red-50' 
+                            : 'border-gray-200 bg-white hover:border-red-300 hover:bg-red-25'
+                        }`}>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium text-sm text-gray-800">Limited Editions</span>
+                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                              newProduct.show_in_limited_editions
+                                ? 'border-red-500 bg-red-500' 
+                                : 'border-gray-300'
+                            }`}>
+                              {newProduct.show_in_limited_editions && 
+                                <span className="text-white text-xs">✓</span>
+                              }
+                            </div>
+                          </div>
+                          <p className="text-xs text-gray-600">Rare & exclusive items</p>
                         </div>
                       </div>
                     </div>
@@ -1342,9 +1467,14 @@ export default function AdminDashboard() {
                       quantity: 1,
                       price: 0,
                       images: [],
+                      status: 'live',
+                      show_in_new_releases: false,
+                      show_in_featured: true,
+                      show_in_coming_soon: true,
                       show_in_staff_picks: false,
                       show_in_limited_editions: false,
                       out_of_stock: false,
+                      show_in_featured_while_coming_soon: false,
                       purchase_cost: 0,
                       shipping_cost: 0,
                       total_cost: 0,

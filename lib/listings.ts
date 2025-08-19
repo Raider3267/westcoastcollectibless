@@ -138,22 +138,27 @@ export async function getListingsFromCsv(filename = 'export.csv', includeOutOfSt
       // Get released_date field
       const released_date = FIRST<string>(row['released_date'], row['Released Date']) || null
       
-      // Get show_in_new_releases field
-      const show_in_new_releases = FIRST<string>(row['show_in_new_releases'], row['Show In New Releases']) === 'true'
+      // Get show_in_new_releases field (handle both string and number values)
+      const show_in_new_releases_val = FIRST<string>(row['show_in_new_releases'], row['Show In New Releases'])
+      const show_in_new_releases = show_in_new_releases_val === 'true' || show_in_new_releases_val === '1' || show_in_new_releases_val === 1
       
-      // Get show_in_featured field (default to true for existing products)
-      const show_in_featured_str = FIRST<string>(row['show_in_featured'], row['Show In Featured'])
-      const show_in_featured = show_in_featured_str ? show_in_featured_str === 'true' : true
+      // Get show_in_featured field (handle both string and number values)
+      const show_in_featured_val = FIRST<string>(row['show_in_featured'], row['Show In Featured'])
+      const show_in_featured = show_in_featured_val === 'true' || show_in_featured_val === '1' || show_in_featured_val === 1
       
-      // Get show_in_coming_soon field (default to true for coming-soon status)
-      const show_in_coming_soon_str = FIRST<string>(row['show_in_coming_soon'], row['Show In Coming Soon'])
-      const show_in_coming_soon = show_in_coming_soon_str ? show_in_coming_soon_str === 'true' : (status === 'coming-soon')
+      // Get show_in_coming_soon field (handle both string and number values)
+      const show_in_coming_soon_val = FIRST<string>(row['show_in_coming_soon'], row['Show In Coming Soon'])
+      const show_in_coming_soon = show_in_coming_soon_val === 'true' || show_in_coming_soon_val === '1' || show_in_coming_soon_val === 1
 
-      // Get special section fields
-      const show_in_staff_picks = FIRST<string>(row['show_in_staff_picks'], row['Show In Staff Picks']) === 'true'
-      const show_in_limited_editions = FIRST<string>(row['show_in_limited_editions'], row['Show In Limited Editions']) === 'true'
-      const out_of_stock = FIRST<string>(row['out_of_stock'], row['Out Of Stock']) === 'true'
-      const show_in_featured_while_coming_soon = FIRST<string>(row['show_in_featured_while_coming_soon'], row['Show In Featured While Coming Soon']) === 'true'
+      // Get special section fields (handle both string and number values)
+      const show_in_staff_picks_val = FIRST<string>(row['show_in_staff_picks'], row['Show In Staff Picks'])
+      const show_in_staff_picks = show_in_staff_picks_val === 'true' || show_in_staff_picks_val === '1' || show_in_staff_picks_val === 1
+      const show_in_limited_editions_val = FIRST<string>(row['show_in_limited_editions'], row['Show In Limited Editions'])
+      const show_in_limited_editions = show_in_limited_editions_val === 'true' || show_in_limited_editions_val === '1' || show_in_limited_editions_val === 1
+      const out_of_stock_val = FIRST<string>(row['out_of_stock'], row['Out Of Stock'])
+      const out_of_stock = out_of_stock_val === 'true' || out_of_stock_val === '1' || out_of_stock_val === 1
+      const show_in_featured_while_coming_soon_val = FIRST<string>(row['show_in_featured_while_coming_soon'], row['Show In Featured While Coming Soon'])
+      const show_in_featured_while_coming_soon = show_in_featured_while_coming_soon_val === 'true' || show_in_featured_while_coming_soon_val === '1' || show_in_featured_while_coming_soon_val === 1
 
       return { 
         id: String(id), 
@@ -272,22 +277,27 @@ export async function getComingSoonProducts(filename = 'export.csv'): Promise<Li
       // Get released_date field
       const released_date = FIRST<string>(row['released_date'], row['Released Date']) || null
       
-      // Get show_in_new_releases field
-      const show_in_new_releases = FIRST<string>(row['show_in_new_releases'], row['Show In New Releases']) === 'true'
+      // Get show_in_new_releases field (handle both string and number values)
+      const show_in_new_releases_val = FIRST<string>(row['show_in_new_releases'], row['Show In New Releases'])
+      const show_in_new_releases = show_in_new_releases_val === 'true' || show_in_new_releases_val === '1' || show_in_new_releases_val === 1
       
-      // Get show_in_featured field (default to true for existing products)
-      const show_in_featured_str = FIRST<string>(row['show_in_featured'], row['Show In Featured'])
-      const show_in_featured = show_in_featured_str ? show_in_featured_str === 'true' : true
+      // Get show_in_featured field (handle both string and number values)
+      const show_in_featured_val = FIRST<string>(row['show_in_featured'], row['Show In Featured'])
+      const show_in_featured = show_in_featured_val === 'true' || show_in_featured_val === '1' || show_in_featured_val === 1
       
-      // Get show_in_coming_soon field (default to true for coming-soon status)
-      const show_in_coming_soon_str = FIRST<string>(row['show_in_coming_soon'], row['Show In Coming Soon'])
-      const show_in_coming_soon = show_in_coming_soon_str ? show_in_coming_soon_str === 'true' : (status === 'coming-soon')
+      // Get show_in_coming_soon field (handle both string and number values)
+      const show_in_coming_soon_val = FIRST<string>(row['show_in_coming_soon'], row['Show In Coming Soon'])
+      const show_in_coming_soon = show_in_coming_soon_val === 'true' || show_in_coming_soon_val === '1' || show_in_coming_soon_val === 1
 
-      // Get special section fields
-      const show_in_staff_picks = FIRST<string>(row['show_in_staff_picks'], row['Show In Staff Picks']) === 'true'
-      const show_in_limited_editions = FIRST<string>(row['show_in_limited_editions'], row['Show In Limited Editions']) === 'true'
-      const out_of_stock = FIRST<string>(row['out_of_stock'], row['Out Of Stock']) === 'true'
-      const show_in_featured_while_coming_soon = FIRST<string>(row['show_in_featured_while_coming_soon'], row['Show In Featured While Coming Soon']) === 'true'
+      // Get special section fields (handle both string and number values)
+      const show_in_staff_picks_val = FIRST<string>(row['show_in_staff_picks'], row['Show In Staff Picks'])
+      const show_in_staff_picks = show_in_staff_picks_val === 'true' || show_in_staff_picks_val === '1' || show_in_staff_picks_val === 1
+      const show_in_limited_editions_val = FIRST<string>(row['show_in_limited_editions'], row['Show In Limited Editions'])
+      const show_in_limited_editions = show_in_limited_editions_val === 'true' || show_in_limited_editions_val === '1' || show_in_limited_editions_val === 1
+      const out_of_stock_val = FIRST<string>(row['out_of_stock'], row['Out Of Stock'])
+      const out_of_stock = out_of_stock_val === 'true' || out_of_stock_val === '1' || out_of_stock_val === 1
+      const show_in_featured_while_coming_soon_val = FIRST<string>(row['show_in_featured_while_coming_soon'], row['Show In Featured While Coming Soon'])
+      const show_in_featured_while_coming_soon = show_in_featured_while_coming_soon_val === 'true' || show_in_featured_while_coming_soon_val === '1' || show_in_featured_while_coming_soon_val === 1
 
       return { 
         id: String(id), 
