@@ -15,7 +15,7 @@ export async function createSquareOrder(cartData: {
   try {
     // Import and call the API route handler directly
     const { randomUUID } = await import('crypto')
-    const { calculateShippingRates, calculateCartWeight } = await import('../lib/shipping')
+    const { calculateShippingRates, calculateCartWeight } = await import('../../lib/shipping')
     
     // Calculate shipping costs
     const shippingAddress = {
