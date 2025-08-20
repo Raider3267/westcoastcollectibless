@@ -3,9 +3,9 @@
 import { SITE } from '../lib/products'
 import { Listing } from '../lib/listings'
 import ProductCard from '../components/ProductCard'
-import CountdownTimer from '../components/CountdownTimer'
 import FilterBar, { FilterOptions } from '../components/FilterBar'
 import RecentlySoldBanner from '../components/RecentlySoldBanner'
+import VIPSection from '../components/VIPSection'
 import { useEffect, useState, useRef } from 'react'
 
 // Scrollable section with navigation arrows component
@@ -205,21 +205,18 @@ function FeaturedHighlightsSection() {
   ]
 
   return (
-    <section className="featured-showcase-section">
-      {/* Animated Divider */}
-      <div className="featured-divider-container">
-        <div className="featured-divider">
-          <div className="divider-shimmer"></div>
-        </div>
-      </div>
+    <section className="featured-showcase-section" id="featured">
+      {/* Luxury Fade Background */}
+      <div className="featured-luxury-backdrop"></div>
       
-      {/* Premium Background Frame */}
-      <div className="featured-backdrop">
-        <div className="backdrop-gradient"></div>
-        <div className="backdrop-vignette"></div>
-      </div>
+      {/* Frosted Panel */}
+      <div className="featured-frosted-panel"></div>
       
-      <div style={{ maxWidth: '1224px', margin: '0 auto', padding: '60px 20px 80px', position: 'relative', zIndex: 2 }}>
+      {/* Subtle Background Decorations */}
+      <div className="featured-bg-decoration featured-bg-1"></div>
+      <div className="featured-bg-decoration featured-bg-2"></div>
+      
+      <div style={{ maxWidth: '1224px', margin: '0 auto', padding: '40px 20px 20px', position: 'relative', zIndex: 2 }}>
         {/* Premium Marquee Header */}
         <div className="featured-marquee-header">
           <h2 className="featured-title">
@@ -284,11 +281,64 @@ function FeaturedHighlightsSection() {
         </div>
         
         <style jsx>{`
-          /* Featured Showcase Section */
+          /* Featured Showcase Section - Premium Spotlight */
           .featured-showcase-section {
             position: relative;
             overflow: hidden;
-            margin: 60px 0;
+            padding: 0px 0 40px;
+            background: linear-gradient(180deg, 
+              rgba(255, 255, 255, 0.95) 0%, 
+              rgba(255, 252, 240, 0.9) 50%, 
+              rgba(250, 248, 235, 0.85) 100%
+            );
+            z-index: 10;
+          }
+
+          .featured-luxury-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, 
+              rgba(255, 255, 255, 0.98) 0%, 
+              rgba(255, 251, 235, 0.95) 100%
+            );
+            z-index: 0;
+          }
+
+          .featured-frosted-panel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            z-index: 1;
+          }
+
+          .featured-bg-decoration {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(40px);
+            z-index: 0;
+          }
+
+          .featured-bg-1 {
+            top: -10%;
+            left: -5%;
+            width: 30%;
+            height: 120%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.08) 0%, transparent 70%);
+          }
+
+          .featured-bg-2 {
+            bottom: -10%;
+            right: -5%;
+            width: 25%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255, 245, 205, 0.1) 0%, transparent 70%);
           }
           
           /* Animated Divider */
@@ -338,10 +388,9 @@ function FeaturedHighlightsSection() {
             right: 0;
             bottom: 0;
             background: linear-gradient(180deg, 
-              rgba(255, 255, 255, 0.02) 0%,
-              rgba(255, 215, 0, 0.008) 30%,
-              rgba(245, 245, 220, 0.012) 70%,
-              rgba(255, 255, 255, 0.02) 100%
+              rgba(199, 163, 255, 0.02) 0%,
+              rgba(94, 208, 192, 0.015) 50%,
+              rgba(247, 231, 195, 0.02) 100%
             );
           }
           
@@ -353,15 +402,15 @@ function FeaturedHighlightsSection() {
             bottom: -20px;
             background: radial-gradient(ellipse at center, 
               transparent 40%, 
-              rgba(255, 215, 0, 0.005) 70%, 
-              rgba(255, 215, 0, 0.015) 100%
+              rgba(199, 163, 255, 0.008) 70%, 
+              rgba(94, 208, 192, 0.012) 100%
             );
           }
           
           /* Premium Marquee Header */
           .featured-marquee-header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 24px;
             position: relative;
           }
           
@@ -377,13 +426,13 @@ function FeaturedHighlightsSection() {
             font-size: clamp(2rem, 3.5vw, 2.8rem);
             font-weight: 900;
             letter-spacing: 0.05em;
-            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 50%, #ffd700 100%);
+            background: linear-gradient(135deg, #b8860b 0%, #daa520 50%, #b8860b 100%);
             background-size: 200% 200%;
-            animation: shimmer 3s ease-in-out infinite;
+            animation: titleShimmer 12s ease-in-out infinite;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+            text-shadow: 0 0 20px rgba(184, 134, 11, 0.2);
             position: relative;
           }
           
@@ -396,11 +445,11 @@ function FeaturedHighlightsSection() {
             bottom: 0;
             background: linear-gradient(90deg, 
               transparent 0%, 
-              rgba(255, 215, 0, 0.1) 50%, 
+              rgba(184, 134, 11, 0.08) 50%, 
               transparent 100%
             );
             opacity: 0;
-            animation: badgeShimmer 10s ease-in-out infinite;
+            animation: titleShimmerPass 12s ease-in-out infinite;
           }
           
           .featured-title-text::after {
@@ -444,8 +493,8 @@ function FeaturedHighlightsSection() {
           /* Premium Background Treatment */
           .featured-grid-container {
             position: relative;
-            padding: 40px 0 30px;
-            overflow: hidden;
+            padding: 30px 0 30px;
+            overflow: visible;
           }
           
           .featured-background-accent {
@@ -455,9 +504,9 @@ function FeaturedHighlightsSection() {
             right: -50px;
             bottom: -50px;
             background: 
-              radial-gradient(circle at 25% 25%, rgba(255, 215, 0, 0.02) 0%, transparent 40%),
-              radial-gradient(circle at 75% 75%, rgba(192, 192, 192, 0.015) 0%, transparent 40%),
-              linear-gradient(135deg, rgba(255, 215, 0, 0.01) 0%, rgba(245, 245, 220, 0.008) 100%);
+              radial-gradient(circle at 25% 25%, rgba(199, 163, 255, 0.02) 0%, transparent 40%),
+              radial-gradient(circle at 75% 75%, rgba(94, 208, 192, 0.02) 0%, transparent 40%),
+              linear-gradient(135deg, rgba(247, 231, 195, 0.015) 0%, rgba(199, 163, 255, 0.01) 100%);
             border-radius: 32px;
             pointer-events: none;
             z-index: 0;
@@ -542,42 +591,72 @@ function FeaturedHighlightsSection() {
             z-index: 1;
           }
           
-          /* Enhanced Premium Hover Effects for Featured Cards */
+          /* Deluxe Hover Effects for Featured Cards Only */
           .featured-card-wrapper :global(.product-card) {
-            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
             cursor: pointer;
             position: relative;
+            will-change: transform, box-shadow;
           }
           
           .featured-card-wrapper :global(.product-card:hover) {
-            transform: translateY(-15px) scale(1.03);
+            transform: translateY(-18px) scale(1.035);
             box-shadow: 
-              0 30px 60px rgba(0, 0, 0, 0.18),
-              0 20px 40px rgba(0, 0, 0, 0.12),
-              0 0 0 1px rgba(255, 215, 0, 0.15),
-              0 0 80px rgba(255, 215, 0, 0.12),
-              0 0 150px rgba(245, 245, 220, 0.08);
-            z-index: 10;
+              0 35px 70px rgba(0, 0, 0, 0.2),
+              0 25px 50px rgba(0, 0, 0, 0.15),
+              0 0 0 1px rgba(184, 134, 11, 0.2),
+              0 0 100px rgba(184, 134, 11, 0.15),
+              0 0 200px rgba(255, 245, 205, 0.1);
+            z-index: 15;
           }
           
           .featured-card-wrapper :global(.product-card::before) {
             content: '';
             position: absolute;
-            top: -25px;
-            left: -25px;
-            right: -25px;
-            bottom: -25px;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.04) 0%, transparent 70%);
+            top: -30px;
+            left: -30px;
+            right: -30px;
+            bottom: -30px;
+            background: radial-gradient(circle, 
+              rgba(184, 134, 11, 0.06) 0%, 
+              rgba(255, 245, 205, 0.04) 40%,
+              transparent 70%
+            );
             border-radius: 50%;
             opacity: 0;
-            transition: opacity 0.5s ease-out;
+            transition: all 0.6s ease-out;
             pointer-events: none;
             z-index: -1;
           }
           
           .featured-card-wrapper :global(.product-card:hover::before) {
             opacity: 1;
-            animation: premiumHaloGlow 0.8s ease-out;
+            animation: deluxeHaloGlow 1s ease-out;
+          }
+
+          .featured-card-wrapper :global(.product-card::after) {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            background: linear-gradient(45deg, 
+              rgba(184, 134, 11, 0.1) 0%,
+              transparent 30%,
+              transparent 70%,
+              rgba(184, 134, 11, 0.1) 100%
+            );
+            border-radius: inherit;
+            opacity: 0;
+            transition: opacity 0.6s ease-out;
+            pointer-events: none;
+            z-index: -1;
+          }
+          
+          .featured-card-wrapper :global(.product-card:hover::after) {
+            opacity: 1;
+            animation: deluxeRimGlow 1.2s ease-out;
           }
           
           /* Enhanced badge shimmer for Featured cards */
@@ -625,6 +704,63 @@ function FeaturedHighlightsSection() {
           }
           
           /* Animations */
+          @keyframes titleShimmer {
+            0%, 90%, 100% { background-position: 0% 50%; }
+            95% { background-position: 100% 50%; }
+          }
+          
+          @keyframes titleShimmerPass {
+            0%, 90%, 100% { opacity: 0; }
+            95% { opacity: 1; }
+          }
+          
+          @keyframes deluxeHaloGlow {
+            0% { 
+              opacity: 0;
+              transform: scale(0.8);
+            }
+            30% { 
+              opacity: 0.6;
+              transform: scale(1.1);
+            }
+            60% { 
+              opacity: 0.9;
+              transform: scale(1.3);
+            }
+            100% { 
+              opacity: 1;
+              transform: scale(1);
+            }
+          }
+          
+          @keyframes deluxeRimGlow {
+            0% { 
+              opacity: 0;
+              background: linear-gradient(45deg, 
+                rgba(184, 134, 11, 0) 0%,
+                transparent 50%,
+                rgba(184, 134, 11, 0) 100%
+              );
+            }
+            50% { 
+              opacity: 0.8;
+              background: linear-gradient(45deg, 
+                rgba(184, 134, 11, 0.2) 0%,
+                transparent 50%,
+                rgba(184, 134, 11, 0.2) 100%
+              );
+            }
+            100% { 
+              opacity: 1;
+              background: linear-gradient(45deg, 
+                rgba(184, 134, 11, 0.1) 0%,
+                transparent 30%,
+                transparent 70%,
+                rgba(184, 134, 11, 0.1) 100%
+              );
+            }
+          }
+          
           @keyframes shimmer {
             0%, 100% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
@@ -883,22 +1019,13 @@ function ComingSoonProductsSection() {
   ]
 
   return (
-    <section className="luxury-section" style={{ 
-      background: 'linear-gradient(135deg, rgba(138,43,226,.05) 0%, rgba(75,0,130,.05) 50%, rgba(138,43,226,.05) 100%)',
-      position: 'relative',
-      overflow: 'hidden'
-    }}>
-      {/* Background decoration */}
-      <div style={{
-        position: 'absolute',
-        top: '-20%',
-        left: '-10%',
-        width: '40%',
-        height: '140%',
-        background: 'radial-gradient(circle, rgba(138,43,226,.1) 0%, transparent 70%)',
-        borderRadius: '50%',
-        filter: 'blur(60px)'
-      }} />
+    <section className="coming-soon-section">
+      {/* Lilac/Indigo gradient background */}
+      <div className="coming-soon-backdrop"></div>
+      
+      {/* Background decorations */}
+      <div className="coming-soon-bg-decoration coming-soon-bg-1"></div>
+      <div className="coming-soon-bg-decoration coming-soon-bg-2"></div>
       
       <div style={{ maxWidth: '1224px', margin: '0 auto', padding: '0 20px', position: 'relative', zIndex: 2 }}>
         <div className="luxury-eyebrow" style={{ marginBottom: '8px' }}>🚀 Preview</div>
@@ -966,6 +1093,539 @@ function ComingSoonProductsSection() {
           </ScrollableSection>
         )}
       </div>
+
+      <style jsx>{`
+        .coming-soon-section {
+          position: relative;
+          overflow: hidden;
+          padding: 44px 0 60px;
+          z-index: 5;
+        }
+
+        .coming-soon-backdrop {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(135deg, 
+            rgba(147, 112, 219, 0.08) 0%, 
+            rgba(102, 51, 153, 0.1) 50%, 
+            rgba(75, 0, 130, 0.08) 100%
+          );
+          z-index: 0;
+        }
+
+        .coming-soon-bg-decoration {
+          position: absolute;
+          border-radius: 50%;
+          filter: blur(50px);
+          z-index: 1;
+        }
+
+        .coming-soon-bg-1 {
+          top: -15%;
+          left: -10%;
+          width: 35%;
+          height: 130%;
+          background: radial-gradient(circle, rgba(147, 112, 219, 0.12) 0%, transparent 70%);
+        }
+
+        .coming-soon-bg-2 {
+          bottom: -15%;
+          right: -10%;
+          width: 30%;
+          height: 120%;
+          background: radial-gradient(circle, rgba(102, 51, 153, 0.1) 0%, transparent 70%);
+        }
+
+        .luxury-eyebrow {
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: rgba(102, 51, 153, 0.8);
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          margin-bottom: 8px;
+        }
+
+        /* Anticipation styling for cards */
+        .coming-soon-section :global(.product-card) {
+          position: relative;
+          overflow: hidden;
+        }
+
+        .coming-soon-section :global(.product-card::before) {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(135deg, 
+            rgba(147, 112, 219, 0.02) 0%, 
+            rgba(102, 51, 153, 0.03) 100%
+          );
+          opacity: 0;
+          transition: opacity 0.3s ease;
+          z-index: 1;
+          pointer-events: none;
+        }
+
+        .coming-soon-section :global(.product-card:hover::before) {
+          opacity: 1;
+        }
+
+        .coming-soon-section :global(.product-card:hover) {
+          transform: translateY(-8px);
+          box-shadow: 
+            0 20px 40px rgba(102, 51, 153, 0.15),
+            0 10px 20px rgba(147, 112, 219, 0.1);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+          .coming-soon-section {
+            padding: 40px 0 50px;
+          }
+
+          .coming-soon-bg-1,
+          .coming-soon-bg-2 {
+            opacity: 0.5;
+          }
+        }
+      `}</style>
+    </section>
+  )
+}
+
+function CollectorAssuranceSection() {
+  return (
+    <section className="collector-assurance-section">
+      {/* Faint gradient backdrop */}
+      <div className="assurance-backdrop"></div>
+      
+      {/* Background decorations */}
+      <div className="assurance-bg-decoration assurance-bg-1"></div>
+      <div className="assurance-bg-decoration assurance-bg-2"></div>
+      <div className="assurance-bg-decoration assurance-bg-3"></div>
+      
+      <div className="assurance-container">
+        {/* Header */}
+        <div className="assurance-header">
+          <div className="luxury-eyebrow">Trusted by Collectors</div>
+          <h2 className="assurance-title">Collector Assurance</h2>
+          <p className="assurance-subtitle">
+            We're collectors too. Here's how we protect your collection.
+          </p>
+        </div>
+        
+        {/* Assurance Cards */}
+        <div className="assurance-grid">
+          {/* Verified Authenticity */}
+          <div className="assurance-card">
+            <div className="card-icon-container">
+              <svg className="card-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M9 12l2 2 4-4"></path>
+                <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"></path>
+                <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"></path>
+                <path d="M12 3c0 1-1 3-3 3s-3-2-3-3 1-3 3-3 3 2 3 3"></path>
+                <path d="M12 21c0-1 1-3 3-3s3 2 3 3-1 3-3 3-3-2-3-3"></path>
+              </svg>
+            </div>
+            <h3 className="card-title">Verified Authenticity</h3>
+            <p className="card-description">
+              Every item is inspected and guaranteed authentic for collectors.
+            </p>
+          </div>
+
+          {/* Fast & Secure Shipping */}
+          <div className="assurance-card">
+            <div className="card-icon-container">
+              <svg className="card-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M16 3h5v5M4 20L21 3m0 13v5h-5M8 4L4 8v5l4 4"></path>
+              </svg>
+            </div>
+            <h3 className="card-title">Fast & Secure Shipping</h3>
+            <p className="card-description">
+              Tracked shipping and protective packaging so your pieces arrive safe.
+            </p>
+          </div>
+
+          {/* Trusted by Collectors */}
+          <div className="assurance-card">
+            <div className="card-icon-container">
+              <svg className="card-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                <path d="M9 12l2 2 4-4"></path>
+              </svg>
+            </div>
+            <h3 className="card-title">Trusted by Collectors</h3>
+            <p className="card-description">
+              Secure checkout and buyer protection, trusted by collectors worldwide.
+            </p>
+          </div>
+
+          {/* Collector Support */}
+          <a href="/contact" className="assurance-card support-card">
+            <div className="card-icon-container">
+              <svg className="card-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </div>
+            <h3 className="card-title">Collector Support</h3>
+            <p className="card-description">
+              Have a question or issue? Contact our team for quick, friendly help.
+            </p>
+            <div className="support-link">
+              <span className="contact-text">Contact us</span>
+              <span className="contact-helper">We typically respond within 1–2 business days.</span>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <style jsx>{`
+        .collector-assurance-section {
+          position: relative;
+          overflow: hidden;
+          padding: 44px 0 60px;
+          background: linear-gradient(135deg, rgba(199,163,255,.08) 0%, rgba(94,208,192,.08) 50%, rgba(247,231,195,.08) 100%);
+        }
+
+        .assurance-backdrop {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.02) 0%,
+            rgba(94, 208, 192, 0.015) 50%,
+            rgba(199, 163, 255, 0.02) 100%
+          );
+          backdrop-filter: blur(1px);
+          z-index: 0;
+        }
+
+        .assurance-bg-decoration {
+          position: absolute;
+          border-radius: 50%;
+          filter: blur(50px);
+          z-index: 0;
+        }
+
+        .assurance-bg-1 {
+          top: -15%;
+          left: -10%;
+          width: 40%;
+          height: 130%;
+          background: radial-gradient(circle, rgba(199,163,255,.06) 0%, transparent 70%);
+        }
+
+        .assurance-bg-2 {
+          bottom: -15%;
+          right: -10%;
+          width: 35%;
+          height: 130%;
+          background: radial-gradient(circle, rgba(94,208,192,.06) 0%, transparent 70%);
+        }
+
+        .assurance-bg-3 {
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 25%;
+          height: 80%;
+          background: radial-gradient(circle, rgba(247,231,195,.04) 0%, transparent 70%);
+        }
+
+        .assurance-container {
+          max-width: 1224px;
+          margin: 0 auto;
+          padding: 0 20px;
+          position: relative;
+          z-index: 2;
+        }
+
+        .assurance-header {
+          text-align: center;
+          margin-bottom: 48px;
+        }
+
+        .luxury-eyebrow {
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: var(--wcc-teal);
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          margin-bottom: 16px;
+        }
+
+        .assurance-title {
+          font-size: clamp(1.8rem, 3vw, 2.4rem);
+          font-weight: 900;
+          color: var(--wcc-ink);
+          margin: 0 0 16px;
+          background: linear-gradient(135deg, var(--wcc-ink) 0%, rgba(94,208,192,0.8) 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        .assurance-subtitle {
+          font-size: 1.1rem;
+          color: var(--wcc-muted);
+          margin: 0;
+          max-width: 600px;
+          margin-left: auto;
+          margin-right: auto;
+          line-height: 1.5;
+        }
+
+        .assurance-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 24px;
+          max-width: 800px;
+          margin: 0 auto;
+        }
+
+        .assurance-card {
+          background: rgba(255, 255, 255, 0.7);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          border-radius: 20px;
+          padding: 32px 24px;
+          text-align: center;
+          transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+          position: relative;
+          overflow: hidden;
+          text-decoration: none;
+          color: inherit;
+          backdrop-filter: blur(10px);
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+        }
+
+        .assurance-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(135deg, 
+            rgba(94, 208, 192, 0.03) 0%, 
+            rgba(199, 163, 255, 0.03) 100%
+          );
+          opacity: 0;
+          transition: opacity 0.4s ease;
+          z-index: 0;
+        }
+
+        .assurance-card:hover {
+          transform: translateY(-8px) scale(1.02);
+          box-shadow: 
+            0 20px 40px rgba(0, 0, 0, 0.12),
+            0 0 0 1px rgba(94, 208, 192, 0.1),
+            0 0 60px rgba(94, 208, 192, 0.08);
+          border-color: rgba(94, 208, 192, 0.2);
+        }
+
+        .assurance-card:hover::before {
+          opacity: 1;
+        }
+
+        .assurance-card:focus {
+          outline: 2px solid var(--wcc-teal);
+          outline-offset: 2px;
+        }
+
+        .card-icon-container {
+          width: 56px;
+          height: 56px;
+          margin: 0 auto 20px;
+          background: linear-gradient(135deg, rgba(94,208,192,0.15), rgba(199,163,255,0.15));
+          border-radius: 16px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+          z-index: 1;
+          transition: all 0.4s ease;
+        }
+
+        .assurance-card:hover .card-icon-container {
+          background: linear-gradient(135deg, rgba(94,208,192,0.25), rgba(199,163,255,0.25));
+          transform: scale(1.1);
+        }
+
+        .card-icon {
+          width: 28px;
+          height: 28px;
+          color: var(--wcc-teal);
+          transition: all 0.4s ease;
+        }
+
+        .assurance-card:hover .card-icon {
+          color: var(--wcc-grad-c);
+          transform: scale(1.1);
+        }
+
+        .card-title {
+          font-size: 1.2rem;
+          font-weight: 800;
+          color: var(--wcc-ink);
+          margin: 0 0 12px;
+          position: relative;
+          z-index: 1;
+        }
+
+        .card-description {
+          font-size: 0.95rem;
+          color: var(--wcc-muted);
+          margin: 0;
+          line-height: 1.5;
+          position: relative;
+          z-index: 1;
+        }
+
+        .support-card {
+          background: linear-gradient(135deg, rgba(94,208,192,0.08), rgba(199,163,255,0.08));
+          border: 1px solid rgba(94,208,192,0.2);
+        }
+
+        .support-card:hover {
+          background: linear-gradient(135deg, rgba(94,208,192,0.12), rgba(199,163,255,0.12));
+          border-color: rgba(94,208,192,0.3);
+        }
+
+        .support-link {
+          margin-top: 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          position: relative;
+          z-index: 1;
+        }
+
+        .contact-text {
+          font-weight: 700;
+          color: var(--wcc-teal);
+          font-size: 0.95rem;
+          transition: color 0.3s ease;
+        }
+
+        .support-card:hover .contact-text {
+          color: var(--wcc-grad-c);
+          text-decoration: underline;
+        }
+
+        .contact-helper {
+          font-size: 0.8rem;
+          color: var(--wcc-muted);
+          font-style: italic;
+        }
+
+        /* Micro-shimmer animation on icons */
+        @keyframes microShimmer {
+          0%, 90%, 100% { 
+            opacity: 1; 
+            transform: scale(1);
+          }
+          95% { 
+            opacity: 1.2; 
+            transform: scale(1.05);
+          }
+        }
+
+        .card-icon-container {
+          animation: microShimmer 15s ease-in-out infinite;
+        }
+
+        .card-icon-container:nth-child(1) { animation-delay: 0s; }
+        .card-icon-container:nth-child(2) { animation-delay: 3s; }
+        .card-icon-container:nth-child(3) { animation-delay: 6s; }
+        .card-icon-container:nth-child(4) { animation-delay: 9s; }
+
+        /* Disable animations for reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+          .card-icon-container {
+            animation: none;
+          }
+          
+          .assurance-card {
+            transition: none;
+          }
+          
+          .assurance-card:hover {
+            transform: none;
+          }
+        }
+
+        /* Tablet Styles */
+        @media (max-width: 1024px) {
+          .assurance-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            max-width: 700px;
+          }
+
+          .assurance-card {
+            padding: 28px 20px;
+          }
+
+          .card-icon-container {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 16px;
+          }
+
+          .card-icon {
+            width: 24px;
+            height: 24px;
+          }
+
+          .card-title {
+            font-size: 1.1rem;
+          }
+        }
+
+        /* Mobile Styles */
+        @media (max-width: 768px) {
+          .collector-assurance-section {
+            padding: 40px 0 50px;
+          }
+
+          .assurance-container {
+            padding: 0 16px;
+          }
+
+          .assurance-header {
+            margin-bottom: 36px;
+          }
+
+          .assurance-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+            max-width: 400px;
+          }
+
+          .assurance-card {
+            padding: 24px 20px;
+          }
+
+          .assurance-card:hover {
+            transform: translateY(-4px);
+          }
+
+          .card-title {
+            font-size: 1rem;
+          }
+
+          .card-description {
+            font-size: 0.9rem;
+          }
+        }
+      `}</style>
     </section>
   )
 }
@@ -1126,26 +1786,39 @@ export default function HomePage() {
             zIndex: 0
           }} />
 
+          {/* Bottom vignette for handoff to Featured */}
+          <div style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '120px',
+            background: 'linear-gradient(to top, rgba(0,0,0,0.4), transparent)',
+            zIndex: 1
+          }} />
+
           {/* Hero Content */}
           <div style={{ 
             position: 'relative', 
             zIndex: 2, 
             color: 'white', 
             textAlign: 'left', 
-            maxWidth: '700px', 
-            padding: '0 50px',
+            maxWidth: '750px', 
+            padding: '0 60px',
             width: '100%'
           }}>
             <div className="luxury-eyebrow" style={{ 
               color: 'rgba(255,255,255,0.9)',
-              textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+              textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+              marginBottom: '20px',
+              fontSize: '0.9rem'
             }}>
               Curated • Limited • Authentic
             </div>
             <h1 style={{ 
-              fontSize: 'clamp(2.5rem, 4vw, 4rem)', 
-              margin: '0.35em 0 0.2em', 
-              lineHeight: 1.07, 
+              fontSize: 'clamp(2.8rem, 4.5vw, 4.5rem)', 
+              margin: '0 0 28px', 
+              lineHeight: 1.1, 
               fontWeight: 800,
               color: 'white',
               textShadow: '0 4px 8px rgba(0,0,0,0.4)'
@@ -1153,25 +1826,27 @@ export default function HomePage() {
               <span className="floating-collectible" style={{ display: 'inline-block' }}>🎯</span> Luxury Designer Toys with Playful Energy
             </h1>
             <p style={{ 
-              margin: '0 0 8px', 
-              fontSize: '1.3rem',
+              margin: '0 0 16px', 
+              fontSize: '1.4rem',
               color: 'rgba(255,255,255,0.95)',
               textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-              lineHeight: 1.4,
-              fontWeight: 600
+              lineHeight: 1.5,
+              fontWeight: 600,
+              maxWidth: '620px'
             }}>
               Limited drops. Authentic releases. For serious collectors.
             </p>
             <p style={{ 
-              margin: '0 0 30px', 
-              fontSize: '1.1rem',
+              margin: '0 0 40px', 
+              fontSize: '1.15rem',
               color: 'rgba(255,255,255,0.85)',
               textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-              lineHeight: 1.6
+              lineHeight: 1.6,
+              maxWidth: '580px'
             }}>
-              Chic gradients, elegant cards, and magical hover effects — built for premium collectibles!
+              Premium collectibles with elegant presentation and magical details.
             </p>
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
               <a 
                 href="#featured"
                 className="luxury-btn"
@@ -1179,15 +1854,15 @@ export default function HomePage() {
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '8px',
-                  padding: '14px 20px',
-                  fontSize: '1rem',
+                  padding: '16px 24px',
+                  fontSize: '1.05rem',
                   borderRadius: '999px',
                   border: 'none',
                   color: '#0b0b0f',
                   background: 'linear-gradient(135deg, var(--wcc-teal), var(--wcc-grad-c))',
                   boxShadow: '0 12px 28px rgba(94,208,192,.4)',
                   textDecoration: 'none',
-                  fontWeight: 600,
+                  fontWeight: 700,
                   transition: 'all 0.3s ease'
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
@@ -1202,15 +1877,15 @@ export default function HomePage() {
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '8px',
-                  padding: '14px 20px',
-                  fontSize: '1rem',
+                  padding: '16px 24px',
+                  fontSize: '1.05rem',
                   borderRadius: '999px',
                   border: '2px solid rgba(255,255,255,0.8)',
                   color: 'white',
                   background: 'rgba(255,255,255,0.1)',
                   backdropFilter: 'blur(10px)',
                   textDecoration: 'none',
-                  fontWeight: 600,
+                  fontWeight: 700,
                   transition: 'all 0.3s ease'
                 }}
                 onMouseEnter={(e) => {
@@ -1228,182 +1903,20 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Featured Highlights Section (max 4 products) */}
+        {/* Featured Collection - Premium Spotlight */}
         <FeaturedHighlightsSection />
 
-        {/* In Stock / Shop Now Section */}
-        <FeaturedSection items={items} filteredItems={filteredItems} loading={loading} onFiltersChange={handleFiltersChange} />
-
-        {/* Staff Picks Section */}
-        <StaffPicksSection />
-
-        {/* Limited Editions Section */}
-        <LimitedEditionsSection />
-
-        {/* Coming Soon Products Section */}
+        {/* Coming Soon - Anticipation */}
         <ComingSoonProductsSection />
 
-        {/* Get Notified / VIP Email Signup Section */}
-        <ComingSoonSection />
+        {/* In Stock - Catalog Utility */}
+        <FeaturedSection items={items} filteredItems={filteredItems} loading={loading} onFiltersChange={handleFiltersChange} />
 
-        {/* Trust & Credibility - Unified Section */}
-        <section className="luxury-section" style={{ 
-          background: 'linear-gradient(135deg, rgba(199,163,255,.08) 0%, rgba(94,208,192,.08) 50%, rgba(247,231,195,.08) 100%)',
-          position: 'relative',
-          overflow: 'hidden',
-          paddingBottom: '60px'
-        }}>
-          {/* Background decorations */}
-          <div style={{
-            position: 'absolute',
-            top: '-10%',
-            left: '-5%',
-            width: '30%',
-            height: '120%',
-            background: 'radial-gradient(circle, rgba(199,163,255,.1) 0%, transparent 70%)',
-            borderRadius: '50%',
-            filter: 'blur(40px)'
-          }} />
-          <div style={{
-            position: 'absolute',
-            bottom: '-10%',
-            right: '-5%',
-            width: '35%',
-            height: '120%',
-            background: 'radial-gradient(circle, rgba(94,208,192,.1) 0%, transparent 70%)',
-            borderRadius: '50%',
-            filter: 'blur(50px)'
-          }} />
-          <div style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '25%',
-            height: '80%',
-            background: 'radial-gradient(circle, rgba(247,231,195,.08) 0%, transparent 70%)',
-            borderRadius: '50%',
-            filter: 'blur(60px)'
-          }} />
-          
-          <div style={{ maxWidth: '1224px', margin: '0 auto', padding: '0 20px', position: 'relative', zIndex: 2 }}>
-            {/* Header */}
-            <div className="luxury-eyebrow" style={{ textAlign: 'center', marginBottom: '16px' }}>Trusted by Collectors</div>
-            <h2 style={{ 
-              fontSize: 'clamp(1.6rem, 2.5vw, 2rem)', 
-              margin: '0 0 12px', 
-              fontWeight: 800,
-              color: 'var(--ink)',
-              textAlign: 'center'
-            }}>
-              Why Choose West Coast Collectibles
-            </h2>
-            <p style={{ fontSize: '1rem', color: 'var(--muted)', margin: '0 0 40px', maxWidth: '600px', textAlign: 'center', marginLeft: 'auto', marginRight: 'auto' }}>
-              We're passionate collectors ourselves, ensuring every piece meets our high standards.
-            </p>
-            
-            {/* Why Choose Us Cards */}
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
-              gap: '20px',
-              marginBottom: '48px'
-            }}>
-              <div className="luxury-card accent-lilac" style={{ padding: '24px', textAlign: 'center' }}>
-                <div style={{ 
-                  width: '64px', 
-                  height: '64px', 
-                  borderRadius: '50%', 
-                  background: 'linear-gradient(135deg, var(--accent-lilac), rgba(199,163,255,0.3))',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 16px',
-                  fontSize: '1.5rem'
-                }}>
-                  ✨
-                </div>
-                <h3 style={{ fontWeight: 800, color: 'var(--ink)', marginBottom: '8px', fontSize: '1.1rem' }}>
-                  100% Authentic
-                </h3>
-                <p style={{ fontSize: '0.9rem', color: 'var(--muted)', margin: 0, lineHeight: 1.5 }}>
-                  Every collectible is carefully verified and authenticated before shipping to ensure you receive genuine products.
-                </p>
-              </div>
-              
-              <div className="luxury-card accent-teal" style={{ padding: '24px', textAlign: 'center' }}>
-                <div style={{ 
-                  width: '64px', 
-                  height: '64px', 
-                  borderRadius: '50%', 
-                  background: 'linear-gradient(135deg, var(--accent-teal), rgba(94,208,192,0.3))',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 16px',
-                  fontSize: '1.5rem'
-                }}>
-                  🚀
-                </div>
-                <h3 style={{ fontWeight: 800, color: 'var(--ink)', marginBottom: '8px', fontSize: '1.1rem' }}>
-                  Lightning Fast
-                </h3>
-                <p style={{ fontSize: '0.9rem', color: 'var(--muted)', margin: 0, lineHeight: 1.5 }}>
-                  Most orders ship within 24 hours with 2-3 day delivery. Your collectibles arrive quickly and safely.
-                </p>
-              </div>
-              
-              <div className="luxury-card accent-gold" style={{ padding: '24px', textAlign: 'center' }}>
-                <div style={{ 
-                  width: '64px', 
-                  height: '64px', 
-                  borderRadius: '50%', 
-                  background: 'linear-gradient(135deg, var(--accent-gold), rgba(201,176,126,0.3))',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 16px',
-                  fontSize: '1.5rem'
-                }}>
-                  🛡️
-                </div>
-                <h3 style={{ fontWeight: 800, color: 'var(--ink)', marginBottom: '8px', fontSize: '1.1rem' }}>
-                  Trusted & Secure
-                </h3>
-                <p style={{ fontSize: '0.9rem', color: 'var(--muted)', margin: 0, lineHeight: 1.5 }}>
-                  U.S.-based seller with secure checkout, buyer protection, and hassle-free returns on all purchases.
-                </p>
-              </div>
-            </div>
+        {/* VIP Invite - Optional Upgrade */}
+        <VIPSection />
 
-            {/* Policies Section */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
-              <div className="luxury-card accent-lilac" style={{ padding: '24px' }}>
-                <div style={{ fontWeight: 800, color: 'var(--ink)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                  🚀 Shipping
-                </div>
-                <p style={{ fontSize: '0.95rem', color: 'var(--muted)', margin: 0, lineHeight: 1.5 }}>{SITE.policies.shipping}</p>
-              </div>
-              <div className="luxury-card accent-teal" style={{ padding: '24px' }}>
-                <div style={{ fontWeight: 800, color: 'var(--ink)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                  🔄 Returns
-                </div>
-                <p style={{ fontSize: '0.95rem', color: 'var(--muted)', margin: 0, lineHeight: 1.5 }}>{SITE.policies.returns}</p>
-              </div>
-              <div className="luxury-card accent-gold" style={{ padding: '24px' }}>
-                <div style={{ fontWeight: 800, color: 'var(--ink)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                  💬 Support
-                </div>
-                <p style={{ fontSize: '0.95rem', color: 'var(--muted)', margin: 0, lineHeight: 1.5 }}>
-                  Questions? Email{' '}
-                  <a style={{ color: 'var(--accent-teal)', textDecoration: 'underline' }} href="mailto:support@westcoastcollectibless.com">
-                    support@westcoastcollectibless.com
-                  </a>
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* Collector Assurance - Consolidated Trust */}
+        <CollectorAssuranceSection />
       </main>
     </div>
   )
@@ -1705,328 +2218,6 @@ function NewReleasesSection() {
   )
 }
 
-function ComingSoonSection() {
-  const [email, setEmail] = useState('')
-  const [isSubmitted, setIsSubmitted] = useState(false)
-  const [comingSoonItems, setComingSoonItems] = useState<Listing[]>([])
-  const [nextDropDate, setNextDropDate] = useState<Date | null>(null)
-
-  useEffect(() => {
-    const fetchComingSoonItems = async () => {
-      try {
-        const response = await fetch('/api/coming-soon/products')
-        if (response.ok) {
-          const data = await response.json()
-          setComingSoonItems(data)
-          
-          // Find the earliest drop date among coming soon items
-          const dropDates = data
-            .filter((item: any) => item.drop_date)
-            .map((item: any) => new Date(item.drop_date))
-            .sort((a: Date, b: Date) => a.getTime() - b.getTime())
-          
-          if (dropDates.length > 0) {
-            setNextDropDate(dropDates[0])
-          } else {
-            setNextDropDate(null)
-          }
-        }
-      } catch (error) {
-        console.error('Failed to load coming soon items:', error)
-      }
-    }
-    
-    fetchComingSoonItems()
-    
-    // Refresh coming soon items every 30 seconds to update when products launch
-    const interval = setInterval(fetchComingSoonItems, 30000)
-    return () => clearInterval(interval)
-  }, [])
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    try {
-      const response = await fetch('/api/email/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      })
-      
-      if (response.ok) {
-        console.log('Email subscribed successfully:', email)
-        setIsSubmitted(true)
-        setTimeout(() => {
-          setIsSubmitted(false)
-          setEmail('')
-        }, 5000) // Show success message longer
-      } else {
-        console.error('Failed to subscribe email')
-        // Could show error message here
-      }
-    } catch (error) {
-      console.error('Email subscription error:', error)
-      // Could show error message here
-    }
-  }
-
-  const timeUntilDrop = () => {
-    if (!nextDropDate) {
-      return 'TBA'
-    }
-    
-    const now = new Date()
-    const timeDiff = nextDropDate.getTime() - now.getTime()
-    
-    if (timeDiff <= 0) {
-      return 'Now available!'
-    }
-    
-    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24))
-    const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60))
-    
-    if (days > 0) {
-      return `${days} day${days > 1 ? 's' : ''}, ${hours}h`
-    } else if (hours > 0) {
-      return `${hours} hour${hours !== 1 ? 's' : ''}, ${minutes}m`
-    } else {
-      return `${minutes} minute${minutes !== 1 ? 's' : ''}`
-    }
-  }
-
-  return (
-    <section className="luxury-section" style={{ 
-      background: 'linear-gradient(135deg, rgba(199,163,255,.08) 0%, rgba(94,208,192,.08) 50%, rgba(247,231,195,.08) 100%)',
-      position: 'relative',
-      overflow: 'hidden'
-    }}>
-      {/* Background decoration */}
-      <div style={{
-        position: 'absolute',
-        top: '-20%',
-        right: '-10%',
-        width: '40%',
-        height: '140%',
-        background: 'radial-gradient(circle, rgba(199,163,255,.1) 0%, transparent 70%)',
-        borderRadius: '50%',
-        filter: 'blur(60px)'
-      }} />
-      <div style={{
-        position: 'absolute',
-        bottom: '-20%',
-        left: '-10%',
-        width: '35%',
-        height: '140%',
-        background: 'radial-gradient(circle, rgba(247,231,195,.08) 0%, transparent 70%)',
-        borderRadius: '50%',
-        filter: 'blur(60px)'
-      }} />
-      
-      <div style={{ maxWidth: '1224px', margin: '0 auto', padding: '60px 20px', position: 'relative', zIndex: 2 }}>
-        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-          <div className="luxury-eyebrow" style={{ marginBottom: '16px' }}>
-            Exclusive • Limited • Weekly
-          </div>
-          <h2 style={{ 
-            fontSize: 'clamp(2rem, 3vw, 2.5rem)', 
-            margin: '0 0 12px', 
-            fontWeight: 800,
-            color: 'var(--wcc-ink)',
-            lineHeight: 1.2
-          }}>
-            🔔 Get Notified - Early Access
-          </h2>
-          {comingSoonItems.length > 0 ? (
-            <p style={{ 
-              fontSize: '1.1rem', 
-              color: 'var(--wcc-muted)', 
-              margin: '0 0 32px',
-              maxWidth: '600px',
-              marginLeft: 'auto',
-              marginRight: 'auto',
-              lineHeight: 1.6
-            }}>
-              Get exclusive access to limited designer toys before they sell out. New drops every week featuring rare collectibles and premium figures.
-            </p>
-          ) : (
-            <p style={{ 
-              fontSize: '1.1rem', 
-              color: 'var(--wcc-muted)', 
-              margin: '0 0 32px',
-              maxWidth: '600px',
-              marginLeft: 'auto',
-              marginRight: 'auto',
-              lineHeight: 1.6
-            }}>
-              No upcoming drops scheduled at the moment. Subscribe to be notified when new products are coming soon!
-            </p>
-          )}
-          
-          {/* Enhanced Countdown Timer */}
-          {nextDropDate && (
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <CountdownTimer 
-                targetDate={nextDropDate}
-                onComplete={() => {
-                  // Refresh the page or update coming soon items when countdown completes
-                  window.location.reload()
-                }}
-              />
-            </div>
-          )}
-        </div>
-
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center'
-        }}>
-          {/* VIP Signup */}
-          <div className="luxury-card accent-lilac" style={{ 
-            padding: '32px',
-            textAlign: 'center',
-            background: 'linear-gradient(#fff,#fff) padding-box, linear-gradient(135deg,var(--wcc-grad-a),var(--wcc-grad-b),var(--wcc-grad-c)) border-box',
-            border: '2px solid transparent'
-          }}>
-            <div className="luxury-eyebrow" style={{ marginBottom: '8px', textAlign: 'center' }}>Free VIP Membership</div>
-            <h3 style={{ 
-              fontSize: '1.5rem', 
-              fontWeight: 800, 
-              color: 'var(--wcc-ink)', 
-              margin: '0 0 12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px'
-            }}>
-              👤 Become a Collector
-            </h3>
-            
-            {/* VIP Benefits List */}
-            <div style={{ 
-              background: 'rgba(124,58,237,.05)',
-              padding: '16px',
-              borderRadius: '12px',
-              marginBottom: '20px',
-              textAlign: 'left'
-            }}>
-              <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--wcc-ink)', marginBottom: '8px', textAlign: 'center' }}>
-                🆓 What you get for FREE:
-              </div>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '0.85rem', color: 'var(--wcc-muted)' }}>
-                <li style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                  <span style={{ color: '#10b981', fontSize: '0.9rem' }}>✓</span>
-                  See all upcoming drops (no more blurred images!)
-                </li>
-                <li style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                  <span style={{ color: '#10b981', fontSize: '0.9rem' }}>✓</span>
-                  Email alerts for new releases
-                </li>
-                <li style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                  <span style={{ color: '#10b981', fontSize: '0.9rem' }}>✓</span>
-                  Personal wishlist & alerts
-                </li>
-                <li style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                  <span style={{ color: '#10b981', fontSize: '0.9rem' }}>✓</span>
-                  Drop calendar access
-                </li>
-              </ul>
-              <div style={{ 
-                fontSize: '0.8rem', 
-                color: 'var(--accent-teal)', 
-                fontWeight: 600, 
-                marginTop: '8px',
-                textAlign: 'center'
-              }}>
-                Want more? <a href="/vip" style={{ textDecoration: 'underline' }}>Upgrade for early access & discounts!</a>
-              </div>
-            </div>
-            
-            <p style={{ 
-              fontSize: '0.9rem', 
-              color: 'var(--wcc-muted)', 
-              margin: '0 0 20px',
-              lineHeight: 1.4
-            }}>
-              Join thousands of collectors who never miss a drop.
-            </p>
-
-            {!isSubmitted ? (
-              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email address"
-                  required
-                  style={{
-                    padding: '14px 16px',
-                    borderRadius: '12px',
-                    border: '2px solid var(--wcc-line)',
-                    fontSize: '1rem',
-                    background: '#fff',
-                    color: 'var(--wcc-ink)',
-                    outline: 'none',
-                    transition: 'border-color 0.3s ease'
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = 'var(--wcc-teal)'}
-                  onBlur={(e) => e.target.style.borderColor = 'var(--wcc-line)'}
-                />
-                <button
-                  type="submit"
-                  style={{
-                    padding: '14px 20px',
-                    borderRadius: '999px',
-                    border: 'none',
-                    background: 'linear-gradient(135deg, var(--wcc-teal), var(--wcc-grad-c))',
-                    color: '#0b0b0f',
-                    fontSize: '1rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    boxShadow: '0 8px 20px rgba(94,208,192,.3)'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-                  onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-                >
-                  🆓 Join Free VIP
-                </button>
-              </form>
-            ) : (
-              <div style={{
-                padding: '20px',
-                background: 'linear-gradient(135deg, rgba(94,208,192,.15), rgba(199,163,255,.15))',
-                borderRadius: '12px',
-                border: '2px solid var(--wcc-teal)'
-              }}>
-                <div style={{ fontSize: '2rem', marginBottom: '8px' }}>🎉</div>
-                <div style={{ fontWeight: 700, color: 'var(--wcc-teal)', marginBottom: '4px' }}>
-                  Welcome to VIP Collector Status!
-                </div>
-                <div style={{ fontSize: '0.9rem', color: 'var(--wcc-muted)' }}>
-                  You can now see all upcoming drops and get early notifications!
-                </div>
-              </div>
-            )}
-
-            <div style={{ 
-              fontSize: '0.8rem', 
-              color: 'var(--wcc-muted)', 
-              marginTop: '16px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px'
-            }}>
-              <span>🔒</span>
-              <span>We respect your privacy. Unsubscribe anytime.</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
 
 function StaffPicksSection() {
   const [staffPicks, setStaffPicks] = useState<Listing[]>([])

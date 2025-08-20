@@ -1,0 +1,17 @@
+[
+  {
+    "email": "test@example.com",
+    "created_at": "2025-08-20T03:19:06.421Z",
+    "source": "vip_home"
+  },
+  {
+    "email": "newuser@example.com",
+    "created_at": "2025-08-20T03:41:39.223Z",
+    "source": "vip_home"
+  },
+  {
+    "email": "jaydenreyes32@gmail.com",
+    "created_at": "2025-08-20T04:57:38.606Z",
+    "source": "vip_home"
+  }
+]
