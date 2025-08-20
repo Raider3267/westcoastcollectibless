@@ -5,6 +5,7 @@ import UserNav from '../components/UserNav'
 import { CartProvider } from '../lib/cart'
 import Cart from '../components/Cart'
 import CartIcon from '../components/CartIcon'
+import GlobalToastProvider from '../components/GlobalToastProvider'
 
 export const metadata: Metadata = {
   title: 'WestCoastCollectibless',
@@ -125,6 +126,7 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 `}} />
         </CartProvider>
+        <GlobalToastProvider />
       </body>
     </html>
   )
