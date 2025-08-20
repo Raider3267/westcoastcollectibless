@@ -152,675 +152,6 @@ function ScrollableSection({ children, className = "wcc-scroll" }: { children: R
   )
 }
 
-function FeaturedHighlightsSection() {
-  const [featuredProducts, setFeaturedProducts] = useState<Listing[]>([])
-  const [loading, setLoading] = useState(true)
-  const [currentTagline, setCurrentTagline] = useState(0)
-
-  const taglines = [
-    "Rare Finds",
-    "Curated Collectibles", 
-    "This Week's Highlights",
-    "Premium Selection",
-    "Exclusive Items"
-  ]
-
-  useEffect(() => {
-    const fetchFeaturedProducts = async () => {
-      try {
-        const response = await fetch('/api/featured')
-        if (response.ok) {
-          const data = await response.json()
-          setFeaturedProducts(data)
-        }
-      } catch (error) {
-        console.error('Failed to load featured products:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    
-    fetchFeaturedProducts()
-  }, [])
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTagline((prev) => (prev + 1) % taglines.length)
-    }, 3000)
-    
-    return () => clearInterval(interval)
-  }, [])
-
-
-  // Don't show section if no featured products
-  if (!loading && featuredProducts.length === 0) {
-    return null
-  }
-
-  const cardColors = [
-    'from-pop-pink/20 to-pop-orange/20',
-    'from-pop-teal/20 to-pop-blue/20', 
-    'from-pop-lime/20 to-pop-yellow/20',
-    'from-pop-purple/20 to-pop-pink/20'
-  ]
-
-  return (
-    <section className="featured-showcase-section">
-      {/* Animated Divider */}
-      <div className="featured-divider-container">
-        <div className="featured-divider">
-          <div className="divider-shimmer"></div>
-        </div>
-      </div>
-      
-      {/* Premium Background Frame */}
-      <div className="featured-backdrop">
-        <div className="backdrop-gradient"></div>
-        <div className="backdrop-vignette"></div>
-      </div>
-      
-      <div style={{ maxWidth: '1224px', margin: '0 auto', padding: '60px 20px 80px', position: 'relative', zIndex: 2 }}>
-        {/* Premium Marquee Header */}
-        <div className="featured-marquee-header">
-          <h2 className="featured-title">
-            <span className="featured-title-text">✨ FEATURED COLLECTION ✨</span>
-          </h2>
-          <div className="featured-tagline-container">
-            <span className="featured-tagline" key={currentTagline}>
-              {taglines[currentTagline]}
-            </span>
-          </div>
-        </div>
-        
-        <p style={{ fontSize: '1rem', color: 'var(--wcc-muted)', margin: '0 0 32px', maxWidth: '600px', textAlign: 'center', marginLeft: 'auto', marginRight: 'auto' }}>
-          Hand-picked premium collectibles and must-have items from our curated collection.
-        </p>
-        
-        <div className="featured-grid-container">
-          {/* Elegant sparkling background */}
-          <div className="featured-background-accent"></div>
-          <div className="featured-sparkles-layer"></div>
-          
-          {loading ? (
-            <div className="featured-grid featured-grid-loading">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="luxury-card accent-teal" style={{ opacity: 0.6 }}>
-                  <div className="luxury-thumb">
-                    <div className="luxury-thumb-inner" style={{ background: '#f0f0f0' }}></div>
-                  </div>
-                  <div className="luxury-body">
-                    <div style={{ background: '#f0f0f0', height: '20px', borderRadius: '4px', marginBottom: '8px' }}></div>
-                    <div style={{ background: '#f0f0f0', height: '16px', borderRadius: '4px', width: '60%' }}></div>
-                  </div>
-                  <div className="luxury-foot">
-                    <div style={{ background: '#f0f0f0', height: '20px', width: '40px', borderRadius: '4px' }}></div>
-                    <div style={{ background: '#f0f0f0', height: '32px', width: '60px', borderRadius: '999px' }}></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className={`featured-grid featured-grid-${featuredProducts.length}`}>
-              {featuredProducts.map((product, index) => {
-                const cardColor = cardColors[index % cardColors.length]
-                const featuredEmojis = ['⭐', '🌟', '✨', '💎']
-                const randomEmoji = featuredEmojis[index % featuredEmojis.length]
-
-                return (
-                  <div 
-                    key={product.id}
-                    className="featured-card-wrapper"
-                  >
-                    <ProductCard
-                      product={product}
-                      cardColor={cardColor}
-                      randomEmoji={randomEmoji}
-                    />
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
-        
-        <style jsx>{`
-          /* Featured Showcase Section */
-          .featured-showcase-section {
-            position: relative;
-            overflow: hidden;
-            margin: 60px 0;
-          }
-          
-          /* Animated Divider */
-          .featured-divider-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 40px;
-            position: relative;
-          }
-          
-          .featured-divider {
-            width: 200px;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3), transparent);
-            position: relative;
-            overflow: hidden;
-          }
-          
-          .divider-shimmer {
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, 
-              transparent 0%, 
-              rgba(255, 215, 0, 0.8) 50%, 
-              transparent 100%
-            );
-            animation: shimmerPass 8s ease-in-out infinite;
-          }
-          
-          /* Premium Background Frame */
-          .featured-backdrop {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 0;
-          }
-          
-          .backdrop-gradient {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(180deg, 
-              rgba(255, 255, 255, 0.02) 0%,
-              rgba(255, 215, 0, 0.008) 30%,
-              rgba(245, 245, 220, 0.012) 70%,
-              rgba(255, 255, 255, 0.02) 100%
-            );
-          }
-          
-          .backdrop-vignette {
-            position: absolute;
-            top: -20px;
-            left: -20px;
-            right: -20px;
-            bottom: -20px;
-            background: radial-gradient(ellipse at center, 
-              transparent 40%, 
-              rgba(255, 215, 0, 0.005) 70%, 
-              rgba(255, 215, 0, 0.015) 100%
-            );
-          }
-          
-          /* Premium Marquee Header */
-          .featured-marquee-header {
-            text-align: center;
-            margin-bottom: 40px;
-            position: relative;
-          }
-          
-          .featured-title {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-            margin: 0 0 20px;
-          }
-          
-          .featured-title-text {
-            font-size: clamp(2rem, 3.5vw, 2.8rem);
-            font-weight: 900;
-            letter-spacing: 0.05em;
-            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 50%, #ffd700 100%);
-            background-size: 200% 200%;
-            animation: shimmer 3s ease-in-out infinite;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
-            position: relative;
-          }
-          
-          .featured-title-text::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -20px;
-            right: -20px;
-            bottom: 0;
-            background: linear-gradient(90deg, 
-              transparent 0%, 
-              rgba(255, 215, 0, 0.1) 50%, 
-              transparent 100%
-            );
-            opacity: 0;
-            animation: badgeShimmer 10s ease-in-out infinite;
-          }
-          
-          .featured-title-text::after {
-            content: '';
-            position: absolute;
-            bottom: -4px;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, #ffd700, transparent);
-            border-radius: 2px;
-            opacity: 0.6;
-          }
-          
-          .featured-count-badge {
-            font-size: 0.8rem;
-            background: linear-gradient(135deg, #ffd700, #ff8c00);
-            color: #333;
-            padding: 8px 12px;
-            border-radius: 999px;
-            font-weight: 700;
-            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
-            animation: pulse 2s ease-in-out infinite;
-          }
-          
-          .featured-tagline-container {
-            height: 24px;
-            overflow: hidden;
-            position: relative;
-          }
-          
-          .featured-tagline {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #6b7280;
-            letter-spacing: 0.02em;
-            animation: fadeInUp 0.8s ease-out;
-            display: block;
-          }
-          
-          /* Premium Background Treatment */
-          .featured-grid-container {
-            position: relative;
-            padding: 40px 0 30px;
-            overflow: hidden;
-          }
-          
-          .featured-background-accent {
-            position: absolute;
-            top: -50px;
-            left: -50px;
-            right: -50px;
-            bottom: -50px;
-            background: 
-              radial-gradient(circle at 25% 25%, rgba(255, 215, 0, 0.02) 0%, transparent 40%),
-              radial-gradient(circle at 75% 75%, rgba(192, 192, 192, 0.015) 0%, transparent 40%),
-              linear-gradient(135deg, rgba(255, 215, 0, 0.01) 0%, rgba(245, 245, 220, 0.008) 100%);
-            border-radius: 32px;
-            pointer-events: none;
-            z-index: 0;
-            animation: breathe 8s ease-in-out infinite;
-          }
-          
-          /* Elegant Sparkling Layer */
-          .featured-sparkles-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
-          }
-          
-          .featured-sparkles-layer::before {
-            content: '';
-            position: absolute;
-            top: 15%;
-            left: 12%;
-            width: 3px;
-            height: 3px;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.8) 0%, transparent 70%);
-            border-radius: 50%;
-            animation: elegantSparkle 4s ease-in-out infinite;
-            box-shadow: 0 0 6px rgba(255, 215, 0, 0.3);
-          }
-          
-          .featured-sparkles-layer::after {
-            content: '';
-            position: absolute;
-            top: 65%;
-            right: 18%;
-            width: 2px;
-            height: 2px;
-            background: radial-gradient(circle, rgba(192, 192, 192, 0.9) 0%, transparent 70%);
-            border-radius: 50%;
-            animation: elegantSparkle 5s ease-in-out infinite 1.5s;
-            box-shadow: 0 0 4px rgba(192, 192, 192, 0.4);
-          }
-          
-          /* Additional sparkles using container pseudo-elements */
-          .featured-grid-container::before {
-            content: '';
-            position: absolute;
-            top: 35%;
-            right: 25%;
-            width: 2.5px;
-            height: 2.5px;
-            background: radial-gradient(circle, rgba(245, 245, 220, 0.7) 0%, transparent 70%);
-            border-radius: 50%;
-            animation: elegantSparkle 6s ease-in-out infinite 2s;
-            box-shadow: 0 0 5px rgba(245, 245, 220, 0.3);
-            z-index: 0;
-          }
-          
-          .featured-grid-container::after {
-            content: '';
-            position: absolute;
-            bottom: 25%;
-            left: 20%;
-            width: 1.5px;
-            height: 1.5px;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.6) 0%, transparent 70%);
-            border-radius: 50%;
-            animation: elegantSparkle 7s ease-in-out infinite 3.5s;
-            box-shadow: 0 0 3px rgba(255, 215, 0, 0.2);
-            z-index: 0;
-          }
-          
-          /* Premium Grid */
-          .featured-grid {
-            display: grid;
-            gap: 24px;
-            justify-content: center;
-            max-width: 1200px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-          }
-          
-          /* Enhanced Premium Hover Effects for Featured Cards */
-          .featured-card-wrapper :global(.product-card) {
-            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-            cursor: pointer;
-            position: relative;
-          }
-          
-          .featured-card-wrapper :global(.product-card:hover) {
-            transform: translateY(-15px) scale(1.03);
-            box-shadow: 
-              0 30px 60px rgba(0, 0, 0, 0.18),
-              0 20px 40px rgba(0, 0, 0, 0.12),
-              0 0 0 1px rgba(255, 215, 0, 0.15),
-              0 0 80px rgba(255, 215, 0, 0.12),
-              0 0 150px rgba(245, 245, 220, 0.08);
-            z-index: 10;
-          }
-          
-          .featured-card-wrapper :global(.product-card::before) {
-            content: '';
-            position: absolute;
-            top: -25px;
-            left: -25px;
-            right: -25px;
-            bottom: -25px;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.04) 0%, transparent 70%);
-            border-radius: 50%;
-            opacity: 0;
-            transition: opacity 0.5s ease-out;
-            pointer-events: none;
-            z-index: -1;
-          }
-          
-          .featured-card-wrapper :global(.product-card:hover::before) {
-            opacity: 1;
-            animation: premiumHaloGlow 0.8s ease-out;
-          }
-          
-          /* Enhanced badge shimmer for Featured cards */
-          .featured-card-wrapper :global(.luxury-badge),
-          .featured-card-wrapper :global(.featured-badge) {
-            position: relative;
-            overflow: hidden;
-          }
-          
-          .featured-card-wrapper :global(.luxury-badge::after),
-          .featured-card-wrapper :global(.featured-badge::after) {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, 
-              transparent 0%, 
-              rgba(255, 255, 255, 0.3) 50%, 
-              transparent 100%
-            );
-            animation: badgeSweep 12s ease-in-out infinite;
-          }
-          
-          .featured-grid-loading {
-            grid-template-columns: repeat(2, 350px);
-          }
-          
-          .featured-grid-4 {
-            grid-template-columns: repeat(2, 350px);
-            grid-template-rows: repeat(2, auto);
-          }
-          
-          .featured-grid-3 {
-            grid-template-columns: repeat(3, 350px);
-          }
-          
-          .featured-grid-2 {
-            grid-template-columns: repeat(2, 350px);
-          }
-          
-          .featured-grid-1 {
-            grid-template-columns: 350px;
-          }
-          
-          /* Animations */
-          @keyframes shimmer {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-          }
-          
-          @keyframes shimmerPass {
-            0%, 100% { left: -100%; opacity: 0; }
-            20% { opacity: 1; }
-            80% { opacity: 1; }
-            100% { left: 100%; opacity: 0; }
-          }
-          
-          @keyframes badgeShimmer {
-            0%, 90%, 100% { opacity: 0; }
-            95% { opacity: 1; }
-          }
-          
-          @keyframes sparkleGlow {
-            0%, 100% { 
-              opacity: 0.4; 
-              transform: scale(1); 
-            }
-            50% { 
-              opacity: 0.8; 
-              transform: scale(1.1); 
-            }
-          }
-          
-          @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.05); opacity: 0.9; }
-          }
-          
-          @keyframes fadeInUp {
-            from { 
-              opacity: 0; 
-              transform: translateY(20px); 
-            }
-            to { 
-              opacity: 1; 
-              transform: translateY(0); 
-            }
-          }
-          
-          @keyframes breathe {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.02); opacity: 0.8; }
-          }
-          
-          @keyframes elegantSparkle {
-            0%, 100% { 
-              opacity: 0.2;
-              transform: scale(1);
-              filter: brightness(1);
-            }
-            20% { 
-              opacity: 0.6;
-              transform: scale(1.3);
-              filter: brightness(1.4);
-            }
-            40% { 
-              opacity: 0.9;
-              transform: scale(1.6);
-              filter: brightness(1.8);
-            }
-            60% { 
-              opacity: 0.6;
-              transform: scale(1.2);
-              filter: brightness(1.3);
-            }
-            80% { 
-              opacity: 0.3;
-              transform: scale(1);
-              filter: brightness(1);
-            }
-          }
-          
-          @keyframes haloGlow {
-            0% { 
-              opacity: 0;
-              transform: scale(0.8);
-            }
-            50% { 
-              opacity: 0.6;
-              transform: scale(1.1);
-            }
-            100% { 
-              opacity: 1;
-              transform: scale(1);
-            }
-          }
-          
-          @keyframes premiumHaloGlow {
-            0% { 
-              opacity: 0;
-              transform: scale(0.7);
-            }
-            30% { 
-              opacity: 0.4;
-              transform: scale(1.0);
-            }
-            60% { 
-              opacity: 0.8;
-              transform: scale(1.2);
-            }
-            100% { 
-              opacity: 1;
-              transform: scale(1);
-            }
-          }
-          
-          @keyframes badgeSweep {
-            0%, 95%, 100% { left: -100%; }
-            97.5% { left: 100%; }
-          }
-          
-          /* Responsive Design */
-          @media (max-width: 1200px) {
-            .featured-grid-4,
-            .featured-grid-3 {
-              grid-template-columns: repeat(2, 330px);
-              grid-template-rows: auto;
-            }
-            
-            .featured-title-text {
-              font-size: clamp(1.8rem, 3vw, 2.4rem);
-            }
-          }
-          
-          @media (max-width: 768px) {
-            .featured-showcase-section {
-              margin: 40px 0;
-            }
-            
-            .featured-divider {
-              width: 150px;
-            }
-            
-            .featured-grid {
-              grid-template-columns: 1fr !important;
-              grid-template-rows: auto !important;
-              padding: 0 20px;
-              max-width: 400px;
-              gap: 20px;
-            }
-            
-            .featured-grid-container {
-              padding: 30px 0 20px;
-            }
-            
-            .featured-background-accent {
-              opacity: 0.3;
-            }
-            
-            .featured-sparkles-layer::before,
-            .featured-sparkles-layer::after,
-            .featured-grid-container::before,
-            .featured-grid-container::after {
-              display: none;
-            }
-            
-            .featured-marquee-header {
-              margin-bottom: 30px;
-              padding: 0 10px;
-            }
-            
-            .featured-title-text {
-              font-size: clamp(1.5rem, 5vw, 2rem);
-              letter-spacing: 0.03em;
-            }
-            
-            .featured-placeholder-card {
-              width: 100%;
-              max-width: 350px;
-              height: 400px;
-            }
-            
-            .featured-card-wrapper :global(.product-card:hover) {
-              transform: translateY(-8px) scale(1.015);
-              box-shadow: 
-                0 15px 30px rgba(0, 0, 0, 0.1),
-                0 0 40px rgba(255, 215, 0, 0.08),
-                0 0 80px rgba(245, 245, 220, 0.04);
-            }
-            
-            .backdrop-gradient,
-            .backdrop-vignette {
-              opacity: 0.5;
-            }
-          }
-        `}</style>
-      </div>
-    </section>
-  )
-}
-
 function ComingSoonProductsSection() {
   const [comingSoonProducts, setComingSoonProducts] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
@@ -831,7 +162,7 @@ function ComingSoonProductsSection() {
     const fetchComingSoonProducts = async () => {
       try {
         console.log('ComingSoon: Starting fetch...')
-        const response = await fetch('/api/preview')
+        const response = await fetch('/api/coming-soon/products')
         console.log('ComingSoon: Response received:', response.status)
         
         if (response.ok) {
@@ -955,6 +286,22 @@ function ComingSoonProductsSection() {
 
               return (
                 <div key={product.id} style={{ position: 'relative' }}>
+                  {/* "COMING SOON" Badge */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '8px',
+                    right: '8px',
+                    background: 'linear-gradient(135deg, #8a2be2, #4b0082)',
+                    color: 'white',
+                    padding: '4px 8px',
+                    borderRadius: '999px',
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    zIndex: 10,
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+                  }}>
+                    COMING SOON
+                  </div>
                   <ProductCard
                     product={product}
                     cardColor={cardColor}
@@ -984,7 +331,7 @@ export default function HomePage() {
 
   const loadProducts = async () => {
     try {
-      const response = await fetch('/api/in-stock')
+      const response = await fetch('/api/public/products')
       if (response.ok) {
         const data = await response.json()
         setItems(data)
@@ -1228,10 +575,10 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Featured Highlights Section (max 4 products) */}
-        <FeaturedHighlightsSection />
+        {/* New Releases Section (toggleable) */}
+        {showNewReleases && <NewReleasesSection />}
 
-        {/* In Stock / Shop Now Section */}
+        {/* Featured Listings */}
         <FeaturedSection items={items} filteredItems={filteredItems} loading={loading} onFiltersChange={handleFiltersChange} />
 
         {/* Staff Picks Section */}
@@ -1409,6 +756,7 @@ export default function HomePage() {
   )
 }
 
+
 function FeaturedSection({ items, filteredItems, loading, onFiltersChange }: { 
   items: Listing[], 
   filteredItems: Listing[], 
@@ -1529,9 +877,9 @@ function FeaturedSection({ items, filteredItems, loading, onFiltersChange }: {
       }} />
       
       <div style={{ maxWidth: '1224px', margin: '0 auto', padding: '0 20px', position: 'relative', zIndex: 2 }}>
-        <div className="luxury-eyebrow">🛒 Available Now</div>
+        <div className="luxury-eyebrow">Featured Collection</div>
         <h2 style={{ fontSize: '1.8rem', margin: '0 0 12px', fontWeight: 800 }}>
-          Shop Now - In Stock
+          Featured Treasures
         </h2>
         <p style={{ fontSize: '1rem', color: 'var(--muted)', margin: '0 0 24px', maxWidth: '600px' }}>
           Handpicked premium collectibles from top designers. Each piece is authenticated and carefully curated for discerning collectors.
@@ -1878,10 +1226,179 @@ function ComingSoonSection() {
         </div>
 
         <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center'
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
+          gap: '32px', 
+          alignItems: 'center' 
         }}>
-          {/* VIP Signup */}
+          {/* Left: Preview Cards */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div className="luxury-eyebrow" style={{ marginBottom: '8px' }}>Exclusive Preview</div>
+            <h3 style={{ 
+              fontSize: '1.4rem', 
+              fontWeight: 800, 
+              color: 'var(--wcc-ink)', 
+              margin: '0 0 12px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              👀 Sneak Peek
+            </h3>
+            <p style={{ fontSize: '0.95rem', color: 'var(--wcc-muted)', margin: '0 0 8px' }}>
+              Want to see exactly what's coming? 
+            </p>
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(124,58,237,.1), rgba(168,85,247,.1))',
+              padding: '12px 16px',
+              borderRadius: '12px',
+              border: '2px solid rgba(124,58,237,.2)',
+              marginBottom: '16px'
+            }}>
+              <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--wcc-ink)', marginBottom: '4px' }}>
+                🆓 Free VIP Access
+              </div>
+              <div style={{ fontSize: '0.85rem', color: 'var(--wcc-muted)' }}>
+                Sign up below to unlock clear images and details of all upcoming drops!
+              </div>
+            </div>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+              {comingSoonItems.length > 0 ? (
+                comingSoonItems.slice(0, 3).map((item, i) => (
+                  <div 
+                    key={item.id}
+                    style={{ 
+                      padding: '12px',
+                      borderRadius: '18px',
+                      background: 'linear-gradient(#fff,#fff) padding-box, linear-gradient(135deg, var(--accent-teal), var(--accent-lilac), var(--accent-gold)) border-box',
+                      border: '2px solid transparent',
+                      boxShadow: `0 8px 24px rgba(0, 0, 0, 0.08), 0 0 20px ${['rgba(94,208,192,0.3)', 'rgba(199,163,255,0.3)', 'rgba(247,231,195,0.3)'][i % 3]}`,
+                      position: 'relative',
+                      overflow: 'hidden',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-6px)'
+                      e.currentTarget.style.boxShadow = `0 16px 40px rgba(0, 0, 0, 0.12), 0 0 32px ${['rgba(94,208,192,0.5)', 'rgba(199,163,255,0.5)', 'rgba(247,231,195,0.5)'][i % 3]}`
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)'
+                      e.currentTarget.style.boxShadow = `0 8px 24px rgba(0, 0, 0, 0.08), 0 0 20px ${['rgba(94,208,192,0.3)', 'rgba(199,163,255,0.3)', 'rgba(247,231,195,0.3)'][i % 3]}`
+                    }}
+                  >
+                    <div style={{ 
+                      height: '80px', 
+                      borderRadius: '8px', 
+                      overflow: 'hidden',
+                      position: 'relative'
+                    }}>
+                      {item.image ? (
+                        <img 
+                          src={item.image} 
+                          alt={item.name}
+                          style={{ 
+                            width: '100%', 
+                            height: '100%', 
+                            objectFit: 'cover',
+                            filter: 'blur(1px) brightness(0.9)'
+                          }}
+                        />
+                      ) : (
+                        <div style={{ 
+                          background: 'linear-gradient(45deg, #f0f0f0, #e0e0e0)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '1.5rem',
+                          filter: 'blur(1px)',
+                          height: '100%'
+                        }}>
+                          🎁
+                        </div>
+                      )}
+                    </div>
+                    <div style={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      background: 'rgba(0,0,0,0.75)',
+                      color: 'white',
+                      padding: '6px 10px',
+                      borderRadius: '6px',
+                      fontSize: '0.7rem',
+                      fontWeight: 700,
+                      textAlign: 'center',
+                      backdropFilter: 'blur(4px)'
+                    }}>
+                      🔥 COMING SOON
+                    </div>
+                  </div>
+                ))
+              ) : (
+                [1, 2, 3].map((i) => (
+                  <div 
+                    key={i}
+                    style={{ 
+                      padding: '12px',
+                      borderRadius: '18px',
+                      background: 'linear-gradient(#fff,#fff) padding-box, linear-gradient(135deg, var(--accent-teal), var(--accent-lilac), var(--accent-gold)) border-box',
+                      border: '2px solid transparent',
+                      boxShadow: `0 8px 24px rgba(0, 0, 0, 0.08), 0 0 20px ${['rgba(94,208,192,0.3)', 'rgba(199,163,255,0.3)', 'rgba(247,231,195,0.3)'][(i - 1) % 3]}`,
+                      position: 'relative',
+                      overflow: 'hidden',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-6px)'
+                      e.currentTarget.style.boxShadow = `0 16px 40px rgba(0, 0, 0, 0.12), 0 0 32px ${['rgba(94,208,192,0.5)', 'rgba(199,163,255,0.5)', 'rgba(247,231,195,0.5)'][(i - 1) % 3]}`
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)'
+                      e.currentTarget.style.boxShadow = `0 8px 24px rgba(0, 0, 0, 0.08), 0 0 20px ${['rgba(94,208,192,0.3)', 'rgba(199,163,255,0.3)', 'rgba(247,231,195,0.3)'][(i - 1) % 3]}`
+                    }}
+                  >
+                    <div style={{ 
+                      height: '80px', 
+                      borderRadius: '8px', 
+                      background: 'linear-gradient(45deg, #f0f0f0, #e0e0e0)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1.5rem',
+                      filter: 'blur(2px)',
+                      position: 'relative'
+                    }}>
+                      {['🎭', '🎪', '🎨'][i - 1]}
+                    </div>
+                    <div style={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      background: 'rgba(0,0,0,0.8)',
+                      color: 'white',
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                      fontSize: '0.7rem',
+                      fontWeight: 600
+                    }}>
+                      MYSTERY
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+            
+            <div style={{ fontSize: '0.9rem', color: 'var(--wcc-muted)', fontStyle: 'italic' }}>
+              {comingSoonItems.length > 0 
+                ? '* These items are coming soon! Subscribe for early access when they drop.'
+                : '* New products coming soon! Subscribe for exclusive previews.'}
+            </div>
+          </div>
+
+          {/* Right: VIP Signup */}
           <div className="luxury-card accent-lilac" style={{ 
             padding: '32px',
             textAlign: 'center',

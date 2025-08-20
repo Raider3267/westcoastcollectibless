@@ -12,11 +12,11 @@ interface Product {
   price: number
   images: string
   status: 'live' | 'coming-soon' | 'draft'
+  sale_state?: 'DRAFT' | 'PREVIEW' | 'LIVE' | 'ARCHIVED'
   drop_date?: string
   released_date?: string
   show_in_new_releases?: boolean
   show_in_featured?: boolean
-  show_in_coming_soon?: boolean
   show_in_staff_picks?: boolean
   show_in_limited_editions?: boolean
   out_of_stock?: boolean
@@ -31,6 +31,11 @@ interface Product {
   profit_per_unit?: number
   total_inventory_value?: number
   potential_profit?: number
+  // Weight and dimensions for shipping
+  weight?: number
+  length?: number
+  width?: number
+  height?: number
 }
 
 interface ProductForm {
@@ -41,13 +46,17 @@ interface ProductForm {
   price: number
   images: string[]
   status: 'live' | 'coming-soon' | 'draft'
+  sale_state?: 'DRAFT' | 'PREVIEW' | 'LIVE' | 'ARCHIVED'
   drop_date?: string
   released_date?: string
   show_in_new_releases?: boolean
   show_in_featured?: boolean
-  show_in_coming_soon?: boolean
   show_in_staff_picks?: boolean
   show_in_limited_editions?: boolean
+  weight?: number
+  length?: number
+  width?: number
+  height?: number
   out_of_stock?: boolean
   show_in_featured_while_coming_soon?: boolean
   // Cost tracking fields
@@ -82,7 +91,6 @@ export default function AdminDashboard() {
     status: 'live',
     show_in_new_releases: false,
     show_in_featured: true,
-    show_in_coming_soon: true,
     show_in_staff_picks: false,
     show_in_limited_editions: false,
     out_of_stock: false,
@@ -101,7 +109,6 @@ export default function AdminDashboard() {
     images: product.images ? product.images.split(',').map(img => img.trim()).filter(img => img) : [],
     show_in_new_releases: product.show_in_new_releases || false,
     show_in_featured: product.show_in_featured !== false, // Default to true
-    show_in_coming_soon: product.show_in_coming_soon !== false, // Default to true
     show_in_staff_picks: product.show_in_staff_picks || false,
     show_in_limited_editions: product.show_in_limited_editions || false,
     out_of_stock: product.out_of_stock || false,
@@ -119,7 +126,6 @@ export default function AdminDashboard() {
     images: form.images.join(', '),
     show_in_new_releases: form.show_in_new_releases || false,
     show_in_featured: form.show_in_featured !== false,
-    show_in_coming_soon: form.show_in_coming_soon !== false,
     show_in_staff_picks: form.show_in_staff_picks || false,
     show_in_limited_editions: form.show_in_limited_editions || false,
     out_of_stock: form.out_of_stock || false,
@@ -205,6 +211,24 @@ export default function AdminDashboard() {
     }
   }
 
+  const updateSaleState = async (sku: string, newSaleState: 'DRAFT' | 'PREVIEW' | 'LIVE' | 'ARCHIVED') => {
+    try {
+      const response = await fetch('/api/admin/products', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sku, sale_state: newSaleState })
+      })
+      
+      if (response.ok) {
+        setProducts(prev => prev.map(p => 
+          p.sku === sku ? { ...p, sale_state: newSaleState } : p
+        ))
+      }
+    } catch (error) {
+      console.error('Failed to update sale state:', error)
+    }
+  }
+
   const updateDropDate = async (sku: string, dropDate: string) => {
     try {
       const response = await fetch('/api/admin/products', {
@@ -241,24 +265,6 @@ export default function AdminDashboard() {
     }
   }
 
-  const updateSectionVisibility = async (sku: string, section: 'featured' | 'coming_soon', visible: boolean) => {
-    try {
-      const fieldName = section === 'featured' ? 'show_in_featured' : 'show_in_coming_soon'
-      const response = await fetch('/api/admin/products', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sku, [fieldName]: visible.toString() })
-      })
-      
-      if (response.ok) {
-        setProducts(prev => prev.map(p => 
-          p.sku === sku ? { ...p, [fieldName]: visible } : p
-        ))
-      }
-    } catch (error) {
-      console.error(`Failed to update ${section} section visibility:`, error)
-    }
-  }
 
   const updateOutOfStockStatus = async (sku: string, outOfStock: boolean) => {
     try {
@@ -630,20 +636,28 @@ export default function AdminDashboard() {
                     </td>
                     <td className="px-6 py-4">
                       <select 
-                        value={product.status || 'live'}
-                        onChange={(e) => updateProductStatus(product.sku, e.target.value as 'live' | 'coming-soon' | 'draft')}
+                        value={product.sale_state || 'LIVE'}
+                        onChange={(e) => updateSaleState(product.sku, e.target.value as 'DRAFT' | 'PREVIEW' | 'LIVE' | 'ARCHIVED')}
                         className={`text-xs font-semibold rounded-full px-3 py-1 border-0 ${
-                          product.status === 'live' 
+                          product.sale_state === 'LIVE' 
                             ? 'bg-green-100 text-green-800' 
-                            : product.status === 'coming-soon'
-                            ? 'bg-yellow-100 text-yellow-800'
+                            : product.sale_state === 'PREVIEW'
+                            ? 'bg-purple-100 text-purple-800'
+                            : product.sale_state === 'ARCHIVED'
+                            ? 'bg-red-100 text-red-800'
                             : 'bg-gray-100 text-gray-800'
                         }`}
                       >
-                        <option value="live">🟢 Live</option>
-                        <option value="coming-soon">🟡 Coming Soon</option>
-                        <option value="draft">⚪ Draft</option>
+                        <option value="DRAFT">⚪ Draft</option>
+                        <option value="PREVIEW">🟣 Preview</option>
+                        <option value="LIVE">🟢 Live</option>
+                        <option value="ARCHIVED">🔴 Archived</option>
                       </select>
+                      {product.sale_state === 'PREVIEW' && (
+                        <div className="text-xs text-purple-600 mt-1">
+                          Quantity is tracked as on-order units. Customers cannot purchase until Live.
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       <input
@@ -692,11 +706,6 @@ export default function AdminDashboard() {
                             Featured
                           </span>
                         }
-                        {product.show_in_coming_soon !== false && 
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                            Coming Soon
-                          </span>
-                        }
                         {product.show_in_staff_picks && 
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                             Staff Picks
@@ -716,7 +725,6 @@ export default function AdminDashboard() {
                         {!(product.status === 'coming-soon' ? 
                           product.show_in_featured_while_coming_soon : 
                           product.show_in_featured !== false) && 
-                         !product.show_in_coming_soon && 
                          !product.show_in_staff_picks && 
                          !product.show_in_limited_editions && 
                          !product.show_in_new_releases && 
@@ -818,6 +826,58 @@ export default function AdminDashboard() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
                     />
                   </div>
+                </div>
+
+                {/* Shipping Information */}
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">📦 Shipping Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Weight (lbs)</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={editingProduct.weight || ''}
+                        onChange={(e) => setEditingProduct(prev => prev ? {...prev, weight: e.target.value ? parseFloat(e.target.value) : 0.3} : null)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
+                        placeholder="0.3"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Length (in)</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={editingProduct.length || ''}
+                        onChange={(e) => setEditingProduct(prev => prev ? {...prev, length: e.target.value ? parseFloat(e.target.value) : 4} : null)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
+                        placeholder="4"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Width (in)</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={editingProduct.width || ''}
+                        onChange={(e) => setEditingProduct(prev => prev ? {...prev, width: e.target.value ? parseFloat(e.target.value) : 3} : null)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
+                        placeholder="3"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Height (in)</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={editingProduct.height || ''}
+                        onChange={(e) => setEditingProduct(prev => prev ? {...prev, height: e.target.value ? parseFloat(e.target.value) : 5} : null)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
+                        placeholder="5"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-2">Used for accurate shipping cost calculation. Defaults: 0.3 lbs, 4"×3"×5"</p>
                 </div>
                 <ImageUpload
                   images={editingProduct.images || []}
@@ -989,34 +1049,6 @@ export default function AdminDashboard() {
                             </div>
                           </div>
 
-                          {/* Coming Soon Section */}
-                          <div 
-                            onClick={() => setEditingProduct(prev => prev ? {
-                              ...prev, 
-                              show_in_coming_soon: !prev.show_in_coming_soon
-                            } : null)}
-                            className="cursor-pointer group"
-                          >
-                            <div className={`p-3 rounded-lg border-2 transition-all ${
-                              editingProduct.show_in_coming_soon !== false
-                                ? 'border-purple-500 bg-purple-50' 
-                                : 'border-gray-200 bg-white hover:border-purple-300 hover:bg-purple-25'
-                            }`}>
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="font-medium text-sm text-gray-800">Coming Soon</span>
-                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                                  editingProduct.show_in_coming_soon !== false
-                                    ? 'border-purple-500 bg-purple-500' 
-                                    : 'border-gray-300'
-                                }`}>
-                                  {editingProduct.show_in_coming_soon !== false && 
-                                    <span className="text-white text-xs">✓</span>
-                                  }
-                                </div>
-                              </div>
-                              <p className="text-xs text-gray-600">Exclusive preview section</p>
-                            </div>
-                          </div>
 
                           {/* Staff Picks Section */}
                           <div 
@@ -1237,6 +1269,58 @@ export default function AdminDashboard() {
                     />
                   </div>
                 </div>
+
+                {/* Shipping Information */}
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">📦 Shipping Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Weight (lbs)</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={newProduct.weight || ''}
+                        onChange={(e) => setNewProduct(prev => ({...prev, weight: e.target.value ? parseFloat(e.target.value) : 0.3}))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
+                        placeholder="0.3"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Length (in)</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={newProduct.length || ''}
+                        onChange={(e) => setNewProduct(prev => ({...prev, length: e.target.value ? parseFloat(e.target.value) : 4}))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
+                        placeholder="4"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Width (in)</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={newProduct.width || ''}
+                        onChange={(e) => setNewProduct(prev => ({...prev, width: e.target.value ? parseFloat(e.target.value) : 3}))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
+                        placeholder="3"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Height (in)</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={newProduct.height || ''}
+                        onChange={(e) => setNewProduct(prev => ({...prev, height: e.target.value ? parseFloat(e.target.value) : 5}))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
+                        placeholder="5"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-2">Used for accurate shipping cost calculation. Defaults: 0.3 lbs, 4"×3"×5"</p>
+                </div>
                 <ImageUpload
                   images={newProduct.images || []}
                   onChange={(newImages) => setNewProduct(prev => ({...prev, images: newImages}))}
@@ -1366,34 +1450,6 @@ export default function AdminDashboard() {
                         </div>
                       </div>
 
-                      {/* Coming Soon Section */}
-                      <div 
-                        onClick={() => setNewProduct(prev => ({
-                          ...prev, 
-                          show_in_coming_soon: !prev.show_in_coming_soon
-                        }))}
-                        className="cursor-pointer group"
-                      >
-                        <div className={`p-3 rounded-lg border-2 transition-all ${
-                          newProduct.show_in_coming_soon
-                            ? 'border-purple-500 bg-purple-50' 
-                            : 'border-gray-200 bg-white hover:border-purple-300 hover:bg-purple-25'
-                        }`}>
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="font-medium text-sm text-gray-800">Coming Soon</span>
-                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                              newProduct.show_in_coming_soon
-                                ? 'border-purple-500 bg-purple-500' 
-                                : 'border-gray-300'
-                            }`}>
-                              {newProduct.show_in_coming_soon && 
-                                <span className="text-white text-xs">✓</span>
-                              }
-                            </div>
-                          </div>
-                          <p className="text-xs text-gray-600">Exclusive preview section</p>
-                        </div>
-                      </div>
 
                       {/* Staff Picks Section */}
                       <div 
@@ -1470,7 +1526,6 @@ export default function AdminDashboard() {
                       status: 'live',
                       show_in_new_releases: false,
                       show_in_featured: true,
-                      show_in_coming_soon: true,
                       show_in_staff_picks: false,
                       show_in_limited_editions: false,
                       out_of_stock: false,

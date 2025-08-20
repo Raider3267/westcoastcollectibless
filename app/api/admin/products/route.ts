@@ -54,6 +54,11 @@ export async function GET() {
       price: parseFloat(product.price) || 0,
       images: product.images || '',
       status: product.status || 'live',
+      sale_state: product.sale_state || null,
+      release_at: product.release_at || null,
+      featured: product.featured === 'true' || product.featured === 1 || product.featured === '1',
+      staff_pick: product.staff_pick === 'true' || product.staff_pick === 1 || product.staff_pick === '1',
+      limited_edition: product.limited_edition === 'true' || product.limited_edition === 1 || product.limited_edition === '1',
       drop_date: product.drop_date || '',
       released_date: product.released_date || '',
       show_in_new_releases: product.show_in_new_releases === 'true' || product.show_in_new_releases === 1 || product.show_in_new_releases === '1',
@@ -116,7 +121,13 @@ export async function PUT(request: NextRequest) {
       show_in_staff_picks: (body.show_in_staff_picks === true || body.show_in_staff_picks === 'true' || body.show_in_staff_picks === 1 || body.show_in_staff_picks === '1') ? 'true' : 'false',
       show_in_limited_editions: (body.show_in_limited_editions === true || body.show_in_limited_editions === 'true' || body.show_in_limited_editions === 1 || body.show_in_limited_editions === '1') ? 'true' : 'false',
       out_of_stock: (body.out_of_stock === true || body.out_of_stock === 'true' || body.out_of_stock === 1 || body.out_of_stock === '1') ? 'true' : 'false',
-      show_in_featured_while_coming_soon: (body.show_in_featured_while_coming_soon === true || body.show_in_featured_while_coming_soon === 'true' || body.show_in_featured_while_coming_soon === 1 || body.show_in_featured_while_coming_soon === '1') ? 'true' : 'false'
+      show_in_featured_while_coming_soon: (body.show_in_featured_while_coming_soon === true || body.show_in_featured_while_coming_soon === 'true' || body.show_in_featured_while_coming_soon === 1 || body.show_in_featured_while_coming_soon === '1') ? 'true' : 'false',
+      // New sale_state system fields
+      sale_state: body.sale_state || '',
+      release_at: body.release_at || '',
+      featured: (body.featured === true || body.featured === 'true' || body.featured === 1 || body.featured === '1') ? 'true' : 'false',
+      staff_pick: (body.staff_pick === true || body.staff_pick === 'true' || body.staff_pick === 1 || body.staff_pick === '1') ? 'true' : 'false',
+      limited_edition: (body.limited_edition === true || body.limited_edition === 'true' || body.limited_edition === 1 || body.limited_edition === '1') ? 'true' : 'false'
     }
     products[productIndex] = updatedProduct
     
@@ -217,6 +228,11 @@ export async function POST(request: NextRequest) {
       brand: '',
       cost: '', // Keep existing cost field for eBay compatibility
       status: 'live',
+      sale_state: '',
+      release_at: '',
+      featured: 'false',
+      staff_pick: 'false',
+      limited_edition: 'false',
       drop_date: '',
       released_date: '',
       show_in_new_releases: 'false',

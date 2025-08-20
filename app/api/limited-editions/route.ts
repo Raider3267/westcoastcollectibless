@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server'
-import { getLimitedEditions } from '../../../lib/staff-picks'
+import { getLimitedEditionsProducts } from '../../../lib/product-queries'
 
 export async function GET() {
   try {
-    const products = await getLimitedEditions('export.csv')
+    const products = await getLimitedEditionsProducts('export.csv')
     return NextResponse.json(products)
   } catch (error) {
     console.error('GET /api/limited-editions error:', error)

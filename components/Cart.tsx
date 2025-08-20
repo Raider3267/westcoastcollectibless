@@ -40,6 +40,14 @@ export default function Cart() {
   })
   
   const [sameAsBilling, setSameAsBilling] = useState(true)
+  
+  // Shipping calculation state
+  const [shippingRates, setShippingRates] = useState<any[]>([])
+  const [selectedShipping, setSelectedShipping] = useState<any>(null)
+  const [isCalculatingShipping, setIsCalculatingShipping] = useState(false)
+  const [shippingError, setShippingError] = useState('')
+  const [showShippingSelection, setShowShippingSelection] = useState(false)
+  const [needsShippingCalculation, setNeedsShippingCalculation] = useState(false)
 
   // Prevent body scroll when cart is open
   useEffect(() => {
@@ -57,6 +65,59 @@ export default function Cart() {
   const handleCheckout = async () => {
     setIsCheckingOut(true)
     setPaymentError('') // Clear any previous payment errors
+  }
+
+  // Calculate shipping rates when address is complete
+  const calculateShipping = async () => {
+    const shippingAddress = sameAsBilling ? billingInfo : shippingInfo
+    
+    // Check if address is complete
+    if (!shippingAddress.firstName || !shippingAddress.lastName || !shippingAddress.address || 
+        !shippingAddress.city || !shippingAddress.state || !shippingAddress.zipCode) {
+      return
+    }
+    
+    setIsCalculatingShipping(true)
+    setShippingError('')
+    
+    try {
+      const { calculateShippingRates, calculateCartWeight } = await import('../lib/shipping')
+      
+      // Calculate cart weight
+      const cartItems = state.items.map(item => ({
+        sku: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        weight: item.weight || 0.3
+      }))
+      
+      const totalWeight = calculateCartWeight(cartItems)
+      const orderSubtotal = Math.round(state.totalPrice * 100) // Convert to cents
+      
+      // Prepare shipping address
+      const address = {
+        name: `${shippingAddress.firstName} ${shippingAddress.lastName}`,
+        address: shippingAddress.address,
+        city: shippingAddress.city,
+        state: shippingAddress.state,
+        zipCode: shippingAddress.zipCode,
+        country: shippingAddress.country || 'US'
+      }
+      
+      const rates = calculateShippingRates(address, orderSubtotal, totalWeight)
+      setShippingRates(rates)
+      
+      if (rates.length > 0) {
+        setSelectedShipping(rates[0]) // Select cheapest by default
+        setShowShippingSelection(true)
+      }
+    } catch (error) {
+      console.error('Shipping calculation error:', error)
+      setShippingError('Failed to calculate shipping rates. Please try again.')
+    } finally {
+      setIsCalculatingShipping(false)
+    }
   }
 
   const handleCreateOrder = async () => {
@@ -77,6 +138,20 @@ export default function Cart() {
         setIsCreatingOrder(false)
         return
       }
+    }
+    
+    // Check if shipping has been calculated
+    if (!showShippingSelection) {
+      setPaymentError('Please calculate shipping costs first.')
+      setIsCreatingOrder(false)
+      setNeedsShippingCalculation(true)
+      return
+    }
+    
+    if (!selectedShipping) {
+      setPaymentError('Please select a shipping option.')
+      setIsCreatingOrder(false)
+      return
     }
 
     try {
@@ -258,9 +333,21 @@ export default function Cart() {
                     </div>
                   ))}
                 </div>
-                <div className="border-t border-gray-200 mt-3 pt-3 flex justify-between font-semibold">
-                  <span>Total</span>
-                  <span>${state.totalPrice.toFixed(2)}</span>
+                <div className="border-t border-gray-200 mt-3 pt-3">
+                  <div className="flex justify-between text-sm text-gray-600 mb-1">
+                    <span>Subtotal</span>
+                    <span>${state.totalPrice.toFixed(2)}</span>
+                  </div>
+                  {selectedShipping && (
+                    <div className="flex justify-between text-sm text-gray-600 mb-2">
+                      <span>Shipping ({selectedShipping.service.replace('_', ' ')})</span>
+                      <span>{selectedShipping.cost === 0 ? 'FREE' : `$${(selectedShipping.cost / 100).toFixed(2)}`}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between font-semibold text-lg">
+                    <span>Total</span>
+                    <span>${(((state.totalPrice * 100) + (selectedShipping?.cost || 0)) / 100).toFixed(2)}</span>
+                  </div>
                 </div>
               </div>
 
@@ -346,7 +433,12 @@ export default function Cart() {
                     <input
                       type="checkbox"
                       checked={sameAsBilling}
-                      onChange={(e) => setSameAsBilling(e.target.checked)}
+                      onChange={(e) => {
+                        setSameAsBilling(e.target.checked)
+                        setShowShippingSelection(false)
+                        setShippingRates([])
+                        setSelectedShipping(null)
+                      }}
                       className="mr-2"
                     />
                     Same as billing
@@ -360,7 +452,10 @@ export default function Cart() {
                         type="text"
                         placeholder="First Name"
                         value={shippingInfo.firstName}
-                        onChange={(e) => setShippingInfo({...shippingInfo, firstName: e.target.value})}
+                        onChange={(e) => {
+                          setShippingInfo({...shippingInfo, firstName: e.target.value})
+                          setShowShippingSelection(false)
+                        }}
                         className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         required
                       />
@@ -368,7 +463,10 @@ export default function Cart() {
                         type="text"
                         placeholder="Last Name"
                         value={shippingInfo.lastName}
-                        onChange={(e) => setShippingInfo({...shippingInfo, lastName: e.target.value})}
+                        onChange={(e) => {
+                          setShippingInfo({...shippingInfo, lastName: e.target.value})
+                          setShowShippingSelection(false)
+                        }}
                         className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         required
                       />
@@ -377,7 +475,10 @@ export default function Cart() {
                       type="text"
                       placeholder="Street Address"
                       value={shippingInfo.address}
-                      onChange={(e) => setShippingInfo({...shippingInfo, address: e.target.value})}
+                      onChange={(e) => {
+                        setShippingInfo({...shippingInfo, address: e.target.value})
+                        setShowShippingSelection(false)
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       required
                     />
@@ -386,7 +487,10 @@ export default function Cart() {
                         type="text"
                         placeholder="City"
                         value={shippingInfo.city}
-                        onChange={(e) => setShippingInfo({...shippingInfo, city: e.target.value})}
+                        onChange={(e) => {
+                          setShippingInfo({...shippingInfo, city: e.target.value})
+                          setShowShippingSelection(false)
+                        }}
                         className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         required
                       />
@@ -394,7 +498,10 @@ export default function Cart() {
                         type="text"
                         placeholder="State"
                         value={shippingInfo.state}
-                        onChange={(e) => setShippingInfo({...shippingInfo, state: e.target.value})}
+                        onChange={(e) => {
+                          setShippingInfo({...shippingInfo, state: e.target.value})
+                          setShowShippingSelection(false)
+                        }}
                         className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         required
                       />
@@ -402,14 +509,73 @@ export default function Cart() {
                         type="text"
                         placeholder="ZIP Code"
                         value={shippingInfo.zipCode}
-                        onChange={(e) => setShippingInfo({...shippingInfo, zipCode: e.target.value})}
+                        onChange={(e) => {
+                          setShippingInfo({...shippingInfo, zipCode: e.target.value})
+                          setShowShippingSelection(false)
+                        }}
                         className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         required
                       />
                     </div>
                   </div>
                 )}
+                
+                {/* Calculate Shipping Button */}
+                <div className="mt-4">
+                  <button
+                    onClick={calculateShipping}
+                    disabled={isCalculatingShipping}
+                    className="w-full py-2 px-4 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
+                  >
+                    {isCalculatingShipping ? 'Calculating...' : 'Calculate Shipping Costs'}
+                  </button>
+                  {needsShippingCalculation && (
+                    <p className="text-sm text-amber-600 mt-2">
+                      Please calculate shipping costs before proceeding to payment.
+                    </p>
+                  )}
+                </div>
               </div>
+              
+              {/* Shipping Options Selection */}
+              {showShippingSelection && shippingRates.length > 0 && (
+                <div className="p-4 border-b border-gray-200">
+                  <h3 className="font-medium text-gray-900 mb-3">Select Shipping Option</h3>
+                  
+                  {shippingError && (
+                    <div className="mb-3 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                      {shippingError}
+                    </div>
+                  )}
+                  
+                  <div className="space-y-2">
+                    {shippingRates.map((rate, index) => (
+                      <label key={index} className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                        <input
+                          type="radio"
+                          name="shipping"
+                          checked={selectedShipping?.service === rate.service}
+                          onChange={() => setSelectedShipping(rate)}
+                          className="mr-3"
+                        />
+                        <div className="flex-1">
+                          <div className="flex justify-between items-center">
+                            <span className="font-medium text-gray-900 capitalize">
+                              {rate.service.replace('_', ' ')}
+                            </span>
+                            <span className="font-semibold text-gray-900">
+                              {rate.cost === 0 ? 'FREE' : `$${(rate.cost / 100).toFixed(2)}`}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600">
+                            {rate.description} • Estimated {rate.estimatedDays} business days
+                          </p>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Payment Error Display */}
               {paymentError && (
@@ -425,10 +591,10 @@ export default function Cart() {
                   <>
                     <button
                       onClick={handleCreateOrder}
-                      disabled={isCreatingOrder}
+                      disabled={isCreatingOrder || !showShippingSelection}
                       className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
                     >
-                      {isCreatingOrder ? 'Creating Order...' : `Continue to Payment - $${state.totalPrice.toFixed(2)}`}
+                      {isCreatingOrder ? 'Creating Order...' : `Continue to Payment - $${(((state.totalPrice * 100) + (selectedShipping?.cost || 0)) / 100).toFixed(2)}`}
                     </button>
                     <p className="text-xs text-gray-500 mt-2 text-center">
                       Next step: Complete payment with Square
@@ -442,7 +608,7 @@ export default function Cart() {
                       </p>
                     </div>
                     <SquarePayment
-                      amount={Math.round(state.totalPrice * 100)} // Convert to cents
+                      amount={Math.round((state.totalPrice * 100) + (selectedShipping?.cost || 0))} // Include shipping
                       currency="USD"
                       productName={`Order (${state.totalItems} items)`}
                       productSku={`cart-${Date.now()}`}

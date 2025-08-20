@@ -74,6 +74,154 @@ export async function addEmailSubscriber(email: string, firstName?: string): Pro
   }
 }
 
+export interface EmailReceiptData {
+  customerEmail: string
+  receiptNumber: string
+  receiptUrl: string
+  orderTotal: number
+  currency: string
+  orderItems: Array<{
+    name: string
+    sku: string
+    quantity: number
+    price: number
+  }>
+  paymentMethod: string
+  transactionId: string
+  orderDate: string
+  shippingAddress?: {
+    name: string
+    address: string
+    city: string
+    state: string
+    zipCode: string
+    country: string
+  }
+  shippingCost?: number
+}
+
+export async function sendEmailReceipt(receiptData: EmailReceiptData) {
+  try {
+    const { customerEmail, receiptNumber, receiptUrl, orderTotal, currency, orderItems, paymentMethod, transactionId, orderDate, shippingAddress, shippingCost } = receiptData
+    
+    const orderSubtotal = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+    const finalTotal = orderSubtotal + (shippingCost || 0)
+    
+    const emailHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Purchase Receipt - West Coast Collectibles</title>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 20px; background-color: #f4f4f4; }
+            .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+            .header { text-align: center; border-bottom: 2px solid #4F46E5; padding-bottom: 20px; margin-bottom: 30px; }
+            .logo { font-size: 24px; font-weight: bold; color: #4F46E5; margin-bottom: 5px; }
+            .receipt-info { background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 25px; }
+            .order-items { margin-bottom: 25px; }
+            .item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
+            .item:last-child { border-bottom: none; }
+            .totals { background: #f8f9fa; padding: 20px; border-radius: 6px; margin-bottom: 25px; }
+            .total-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+            .total-row.final { font-weight: bold; font-size: 18px; padding-top: 10px; border-top: 2px solid #4F46E5; }
+            .shipping { margin-bottom: 25px; padding: 15px; background: #f0f9ff; border-radius: 6px; }
+            .button { display: inline-block; padding: 12px 24px; background: #4F46E5; color: white; text-decoration: none; border-radius: 6px; margin: 10px 0; }
+            .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; color: #666; font-size: 14px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <div class="logo">West Coast Collectibles</div>
+              <p>Thank you for your purchase!</p>
+            </div>
+            
+            <div class="receipt-info">
+              <h3>Receipt Details</h3>
+              <p><strong>Receipt #:</strong> ${receiptNumber}</p>
+              <p><strong>Transaction ID:</strong> ${transactionId}</p>
+              <p><strong>Order Date:</strong> ${new Date(orderDate).toLocaleDateString()}</p>
+              <p><strong>Payment Method:</strong> ${paymentMethod}</p>
+            </div>
+            
+            <div class="order-items">
+              <h3>Order Items</h3>
+              ${orderItems.map(item => `
+                <div class="item">
+                  <div>
+                    <strong>${item.name}</strong><br>
+                    <small>SKU: ${item.sku} | Qty: ${item.quantity}</small>
+                  </div>
+                  <div>$${(item.price * item.quantity / 100).toFixed(2)}</div>
+                </div>
+              `).join('')}
+            </div>
+            
+            <div class="totals">
+              <div class="total-row">
+                <span>Subtotal:</span>
+                <span>$${(orderSubtotal / 100).toFixed(2)}</span>
+              </div>
+              ${shippingCost ? `
+                <div class="total-row">
+                  <span>Shipping:</span>
+                  <span>$${(shippingCost / 100).toFixed(2)}</span>
+                </div>
+              ` : ''}
+              <div class="total-row final">
+                <span>Total:</span>
+                <span>$${(finalTotal / 100).toFixed(2)}</span>
+              </div>
+            </div>
+            
+            ${shippingAddress ? `
+              <div class="shipping">
+                <h3>Shipping Address</h3>
+                <p>
+                  ${shippingAddress.name}<br>
+                  ${shippingAddress.address}<br>
+                  ${shippingAddress.city}, ${shippingAddress.state} ${shippingAddress.zipCode}<br>
+                  ${shippingAddress.country}
+                </p>
+              </div>
+            ` : ''}
+            
+            <div style="text-align: center;">
+              <a href="${receiptUrl}" class="button">View Online Receipt</a>
+            </div>
+            
+            <div class="footer">
+              <p>Questions about your order? Contact us at support@westcoastcollectibles.com</p>
+              <p>West Coast Collectibles | Bringing you the best collectibles</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `
+    
+    const { data, error } = await resend.emails.send({
+      from: 'West Coast Collectibles <receipts@westcoastcollectibles.com>',
+      to: [customerEmail],
+      subject: `Purchase Receipt #${receiptNumber} - West Coast Collectibles`,
+      html: emailHtml,
+    })
+    
+    if (error) {
+      console.error('Email send error:', error)
+      return { success: false, error }
+    }
+    
+    console.log('Email receipt sent successfully:', data)
+    return { success: true, data }
+    
+  } catch (error) {
+    console.error('Email receipt error:', error)
+    return { success: false, error }
+  }
+}
+
 export async function sendProductDropNotification(
   email: string, 
   productName: string, 

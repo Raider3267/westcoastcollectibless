@@ -20,6 +20,13 @@ export type Listing = {
   stripeLink?: string | null
   description?: string | null
   quantity?: number
+  // New product state system
+  sale_state?: 'DRAFT' | 'PREVIEW' | 'LIVE' | 'ARCHIVED'
+  release_at?: string | null  // UTC datetime
+  featured?: boolean
+  staff_pick?: boolean
+  limited_edition?: boolean
+  // Legacy fields (still supported for backward compatibility)
   status?: 'live' | 'coming-soon' | 'draft'
   drop_date?: string | null
   released_date?: string | null
@@ -116,9 +123,10 @@ export async function getListingsFromCsv(filename = 'export.csv', includeOutOfSt
       const quantityStr = FIRST<string>(row['quantity'], row['Quantity'])
       const quantity = quantityStr ? Number(String(quantityStr).replace(/[^0-9]/g, '')) : 0
 
-      // Get all images from the comma-separated image URLs
+      // Get all images from the comma or pipe-separated image URLs
       const imagesString = FIRST<string>(row['images'], row['Images']) || ''
-      const imageUrls = imagesString.split(',').map(url => url.trim()).filter(url => url)
+      const separator = imagesString.includes('|') ? '|' : ','
+      const imageUrls = imagesString.split(separator).map(url => url.trim()).filter(url => url)
       const image = imageUrls[0] || null
       const images = imageUrls.length > 0 ? imageUrls : []
 
@@ -164,6 +172,21 @@ export async function getListingsFromCsv(filename = 'export.csv', includeOutOfSt
       const show_in_featured_while_coming_soon_val = FIRST<string>(row['show_in_featured_while_coming_soon'], row['Show In Featured While Coming Soon'])
       const show_in_featured_while_coming_soon = show_in_featured_while_coming_soon_val === 'true' || show_in_featured_while_coming_soon_val === '1' || show_in_featured_while_coming_soon_val === 1
 
+      // Get new product state fields
+      const sale_state_val = FIRST<string>(row['sale_state'], row['Sale State'])
+      const sale_state = (['DRAFT', 'PREVIEW', 'LIVE', 'ARCHIVED'].includes(sale_state_val) ? sale_state_val : null) as 'DRAFT' | 'PREVIEW' | 'LIVE' | 'ARCHIVED' | null
+      
+      const release_at = FIRST<string>(row['release_at'], row['Release At']) || null
+      
+      const featured_val = FIRST<string>(row['featured'], row['Featured'])
+      const featured = featured_val === 'true' || featured_val === '1' || featured_val === 1
+      
+      const staff_pick_val = FIRST<string>(row['staff_pick'], row['Staff Pick'])
+      const staff_pick = staff_pick_val === 'true' || staff_pick_val === '1' || staff_pick_val === 1
+      
+      const limited_edition_val = FIRST<string>(row['limited_edition'], row['Limited Edition'])
+      const limited_edition = limited_edition_val === 'true' || limited_edition_val === '1' || limited_edition_val === 1
+
       // Get weight and dimensions
       const weightStr = FIRST<string>(row['weight'], row['Weight'])
       const weight = weightStr ? Number(String(weightStr).replace(/[^0-9.]/g, '')) : 0.3 // Default 0.3 lbs for collectibles
@@ -187,6 +210,13 @@ export async function getListingsFromCsv(filename = 'export.csv', includeOutOfSt
         stripeLink, 
         description,
         quantity,
+        // New fields
+        sale_state,
+        release_at,
+        featured,
+        staff_pick,
+        limited_edition,
+        // Legacy fields
         status,
         drop_date,
         released_date,
@@ -208,21 +238,33 @@ export async function getListingsFromCsv(filename = 'export.csv', includeOutOfSt
       // Filter out items without basic required fields
       if (!item.name || item.name.trim() === '' || item.name === 'Item 1' || item.name.includes('Item ')) return false
       
-      // Include live products OR coming-soon products with featured toggle enabled
-      if (item.status === 'live') {
-        // Live products are included
-      } else if (item.status === 'coming-soon' && item.show_in_featured_while_coming_soon) {
-        // Coming-soon products with featured toggle are included
+      // New product state system: Include based on sale_state if available
+      if (item.sale_state) {
+        // Use new sale_state system
+        if (['PREVIEW', 'LIVE'].includes(item.sale_state)) {
+          // PREVIEW and LIVE products are included
+        } else {
+          // Skip DRAFT and ARCHIVED products
+          return false
+        }
       } else {
-        // Skip draft products and coming-soon without featured toggle
-        return false
+        // Fallback to legacy status system
+        if (item.status === 'live') {
+          // Live products are included
+        } else if (item.status === 'coming-soon' && item.show_in_featured_while_coming_soon) {
+          // Coming-soon products with featured toggle are included
+        } else {
+          // Skip draft products and coming-soon without featured toggle
+          return false
+        }
       }
       
       // Always require a price
       if (!item.price || item.price <= 0) return false
       
       // Filter by stock unless out-of-stock items are specifically requested
-      if (!includeOutOfStock && (item.out_of_stock || (!item.quantity || item.quantity <= 0))) return false
+      // PREVIEW items are always included regardless of stock (quantity is for tracking ordered items)
+      if (!includeOutOfStock && item.sale_state !== 'PREVIEW' && (item.out_of_stock || (!item.quantity || item.quantity <= 0))) return false
       
       // Filter out items without images
       if (!item.image || item.image.trim() === '') return false
@@ -275,9 +317,10 @@ export async function getComingSoonProducts(filename = 'export.csv'): Promise<Li
       const quantityStr = FIRST<string>(row['quantity'], row['Quantity'])
       const quantity = quantityStr ? Number(String(quantityStr).replace(/[^0-9]/g, '')) : 0
 
-      // Get all images from the comma-separated image URLs
+      // Get all images from the comma or pipe-separated image URLs
       const imagesString = FIRST<string>(row['images'], row['Images']) || ''
-      const imageUrls = imagesString.split(',').map(url => url.trim()).filter(url => url)
+      const separator = imagesString.includes('|') ? '|' : ','
+      const imageUrls = imagesString.split(separator).map(url => url.trim()).filter(url => url)
       const image = imageUrls[0] || null
       const images = imageUrls.length > 0 ? imageUrls : []
 
@@ -320,6 +363,21 @@ export async function getComingSoonProducts(filename = 'export.csv'): Promise<Li
       const show_in_featured_while_coming_soon_val = FIRST<string>(row['show_in_featured_while_coming_soon'], row['Show In Featured While Coming Soon'])
       const show_in_featured_while_coming_soon = show_in_featured_while_coming_soon_val === 'true' || show_in_featured_while_coming_soon_val === '1' || show_in_featured_while_coming_soon_val === 1
 
+      // Get new product state fields
+      const sale_state_val = FIRST<string>(row['sale_state'], row['Sale State'])
+      const sale_state = (['DRAFT', 'PREVIEW', 'LIVE', 'ARCHIVED'].includes(sale_state_val) ? sale_state_val : null) as 'DRAFT' | 'PREVIEW' | 'LIVE' | 'ARCHIVED' | null
+      
+      const release_at = FIRST<string>(row['release_at'], row['Release At']) || null
+      
+      const featured_val = FIRST<string>(row['featured'], row['Featured'])
+      const featured = featured_val === 'true' || featured_val === '1' || featured_val === 1
+      
+      const staff_pick_val = FIRST<string>(row['staff_pick'], row['Staff Pick'])
+      const staff_pick = staff_pick_val === 'true' || staff_pick_val === '1' || staff_pick_val === 1
+      
+      const limited_edition_val = FIRST<string>(row['limited_edition'], row['Limited Edition'])
+      const limited_edition = limited_edition_val === 'true' || limited_edition_val === '1' || limited_edition_val === 1
+
       // Get weight and dimensions
       const weightStr = FIRST<string>(row['weight'], row['Weight'])
       const weight = weightStr ? Number(String(weightStr).replace(/[^0-9.]/g, '')) : 0.3 // Default 0.3 lbs for collectibles
@@ -343,6 +401,13 @@ export async function getComingSoonProducts(filename = 'export.csv'): Promise<Li
         stripeLink, 
         description,
         quantity,
+        // New fields
+        sale_state,
+        release_at,
+        featured,
+        staff_pick,
+        limited_edition,
+        // Legacy fields
         status,
         drop_date,
         released_date,

@@ -13,6 +13,52 @@ export async function createSquareOrder(cartData: {
   shippingInfo: any
 }) {
   try {
+    // Purchase validation: Block checkout unless sale_state = LIVE and quantity > 0
+    const { getListingsFromCsv } = await import('../../lib/listings')
+    const { canPurchaseProduct } = await import('../../lib/product-queries')
+    
+    // Get all products to validate cart items
+    const allProducts = await getListingsFromCsv('export.csv', true)
+    
+    // Validate each cart item
+    for (const cartItem of cartData.items) {
+      const product = allProducts.find(p => p.id === cartItem.id)
+      
+      if (!product) {
+        return {
+          success: false,
+          error: `Product ${cartItem.name} not found`
+        }
+      }
+      
+      if (!canPurchaseProduct(product)) {
+        const saleState = product.sale_state || (
+          product.status === 'live' ? 'LIVE' : 'DRAFT'
+        )
+        
+        if (saleState === 'PREVIEW') {
+          return {
+            success: false,
+            error: `Product ${product.name} is coming soon and not yet available for purchase. Please use "Notify Me" to get updates.`
+          }
+        }
+        
+        if (saleState !== 'LIVE') {
+          return {
+            success: false,
+            error: `Product ${product.name} is not available for purchase (status: ${saleState})`
+          }
+        }
+        
+        if ((product.quantity || 0) <= 0) {
+          return {
+            success: false,
+            error: `Product ${product.name} is out of stock`
+          }
+        }
+      }
+    }
+    
     // Import and call the API route handler directly
     const { randomUUID } = await import('crypto')
     const { calculateShippingRates, calculateCartWeight } = await import('../../lib/shipping')

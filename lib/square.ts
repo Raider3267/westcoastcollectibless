@@ -23,6 +23,26 @@ export interface PaymentRequest {
   buyerEmailAddress?: string
   note?: string
   orderId?: string
+  shippingAddress?: {
+    address_line_1: string
+    address_line_2?: string
+    locality: string // city
+    administrative_district_level_1: string // state
+    postal_code: string
+    country: string
+    first_name?: string
+    last_name?: string
+  }
+  lineItems?: Array<{
+    name: string
+    quantity: string
+    item_type: string
+    base_price_money: {
+      amount: number
+      currency: string
+    }
+    variation_name?: string
+  }>
 }
 
 export async function createPayment(paymentRequest: PaymentRequest) {
@@ -39,7 +59,8 @@ export async function createPayment(paymentRequest: PaymentRequest) {
       amount_money: {
         amount: amountCents,
         currency: paymentRequest.amountMoney.currency
-      }
+      },
+      autocomplete: true // This ensures immediate payment processing
     }
     
     // Only add optional fields if they exist
@@ -51,6 +72,17 @@ export async function createPayment(paymentRequest: PaymentRequest) {
     }
     if (paymentRequest.orderId) {
       paymentData.order_id = paymentRequest.orderId
+    }
+    if (paymentRequest.shippingAddress) {
+      paymentData.shipping_address = paymentRequest.shippingAddress
+    }
+    
+    // Add line items if provided
+    if (paymentRequest.lineItems && paymentRequest.lineItems.length > 0) {
+      paymentData.order = {
+        location_id: process.env.SQUARE_LOCATION_ID,
+        line_items: paymentRequest.lineItems
+      }
     }
     
     console.log('Clean payment data:', JSON.stringify(paymentData, null, 2))
@@ -109,16 +141,26 @@ export async function createCustomer(customerData: {
   phoneNumber?: string
 }) {
   try {
-    const { result } = await customersApi.create({
+    const response = await customersApi.create({
       emailAddress: customerData.emailAddress,
       givenName: customerData.givenName,
       familyName: customerData.familyName,
       phoneNumber: customerData.phoneNumber,
     })
     
-    return {
-      success: true,
-      customer: result.customer,
+    console.log('Customer creation response:', response)
+    
+    if (response.result && response.result.customer) {
+      return {
+        success: true,
+        customer: response.result.customer,
+      }
+    } else {
+      console.error('No customer in response:', response)
+      return {
+        success: false,
+        error: { detail: 'Customer creation failed - no customer returned' },
+      }
     }
   } catch (error: any) {
     console.error('Square customer creation error:', error)

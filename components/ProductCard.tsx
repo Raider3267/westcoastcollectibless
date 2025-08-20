@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react'
 import ProductModal from './ProductModal'
 import DetailsButton from './DetailsButton'
 import ImageCarousel from './ImageCarousel'
+import ProductChip from './ProductChip'
+import ProductCTAButton from './ProductCTAButton'
+import NotifyMeModal from './NotifyMeModal'
 import { AuthService } from '../lib/auth'
 import { useCart } from '../lib/cart'
 
@@ -17,6 +20,13 @@ type Product = {
   stripeLink?: string | null
   description?: string | null
   quantity?: number
+  // New product state system
+  sale_state?: 'DRAFT' | 'PREVIEW' | 'LIVE' | 'ARCHIVED'
+  release_at?: string | null
+  featured?: boolean
+  staff_pick?: boolean
+  limited_edition?: boolean
+  // Legacy fields (still supported)
   status?: 'live' | 'coming-soon' | 'draft'
   drop_date?: string | null
   released_date?: string | null
@@ -24,6 +34,7 @@ type Product = {
   show_in_featured?: boolean
   show_in_coming_soon?: boolean
   out_of_stock?: boolean
+  weight?: number
 }
 
 interface ProductCardProps {
@@ -34,9 +45,25 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, cardColor, randomEmoji }: ProductCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isNotifyModalOpen, setIsNotifyModalOpen] = useState(false)
   const [isInWishlist, setIsInWishlist] = useState(false)
   const [user, setUser] = useState(AuthService.getCurrentUser())
   const { addItem } = useCart()
+  
+  // Convert legacy status to new sale_state system
+  const getSaleState = (): 'DRAFT' | 'PREVIEW' | 'LIVE' | 'ARCHIVED' => {
+    if (product.sale_state) {
+      return product.sale_state
+    }
+    // Legacy conversion
+    if (product.status === 'coming-soon') return 'PREVIEW'
+    if (product.status === 'live') return 'LIVE'
+    if (product.status === 'draft') return 'DRAFT'
+    return 'LIVE' // Default fallback
+  }
+  
+  const saleState = getSaleState()
+  const releaseAt = product.release_at || product.drop_date
   
   useEffect(() => {
     setUser(AuthService.getCurrentUser())
@@ -60,6 +87,20 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
       AuthService.addToWishlist(product.id)
       setIsInWishlist(true)
     }
+  }
+  
+  const handleAddToCart = () => {
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price || 0,
+      image: product.image || undefined,
+      weight: product.weight || 0.3
+    })
+  }
+  
+  const handleNotifyMe = () => {
+    setIsNotifyModalOpen(true)
   }
   
   const handleCreateAlert = (e: React.MouseEvent) => {
@@ -101,36 +142,38 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
   return (
     <>
       <article className={`product-card wcc-card ${accentClass} group`} style={{ overflow: 'hidden' }}>
-        {/* Enhanced badge for featured/new items */}
-        {product.show_in_new_releases && (
+        {/* Product status chip */}
+        <div style={{
+          position: 'absolute',
+          top: '12px',
+          right: '12px',
+          zIndex: 15
+        }}>
+          <ProductChip 
+            sale_state={saleState}
+            release_at={releaseAt}
+            quantity={product.quantity}
+          />
+        </div>
+        
+        {/* Featured badge */}
+        {product.featured && (
           <div className="luxury-badge featured" style={{
             position: 'absolute',
             top: '12px',
-            right: '12px',
-            zIndex: 15
-          }}>
-            ✨ NEW
-          </div>
-        )}
-        
-        {/* Out of stock overlay */}
-        {(product.out_of_stock || (!product.quantity || product.quantity <= 0)) && (
-          <div style={{
-            position: 'absolute',
-            top: '12px',
             left: '12px',
-            background: 'rgba(220, 53, 69, 0.9)',
-            color: 'white',
-            padding: '6px 12px',
-            borderRadius: '999px',
-            fontSize: '0.8rem',
-            fontWeight: 700,
             zIndex: 15,
+            background: 'rgba(255, 215, 0, 0.9)',
+            color: '#000',
+            padding: '4px 8px',
+            borderRadius: '999px',
+            fontSize: '0.7rem',
+            fontWeight: 700,
             backdropFilter: 'blur(4px)',
             border: '2px solid white',
-            boxShadow: '0 4px 12px rgba(220, 53, 69, 0.3)'
+            boxShadow: '0 4px 12px rgba(255, 215, 0, 0.3)'
           }}>
-            🚫 OUT OF STOCK
+            ⭐ FEATURED
           </div>
         )}
         
@@ -167,56 +210,16 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
           )}
           
           <div className="wcc-actions" style={{ position: 'relative', zIndex: 10, width: '100%', display: 'flex', gap: '8px' }}>
-            {(product.out_of_stock || (!product.quantity || product.quantity <= 0)) ? (
-              <button
-                className="btn wcc-btn"
-                style={{ 
-                  pointerEvents: 'all',
-                  cursor: 'pointer',
-                  position: 'relative',
-                  zIndex: 11,
-                  display: 'inline-flex',
-                  flex: 1,
-                  justifyContent: 'center',
-                  fontSize: '0.9rem',
-                  fontWeight: 600,
-                  background: 'linear-gradient(135deg, #6c757d, #95a5a6)',
-                  color: 'white',
-                  border: 'none'
-                }}
-                onClick={handleCreateAlert}
-              >
-                Get Alert
-              </button>
-            ) : (
-              <button
-                className="btn wcc-btn wcc-btn--grad"
-                style={{ 
-                  pointerEvents: 'all',
-                  cursor: 'pointer',
-                  position: 'relative',
-                  zIndex: 11,
-                  display: 'inline-flex',
-                  flex: 1,
-                  justifyContent: 'center',
-                  fontSize: '0.9rem',
-                  fontWeight: 600
-                }}
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  addItem({
-                    id: product.id,
-                    name: product.name,
-                    price: product.price || 0,
-                    image: product.image || undefined,
-                    weight: product.weight || 0.3 // Default weight for collectibles
-                  })
-                }}
-              >
-                Add to Cart
-              </button>
-            )}
+            <ProductCTAButton
+              sale_state={saleState}
+              quantity={product.quantity}
+              price={product.price}
+              productId={product.id}
+              productName={product.name}
+              onAddToCart={handleAddToCart}
+              onNotifyMe={handleNotifyMe}
+              className="flex-1"
+            />
             <button 
               type="button"
               className="btn wcc-btn"
@@ -245,6 +248,13 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
         product={product}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+      />
+      
+      <NotifyMeModal
+        isOpen={isNotifyModalOpen}
+        productId={product.id}
+        productName={product.name}
+        onClose={() => setIsNotifyModalOpen(false)}
       />
     </>
   )
