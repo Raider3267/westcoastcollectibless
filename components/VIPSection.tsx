@@ -77,24 +77,25 @@ export default function VIPSection({ className = '' }: VIPSectionProps) {
           {/* Hero Strip */}
           <div className="vip-hero">
             <div className="vip-hero-content">
-              <div className="vip-text">
-                <h2 className="vip-title">
-                  <span className="vip-title-text">Become a Collector</span>
-                  <span className="vip-badge">(Coming Soon)</span>
-                </h2>
-                <p className="vip-subtitle">
-                  Our VIP collector program is launching soon! Sign up to be notified when advanced features like early access, curated picks, and exclusive perks become available.
-                </p>
-              </div>
-              
-              <div className="vip-form">
-                <button 
-                  onClick={handleSignUp}
-                  className="vip-join-button"
-                >
-                  Sign Up to Get Notified
-                </button>
-                <p className="vip-privacy">Create an account to get notified about VIP features, exclusive drops, and collector updates.</p>
+              <div className="vip-content-wrapper">
+                <div className="vip-text">
+                  <h2 className="vip-title">
+                    <span className="vip-title-text">Become a Collector</span>
+                  </h2>
+                  <p className="vip-subtitle">
+                    Our VIP collector program is launching soon! Sign up to be notified when advanced features like early access, curated picks, and exclusive perks become available.
+                  </p>
+                </div>
+                
+                <div className="vip-form">
+                  <button 
+                    onClick={handleSignUp}
+                    className="vip-join-button"
+                  >
+                    Sign Up to Get Notified
+                  </button>
+                  <p className="vip-privacy">Create an account to get notified about VIP features, exclusive drops, and collector updates.</p>
+                </div>
               </div>
             </div>
           </div>
@@ -154,37 +155,29 @@ export default function VIPSection({ className = '' }: VIPSectionProps) {
 
           .vip-hero-content {
             display: flex;
+            justify-content: center;
+          }
+
+          .vip-content-wrapper {
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: space-between;
-            gap: 40px;
+            text-align: center;
+            max-width: 600px;
           }
 
           .vip-text {
-            flex: 1;
+            margin-bottom: 32px;
           }
 
           .vip-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin: 0 0 12px;
+            margin: 0 0 16px;
           }
 
           .vip-title-text {
             font-size: clamp(1.8rem, 3vw, 2.2rem);
             font-weight: 800;
             color: var(--wcc-ink);
-            position: relative;
-          }
-
-          .vip-badge {
-            font-size: 0.85rem;
-            background: linear-gradient(135deg, #ffd700, #ff8c00);
-            color: #333;
-            padding: 6px 12px;
-            border-radius: 999px;
-            font-weight: 700;
-            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
           }
 
           .vip-subtitle {
@@ -192,11 +185,9 @@ export default function VIPSection({ className = '' }: VIPSectionProps) {
             color: #6b7280;
             line-height: 1.5;
             margin: 0;
-            max-width: 400px;
           }
 
           .vip-form {
-            flex-shrink: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -359,27 +350,12 @@ export default function VIPSection({ className = '' }: VIPSectionProps) {
               margin: 0 16px;
             }
 
-            .vip-hero-content {
-              flex-direction: column;
-              gap: 24px;
-              text-align: center;
-            }
-
-            .vip-title {
-              justify-content: center;
+            .vip-content-wrapper {
+              max-width: none;
             }
 
             .vip-title-text {
               font-size: clamp(1.5rem, 4vw, 1.8rem);
-            }
-
-            .vip-subtitle {
-              max-width: none;
-            }
-
-            .vip-form {
-              width: 100%;
-              align-items: stretch;
             }
 
             .vip-benefits {
