@@ -11,13 +11,27 @@ export default function UserNav() {
 
   useEffect(() => {
     // Subscribe to auth changes
-    const unsubscribe = authService.subscribe(setUser)
+    const unsubscribe = authService.subscribe((newUser) => {
+      setUser(newUser)
+    })
     
     // Initialize auth
     authService.initialize()
     
-    return unsubscribe
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe()
+      }
+    }
   }, [])
+  
+  // Also check current user on every render as fallback
+  useEffect(() => {
+    const currentUser = authService.getCurrentUser()
+    if (currentUser && !user) {
+      setUser(currentUser)
+    }
+  })
 
   const handleSignOut = async () => {
     await authService.signOut()
@@ -50,7 +64,10 @@ export default function UserNav() {
         <AuthLightModal 
           isOpen={showAuthModal}
           onClose={() => setShowAuthModal(false)}
-          onSuccess={() => setShowAuthModal(false)}
+          onSuccess={() => {
+            setShowAuthModal(false)
+            // The authService will notify listeners, so user state will update automatically
+          }}
         />
       </>
     )

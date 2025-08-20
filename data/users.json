@@ -1,0 +1,35 @@
+[
+  {
+    "id": "user_1755672557131_wv5k4gz15",
+    "email": "test@example.com",
+    "name": "TestUSer",
+    "password_hash": "$2b$10$V6fSUBzwTsDcH5YemusLr.e2F7.UOHXwXgnJhsxvObIdCqMxdIjg.",
+    "email_verified_at": null,
+    "marketing_opt_in": true,
+    "terms_accepted_at": "2025-08-20T06:49:17.131Z",
+    "created_at": "2025-08-20T06:49:17.131Z",
+    "updated_at": "2025-08-20T06:49:17.131Z"
+  },
+  {
+    "id": "user_1755672730676_8odulxe0q",
+    "email": "testuser@gmail.com",
+    "name": "TEST",
+    "password_hash": "$2b$10$/eJS.9HAoUfribcbUKmtA.y40d/3WWLrEk4TnNEAPCf27p/NMj5fG",
+    "email_verified_at": null,
+    "marketing_opt_in": true,
+    "terms_accepted_at": "2025-08-20T06:52:10.676Z",
+    "created_at": "2025-08-20T06:52:10.676Z",
+    "updated_at": "2025-08-20T06:52:10.676Z"
+  },
+  {
+    "id": "user_1755672857593_x4o1z37h2",
+    "email": "Usertest@gmail.com",
+    "name": "User Test",
+    "password_hash": "$2b$10$YxRsQpaANwVO14ZelG0yS.Fx5HZ8ZW2A5QAZyBjV1AcLOym77kNx6",
+    "email_verified_at": null,
+    "marketing_opt_in": true,
+    "terms_accepted_at": "2025-08-20T06:54:17.593Z",
+    "created_at": "2025-08-20T06:54:17.593Z",
+    "updated_at": "2025-08-20T06:54:17.593Z"
+  }
+]

@@ -27,7 +27,11 @@ export default function WishlistButton({
     // Set initial user
     setUser(authService.getCurrentUser())
     
-    return unsubscribe
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe()
+      }
+    }
   }, [])
 
   useEffect(() => {

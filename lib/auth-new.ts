@@ -148,7 +148,7 @@ class AuthService {
   }
 
   // Subscribe to notifications
-  async subscribe(productId: string, source: 'wishlist' | 'notify_me' = 'wishlist'): Promise<void> {
+  async subscribeToProduct(productId: string, source: 'wishlist' | 'notify_me' = 'wishlist'): Promise<void> {
     const response = await fetch('/api/subscribe', {
       method: 'POST',
       headers: {
@@ -166,7 +166,9 @@ class AuthService {
 // Create singleton instance
 export const authService = new AuthService()
 
-// Initialize on module load
+// Initialize on module load (but don't await it to avoid blocking)
 if (typeof window !== 'undefined') {
-  authService.initialize()
+  authService.initialize().catch(error => {
+    console.warn('Auth initialization failed:', error)
+  })
 }

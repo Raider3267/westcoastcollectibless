@@ -5,7 +5,6 @@ import { authService, AuthUser } from '../../../lib/auth-new'
 import WishlistButton from '../../../components/WishlistButton'
 import AuthLightModal from '../../../components/AuthLightModal'
 import { useRouter } from 'next/navigation'
-import { getAllProducts } from '../../../lib/products'
 
 interface Product {
   id: string
@@ -32,7 +31,11 @@ export default function WishlistPage() {
     // Initialize
     initialize()
     
-    return unsubscribe
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe()
+      }
+    }
   }, [])
 
   const initialize = async () => {
@@ -67,8 +70,11 @@ export default function WishlistPage() {
 
   const loadProducts = async () => {
     try {
-      const allProducts = await getAllProducts()
-      setProducts(allProducts)
+      const response = await fetch('/api/products')
+      if (response.ok) {
+        const allProducts = await response.json()
+        setProducts(allProducts)
+      }
     } catch (error) {
       console.error('Failed to load products:', error)
     }

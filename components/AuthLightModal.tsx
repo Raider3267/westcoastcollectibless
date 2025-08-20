@@ -72,6 +72,11 @@ export default function AuthLightModal({
       onSuccess?.(productId)
       onClose()
       
+      // Force auth state refresh
+      setTimeout(() => {
+        authService.initialize()
+      }, 100)
+      
       // Reset form
       setFormData({
         name: '',
