@@ -155,7 +155,6 @@ function ScrollableSection({ children, className = "wcc-scroll" }: { children: R
 function HeroSection() {
   const [currentTagline, setCurrentTagline] = useState(0)
   const [nextDrop, setNextDrop] = useState<Listing | null>(null)
-  const [spotlightItem, setSpotlightItem] = useState<Listing | null>(null)
   const [timeLeft, setTimeLeft] = useState<{days: number, hours: number, minutes: number} | null>(null)
   const [scrollY, setScrollY] = useState(0)
 
@@ -184,26 +183,9 @@ function HeroSection() {
         
         if (upcomingItems.length > 0) {
           setNextDrop(upcomingItems[0])
-        } else {
-          // Fallback to spotlight collectible
-          const featuredResponse = await fetch('/api/featured')
-          const featuredItems = await featuredResponse.json()
-          if (featuredItems.length > 0) {
-            setSpotlightItem(featuredItems[0])
-          }
         }
       } catch (error) {
         console.error('Error fetching next drop:', error)
-        // Fallback to spotlight
-        try {
-          const featuredResponse = await fetch('/api/featured')
-          const featuredItems = await featuredResponse.json()
-          if (featuredItems.length > 0) {
-            setSpotlightItem(featuredItems[0])
-          }
-        } catch (fallbackError) {
-          console.error('Error fetching featured items:', error)
-        }
       }
     }
 
@@ -341,7 +323,6 @@ function HeroSection() {
           }}>
             WestCoast
           </span>
-          <span style={{ color: 'white', margin: '0 8px' }}>•</span>
           <span style={{ 
             background: 'linear-gradient(135deg, #9c27b0, #2196f3, #4caf50, #ffeb3b, #ffa500, #ff6b6b)',
             WebkitBackgroundClip: 'text',
@@ -405,39 +386,8 @@ function HeroSection() {
           </span>
         </div>
 
-        {/* Micro Trust Line */}
-        <div style={{
-          margin: '0 0 32px',
-          fontSize: '0.85rem',
-          color: 'rgba(255,255,255,0.7)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '16px',
-          flexWrap: 'wrap'
-        }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z"/>
-            </svg>
-            Authenticity Verified
-          </span>
-          <span>•</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M3,4A2,2 0 0,0 1,6V8H23V6A2,2 0 0,0 21,4H3M1,19A2,2 0 0,0 3,21H10.84L15.82,16H23V10H1V19Z"/>
-            </svg>
-            Fast Shipping
-          </span>
-          <span>•</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M12,3C17.5,3 22,6.58 22,11C22,15.42 17.5,19 12,19C10.76,19 9.57,18.82 8.47,18.5C5.55,21 2,21 2,21C4.33,18.67 4.7,17.1 4.75,16.5C3.05,15.07 2,13.13 2,11C2,6.58 6.5,3 12,3Z"/>
-            </svg>
-            Collector Support
-          </span>
-        </div>
 
-        {/* Purpose Block: Next Drop Countdown OR Spotlight Collectible */}
+        {/* Purpose Block: Next Drop Countdown Only */}
         {nextDrop && timeLeft ? (
           <div style={{
             background: 'rgba(255,255,255,0.1)',
@@ -446,6 +396,7 @@ function HeroSection() {
             borderRadius: '16px',
             padding: '20px',
             maxWidth: '400px',
+            margin: '0 auto',
             boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
           }}>
             <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)', marginBottom: '8px', fontWeight: 600 }}>
@@ -457,6 +408,7 @@ function HeroSection() {
             <div style={{ 
               display: 'flex', 
               alignItems: 'center', 
+              justifyContent: 'center',
               gap: '12px', 
               marginBottom: '16px',
               fontSize: '1rem',
@@ -468,89 +420,29 @@ function HeroSection() {
                 {timeLeft.hours}h {timeLeft.minutes}m
               </time>
             </div>
-            <button
-              onClick={() => {
-                // Open notify/signup flow
-                const notifyEvent = new CustomEvent('show-auth-modal')
-                window.dispatchEvent(notifyEvent)
-              }}
-              style={{
-                background: 'linear-gradient(135deg, var(--wcc-teal), var(--wcc-lilac))',
-                color: '#0b0b0f',
-                border: 'none',
-                borderRadius: '8px',
-                padding: '8px 16px',
-                fontSize: '0.9rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-1px)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-            >
-              Set a reminder
-            </button>
-          </div>
-        ) : spotlightItem ? (
-          <div style={{
-            background: 'rgba(255,255,255,0.1)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            borderRadius: '16px',
-            padding: '20px',
-            maxWidth: '400px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
-            transition: 'all 0.3s ease'
-          }}
-          onMouseEnter={(e) => {
-            if (!prefersReducedMotion) {
-              e.currentTarget.style.transform = 'translateY(-2px)'
-              e.currentTarget.style.boxShadow = '0 12px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15)'
-            }
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)'
-            e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
-          }}
-          >
-            <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)', marginBottom: '12px', fontWeight: 600 }}>
-              Spotlight Collectible
-            </div>
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              {spotlightItem.image && (
-                <img 
-                  src={spotlightItem.image.split(',')[0].trim()} 
-                  alt={spotlightItem.name}
-                  style={{
-                    width: '60px',
-                    height: '60px',
-                    borderRadius: '8px',
-                    objectFit: 'cover'
-                  }}
-                />
-              )}
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '1.1rem', color: 'white', marginBottom: '4px', fontWeight: 600 }}>
-                  {spotlightItem.name}
-                </div>
-                {spotlightItem.price && (
-                  <div style={{ fontSize: '1rem', color: '#5ED0C0', fontWeight: 700 }}>
-                    ${spotlightItem.price}
-                  </div>
-                )}
-                <a
-                  href={`#product-${spotlightItem.id}`}
-                  style={{
-                    fontSize: '0.85rem',
-                    color: 'rgba(255,255,255,0.8)',
-                    textDecoration: 'underline',
-                    marginTop: '8px',
-                    display: 'inline-block'
-                  }}
-                >
-                  View details
-                </a>
-              </div>
+            <div style={{ textAlign: 'center' }}>
+              <button
+                onClick={() => {
+                  // Open notify/signup flow
+                  const notifyEvent = new CustomEvent('show-auth-modal')
+                  window.dispatchEvent(notifyEvent)
+                }}
+                style={{
+                  background: 'linear-gradient(135deg, var(--wcc-teal), var(--wcc-lilac))',
+                  color: '#0b0b0f',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '8px 16px',
+                  fontSize: '0.9rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-1px)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+              >
+                Set a reminder
+              </button>
             </div>
           </div>
         ) : null}
