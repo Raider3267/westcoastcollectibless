@@ -22,7 +22,6 @@ export default function CartConfirmation({
   onViewCart
 }: CartConfirmationProps) {
   const { state } = useCart()
-  const items = state?.items || []
   
   useEffect(() => {
     if (isOpen) {
@@ -36,10 +35,11 @@ export default function CartConfirmation({
 
   if (!isOpen) return null
 
-  const cartTotal = items?.reduce((sum, item) => sum + (item.price * item.quantity), 0) || 0
-  const cartCount = items?.reduce((sum, item) => sum + item.quantity, 0) || 0
+  const items = state?.items || []
+  const cartTotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+  const cartCount = items.reduce((sum, item) => sum + item.quantity, 0)
 
-  return createPortal(
+  const modalContent = (
     <div 
       className="cart-confirmation-overlay"
       onClick={onClose}
@@ -216,8 +216,16 @@ export default function CartConfirmation({
         >
           ×
         </button>
+      </div>
+    </div>
+  )
 
-        <style jsx>{`
+  // Use createPortal to render modal at document.body level
+  if (typeof document !== 'undefined') {
+    return (
+      <>
+        {createPortal(modalContent, document.body)}
+        <style jsx global>{`
           @keyframes slideUp {
             from {
               opacity: 0;
@@ -238,8 +246,9 @@ export default function CartConfirmation({
             }
           }
         `}</style>
-      </div>
-    </div>,
-    document.body
-  )
+      </>
+    )
+  }
+
+  return modalContent
 }
