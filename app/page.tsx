@@ -5,6 +5,8 @@ import { Listing } from '../lib/listings'
 import ProductCard from '../components/ProductCard'
 import FilterBar, { FilterOptions } from '../components/FilterBar'
 import VIPSection from '../components/VIPSection'
+import UserNav from '../components/UserNav'
+import CartIcon from '../components/CartIcon'
 import { useEffect, useState, useRef } from 'react'
 
 // Scrollable section with navigation arrows component
@@ -211,14 +213,32 @@ function HeroSection() {
     return () => clearInterval(interval)
   }, [nextDrop])
 
-  // Parallax scroll effect
+  // Parallax scroll effect and floating nav positioning
   useEffect(() => {
-    if (prefersReducedMotion) return
-
-    const handleScroll = () => setScrollY(window.scrollY)
+    const handleScroll = () => {
+      const scrolled = window.scrollY
+      setScrollY(scrolled)
+      
+      // Update floating navigation based on scroll
+      const nav = document.getElementById('floating-nav')
+      if (nav) {
+        if (scrolled > 100) {
+          // Scrolled - shrink and stick to top
+          nav.style.transform = 'scale(0.9)'
+          nav.style.top = '12px'
+          nav.style.right = '12px'
+        } else {
+          // At top - normal size
+          nav.style.transform = 'scale(1)'
+          nav.style.top = '20px' 
+          nav.style.right = '20px'
+        }
+      }
+    }
+    
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [prefersReducedMotion])
+  }, [])
 
   return (
     <section style={{ 
@@ -228,6 +248,85 @@ function HeroSection() {
       display: 'flex',
       alignItems: 'center'
     }}>
+      {/* Floating Navigation */}
+      <nav 
+        id="floating-nav"
+        role="navigation"
+        aria-label="Main navigation"
+        style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          zIndex: 1000,
+          display: 'flex',
+          gap: '12px',
+          alignItems: 'center',
+          transition: 'all 0.3s ease'
+        }}
+      >
+        <div 
+          role="group" 
+          aria-label="Shopping cart"
+          style={{
+            background: 'rgba(255,255,255,0.1)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '50px',
+            padding: '8px 16px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+            display: 'flex',
+            gap: '8px',
+            alignItems: 'center'
+          }}
+        >
+          <CartIcon />
+        </div>
+        
+        <div 
+          role="group" 
+          aria-label="User account"
+          style={{
+            background: 'rgba(255,255,255,0.1)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '50px',
+            padding: '4px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
+          }}
+        >
+          <UserNav />
+        </div>
+        
+        <a 
+          href="/admin/login" 
+          aria-label="Admin panel login"
+          style={{ 
+            display: 'inline-block',
+            background: 'rgba(255,255,255,0.1)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '50px',
+            padding: '10px 16px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+            textDecoration: 'none',
+            color: 'white',
+            fontSize: '0.9rem',
+            fontWeight: 600,
+            transition: 'all 0.3s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'rgba(255,255,255,0.2)'
+            e.currentTarget.style.transform = 'translateY(-1px)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'rgba(255,255,255,0.1)'
+            e.currentTarget.style.transform = 'translateY(0)'
+          }}
+        >
+          Admin
+        </a>
+      </nav>
+
       {/* Video Background with Parallax */}
       <video 
         autoPlay 
@@ -285,14 +384,14 @@ function HeroSection() {
         width: '100%',
         margin: '0 auto'
       }}>        
-        {/* Fun Colorful Business Name */}
+        {/* Brand Name as Primary Headline */}
         <h1 style={{ 
-          fontSize: 'clamp(3rem, 8vw, 6rem)', 
-          margin: '0 0 32px', 
-          lineHeight: 1.1, 
+          fontSize: 'clamp(3.5rem, 10vw, 7rem)', 
+          margin: '0 0 16px', 
+          lineHeight: 1, 
           fontWeight: 900,
-          textShadow: '0 4px 8px rgba(0,0,0,0.4)',
-          letterSpacing: '-0.02em'
+          textShadow: '0 6px 12px rgba(0,0,0,0.5)',
+          letterSpacing: '-0.03em'
         }}>
           <span style={{ 
             background: 'linear-gradient(135deg, #ff6b6b, #ffa500, #ffeb3b, #4caf50, #2196f3, #9c27b0)',
@@ -304,6 +403,7 @@ function HeroSection() {
           }}>
             WestCoast
           </span>
+          <br />
           <span style={{ 
             background: 'linear-gradient(135deg, #9c27b0, #2196f3, #4caf50, #ffeb3b, #ffa500, #ff6b6b)',
             WebkitBackgroundClip: 'text',
@@ -315,6 +415,19 @@ function HeroSection() {
             Collectibles
           </span>
         </h1>
+        
+        {/* Brand Tagline */}
+        <p style={{ 
+          margin: '0 0 24px', 
+          fontSize: 'clamp(1rem, 2.5vw, 1.4rem)',
+          color: 'rgba(255,255,255,0.9)',
+          textShadow: '0 2px 4px rgba(0,0,0,0.4)',
+          lineHeight: 1.3,
+          fontWeight: 600,
+          letterSpacing: '0.02em'
+        }}>
+          Premium Designer Collectibles
+        </p>
         
         {/* Supporting Text */}
         <p style={{ 

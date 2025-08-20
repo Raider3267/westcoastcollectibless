@@ -17,36 +17,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <CartProvider>
-        <header style={{ position: 'sticky', top: 0, zIndex: 40, background: 'rgba(255,255,255,.75)', backdropFilter: 'saturate(140%) blur(14px)', borderBottom: '1px solid var(--line)' }}>
-          <div style={{ maxWidth: '1224px', margin: '0 auto', padding: '0 20px' }}>
-            <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <img 
-                  src="/Logo.png" 
-                  alt="WestCoast Collectibles Logo" 
-                  style={{ 
-                    height: '36px', 
-                    width: '36px', 
-                    borderRadius: '12px', 
-                    objectFit: 'cover',
-                    objectPosition: 'center',
-                    padding: '2px',
-                    background: 'linear-gradient(135deg, var(--wcc-grad-a), var(--wcc-grad-b))',
-                    border: '2px solid transparent'
-                  }}
-                />
-                <h1 style={{ margin: 0, fontSize: '1rem', letterSpacing: '.14em', textTransform: 'uppercase', fontWeight: 'bold' }}>
-                  WestCoast Collectibles
-                </h1>
-              </div>
-              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                <CartIcon />
-                <UserNav />
-                <a href="/admin/login" style={{ padding: '11px 16px', borderRadius: '999px', border: 'none', position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg,var(--accent-start), var(--accent-mid) 55%, var(--accent-end))', boxShadow: 'var(--shadow-soft)', textDecoration: 'none', color: '#0b0b0f' }}>Admin</a>
-              </div>
-            </nav>
-          </div>
-        </header>
         <div>{children}</div>
         <footer style={{ padding: '16px 24px', borderTop: '1px solid #eee', marginTop: 40, fontSize: 12, color: '#555' }}>
           © {new Date().getFullYear()} WestCoastCollectibless • Santa Monica, CA
