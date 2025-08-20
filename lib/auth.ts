@@ -160,6 +160,32 @@ export class AuthService {
   static async signIn(email: string, password: string): Promise<User> {
     // Demo implementation
     const users = this.getUsers()
+    
+    // Handle guest account specially
+    if (email === 'guest@westcoastcollectibles.com' && password === 'guest123') {
+      let guestUser = users.find(u => u.email === email)
+      
+      if (!guestUser) {
+        // Create guest user if it doesn't exist
+        guestUser = {
+          id: 'guest-user',
+          email: 'guest@westcoastcollectibles.com',
+          name: 'Guest Collector',
+          tier: 'basic',
+          joined_date: new Date().toISOString(),
+          wishlist: [],
+          alerts: [],
+          collection_photos: []
+        }
+        
+        users.push(guestUser)
+        this.saveUsers(users)
+      }
+      
+      this.setCurrentUser(guestUser)
+      return guestUser
+    }
+    
     const user = users.find(u => u.email === email)
     
     if (!user) {

@@ -43,18 +43,48 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
     }
   }
 
+  const handleGuestSignIn = async () => {
+    setError('')
+    setLoading(true)
+    
+    try {
+      // Use predefined guest credentials
+      await AuthService.signIn('guest@westcoastcollectibles.com', 'guest123')
+      onAuthSuccess()
+      onClose()
+    } catch (err) {
+      setError('Guest sign-in failed. Please try regular sign-in.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const switchMode = () => {
     setMode(mode === 'signin' ? 'signup' : 'signin')
     setError('')
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      background: 'rgba(0, 0, 0, 0.5)',
+      backdropFilter: 'blur(4px)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px',
+      zIndex: 9999,
+      overflowY: 'auto'
+    }}>
       <div className="luxury-card accent-teal" style={{ 
         maxWidth: '400px', 
         width: '100%',
         padding: '32px',
-        position: 'relative'
+        position: 'relative',
+        margin: 'auto',
+        maxHeight: '90vh',
+        overflowY: 'auto'
       }}>
         <button
           onClick={onClose}
@@ -275,6 +305,66 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
               {mode === 'signin' ? 'Sign up' : 'Sign in'}
             </button>
           </p>
+          
+          {mode === 'signin' && (
+            <div style={{ marginTop: '16px' }}>
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '12px',
+                margin: '16px 0'
+              }}>
+                <div style={{ flex: 1, height: '1px', background: 'var(--line)' }} />
+                <span style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>OR</span>
+                <div style={{ flex: 1, height: '1px', background: 'var(--line)' }} />
+              </div>
+              
+              <button
+                onClick={handleGuestSignIn}
+                disabled={loading}
+                style={{
+                  width: '100%',
+                  padding: '12px 20px',
+                  fontSize: '0.95rem',
+                  fontWeight: 600,
+                  borderRadius: '999px',
+                  border: '2px solid var(--line)',
+                  background: 'white',
+                  color: 'var(--ink)',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  opacity: loading ? 0.7 : 1,
+                  transition: 'all 0.3s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
+                }}
+                onMouseEnter={(e) => {
+                  if (!loading) {
+                    e.currentTarget.style.borderColor = 'var(--accent-teal)'
+                    e.currentTarget.style.background = 'rgba(94,208,192,0.05)'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!loading) {
+                    e.currentTarget.style.borderColor = 'var(--line)'
+                    e.currentTarget.style.background = 'white'
+                  }
+                }}
+              >
+                🎮 Continue as Guest
+              </button>
+              
+              <p style={{ 
+                fontSize: '0.75rem', 
+                color: 'var(--muted)', 
+                marginTop: '8px',
+                fontStyle: 'italic'
+              }}>
+                Test the experience with limited features
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
