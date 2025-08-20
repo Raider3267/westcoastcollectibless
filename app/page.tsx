@@ -6,7 +6,6 @@ import ProductCard from '../components/ProductCard'
 import FilterBar, { FilterOptions } from '../components/FilterBar'
 import RecentlySoldBanner from '../components/RecentlySoldBanner'
 import VIPSection from '../components/VIPSection'
-import AuthLightModal from '../components/AuthLightModal'
 import { useEffect, useState, useRef } from 'react'
 
 // Scrollable section with navigation arrows component
@@ -1199,77 +1198,6 @@ function ComingSoonProductsSection() {
   )
 }
 
-function NewsletterSignupSection() {
-  const [showAuthModal, setShowAuthModal] = useState(false)
-
-  return (
-    <>
-      <section style={{
-        padding: '60px 0',
-        background: 'linear-gradient(135deg, rgba(199,163,255,.05) 0%, rgba(94,208,192,.05) 100%)',
-        borderTop: '1px solid rgba(255,255,255,0.1)'
-      }}>
-        <div style={{
-          maxWidth: '600px',
-          margin: '0 auto',
-          padding: '0 20px',
-          textAlign: 'center'
-        }}>
-          <h2 style={{
-            fontSize: '1.8rem',
-            fontWeight: '800',
-            color: 'var(--wcc-ink)',
-            marginBottom: '16px'
-          }}>
-            Stay Updated
-          </h2>
-          <p style={{
-            fontSize: '1.1rem',
-            color: 'var(--wcc-muted)',
-            marginBottom: '32px',
-            lineHeight: '1.5'
-          }}>
-            Get notified about new drops, restocks, and exclusive collector updates.
-          </p>
-          
-          <button
-            onClick={() => setShowAuthModal(true)}
-            style={{
-              padding: '16px 32px',
-              fontSize: '1rem',
-              fontWeight: '700',
-              borderRadius: '12px',
-              border: 'none',
-              background: 'linear-gradient(135deg, #5ED0C0, #C7A3FF)',
-              color: 'white',
-              cursor: 'pointer',
-              boxShadow: '0 8px 24px rgba(94, 208, 192, 0.3)',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)'
-              e.currentTarget.style.boxShadow = '0 12px 32px rgba(94, 208, 192, 0.4)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)'
-              e.currentTarget.style.boxShadow = '0 8px 24px rgba(94, 208, 192, 0.3)'
-            }}
-          >
-            Sign Up to Get Notified
-          </button>
-        </div>
-      </section>
-      
-      <AuthLightModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        onSuccess={() => setShowAuthModal(false)}
-        title="Join our collector community"
-        subtitle="Get notified about new drops, restocks, and exclusive updates."
-      />
-    </>
-  )
-}
 
 function CollectorAssuranceSection() {
   return (
@@ -1994,9 +1922,6 @@ export default function HomePage() {
 
         {/* Collector Assurance - Consolidated Trust */}
         <CollectorAssuranceSection />
-        
-        {/* Newsletter Signup */}
-        <NewsletterSignupSection />
       </main>
     </div>
   )
