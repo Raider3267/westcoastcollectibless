@@ -3,6 +3,8 @@
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import ImageCarousel from './ImageCarousel'
+import ProductCTAButton from './ProductCTAButton'
+import { useCart } from '../lib/cart'
 
 type Product = {
   id: string
@@ -14,10 +16,15 @@ type Product = {
   stripeLink?: string | null
   description?: string | null
   quantity?: number
+  // New product state system
+  sale_state?: 'DRAFT' | 'PREVIEW' | 'LIVE' | 'ARCHIVED'
+  release_at?: string | null
+  // Legacy fields (still supported)
   status?: 'live' | 'coming-soon' | 'draft'
   drop_date?: string | null
   released_date?: string | null
   show_in_new_releases?: boolean
+  weight?: number
 }
 
 interface ProductModalProps {
@@ -27,6 +34,35 @@ interface ProductModalProps {
 }
 
 export default function ProductModal({ product, isOpen, onClose }: ProductModalProps) {
+  const { addItem } = useCart()
+  
+  // Convert legacy status to new sale_state system
+  const getSaleState = (): 'DRAFT' | 'PREVIEW' | 'LIVE' | 'ARCHIVED' => {
+    if (product?.sale_state) {
+      return product.sale_state
+    }
+    // Legacy conversion
+    if (product?.status === 'coming-soon') return 'PREVIEW'
+    if (product?.status === 'live') return 'LIVE'
+    if (product?.status === 'draft') return 'DRAFT'
+    return 'LIVE' // Default fallback
+  }
+  
+  const handleAddToCart = () => {
+    if (!product) return
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price || 0,
+      image: product.image || undefined,
+      weight: product.weight || 0.3
+    })
+  }
+  
+  const handleNotifyMe = () => {
+    // For now, just show an alert. This could be enhanced with a proper modal
+    alert('Notify me functionality will be available soon!')
+  }
   // Close modal on Escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -143,6 +179,16 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
 
           {/* Action Buttons */}
           <div className="flex gap-4">
+            <ProductCTAButton
+              sale_state={getSaleState()}
+              quantity={product.quantity}
+              price={product.price}
+              productId={product.id}
+              productName={product.name}
+              onAddToCart={handleAddToCart}
+              onNotifyMe={handleNotifyMe}
+              className="flex-1 text-lg font-bold py-4"
+            />
             {product.ebayUrl && (
               <a
                 href={product.ebayUrl}
@@ -151,12 +197,13 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
                 className="flex-1 text-center font-bold text-lg transition-all duration-300 hover:scale-105 text-decoration-none"
                 style={{
                   padding: '16px 24px',
-                  borderRadius: '999px',
-                  background: 'linear-gradient(135deg, var(--wcc-teal), var(--wcc-grad-c))',
-                  color: '#0b0b0f',
-                  boxShadow: '0 12px 28px rgba(94,208,192,.25)'
+                  borderRadius: '12px',
+                  background: 'linear-gradient(135deg, #e5e7eb, #f3f4f6)',
+                  color: '#4b5563',
+                  boxShadow: '0 4px 12px rgba(0,0,0,.1)',
+                  border: '2px solid #d1d5db'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
                 onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
               >
                 🏪 View on eBay
@@ -167,7 +214,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
               className="font-bold text-lg transition-all duration-300 hover:scale-105"
               style={{
                 padding: '16px 24px',
-                borderRadius: '999px',
+                borderRadius: '12px',
                 border: '2px solid var(--wcc-line)',
                 background: '#fff',
                 color: 'var(--wcc-ink)'
