@@ -6,6 +6,7 @@ import ProductCard from '../components/ProductCard'
 import FilterBar, { FilterOptions } from '../components/FilterBar'
 import RecentlySoldBanner from '../components/RecentlySoldBanner'
 import VIPSection from '../components/VIPSection'
+import AuthLightModal from '../components/AuthLightModal'
 import { useEffect, useState, useRef } from 'react'
 
 // Scrollable section with navigation arrows component
@@ -1198,6 +1199,78 @@ function ComingSoonProductsSection() {
   )
 }
 
+function NewsletterSignupSection() {
+  const [showAuthModal, setShowAuthModal] = useState(false)
+
+  return (
+    <>
+      <section style={{
+        padding: '60px 0',
+        background: 'linear-gradient(135deg, rgba(199,163,255,.05) 0%, rgba(94,208,192,.05) 100%)',
+        borderTop: '1px solid rgba(255,255,255,0.1)'
+      }}>
+        <div style={{
+          maxWidth: '600px',
+          margin: '0 auto',
+          padding: '0 20px',
+          textAlign: 'center'
+        }}>
+          <h2 style={{
+            fontSize: '1.8rem',
+            fontWeight: '800',
+            color: 'var(--wcc-ink)',
+            marginBottom: '16px'
+          }}>
+            Stay Updated
+          </h2>
+          <p style={{
+            fontSize: '1.1rem',
+            color: 'var(--wcc-muted)',
+            marginBottom: '32px',
+            lineHeight: '1.5'
+          }}>
+            Get notified about new drops, restocks, and exclusive collector updates.
+          </p>
+          
+          <button
+            onClick={() => setShowAuthModal(true)}
+            style={{
+              padding: '16px 32px',
+              fontSize: '1rem',
+              fontWeight: '700',
+              borderRadius: '12px',
+              border: 'none',
+              background: 'linear-gradient(135deg, #5ED0C0, #C7A3FF)',
+              color: 'white',
+              cursor: 'pointer',
+              boxShadow: '0 8px 24px rgba(94, 208, 192, 0.3)',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)'
+              e.currentTarget.style.boxShadow = '0 12px 32px rgba(94, 208, 192, 0.4)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)'
+              e.currentTarget.style.boxShadow = '0 8px 24px rgba(94, 208, 192, 0.3)'
+            }}
+          >
+            Sign Up to Get Notified
+          </button>
+        </div>
+      </section>
+      
+      <AuthLightModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={() => setShowAuthModal(false)}
+        title="Join our collector community"
+        subtitle="Get notified about new drops, restocks, and exclusive updates."
+      />
+    </>
+  )
+}
+
 function CollectorAssuranceSection() {
   return (
     <section className="collector-assurance-section">
@@ -1423,11 +1496,13 @@ function CollectorAssuranceSection() {
 
         .assurance-card:hover {
           transform: translateY(-8px) scale(1.02);
+          background: linear-gradient(135deg, rgba(94,208,192,0.12), rgba(199,163,255,0.12));
           box-shadow: 
             0 20px 40px rgba(0, 0, 0, 0.12),
-            0 0 0 1px rgba(94, 208, 192, 0.1),
-            0 0 60px rgba(94, 208, 192, 0.08);
-          border-color: rgba(94, 208, 192, 0.2);
+            0 0 0 1px rgba(94, 208, 192, 0.2),
+            0 0 40px rgba(94, 208, 192, 0.15),
+            0 0 80px rgba(94, 208, 192, 0.08);
+          border-color: rgba(94, 208, 192, 0.3);
         }
 
         .assurance-card:hover::before {
@@ -1466,8 +1541,9 @@ function CollectorAssuranceSection() {
         }
 
         .assurance-card:hover .card-icon {
-          color: var(--wcc-grad-c);
+          color: #5ED0C0;
           transform: scale(1.1);
+          filter: drop-shadow(0 4px 12px rgba(94, 208, 192, 0.4));
         }
 
         .card-title {
@@ -1489,8 +1565,8 @@ function CollectorAssuranceSection() {
         }
 
         .support-card {
-          background: linear-gradient(135deg, rgba(94,208,192,0.08), rgba(199,163,255,0.08));
-          border: 1px solid rgba(94,208,192,0.2);
+          background: rgba(255, 255, 255, 0.7);
+          border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .support-card:hover {
@@ -1515,8 +1591,9 @@ function CollectorAssuranceSection() {
         }
 
         .support-card:hover .contact-text {
-          color: var(--wcc-grad-c);
+          color: #5ED0C0;
           text-decoration: underline;
+          text-shadow: 0 2px 8px rgba(94, 208, 192, 0.3);
         }
 
         .contact-helper {
@@ -1917,6 +1994,9 @@ export default function HomePage() {
 
         {/* Collector Assurance - Consolidated Trust */}
         <CollectorAssuranceSection />
+        
+        {/* Newsletter Signup */}
+        <NewsletterSignupSection />
       </main>
     </div>
   )

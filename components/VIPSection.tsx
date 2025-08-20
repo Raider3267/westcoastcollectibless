@@ -139,7 +139,7 @@ export default function VIPSection({ className = '' }: VIPSectionProps) {
                   {isSubmitting ? 'Signing up...' : 'Get Notified'}
                 </button>
               </div>
-              <p className="vip-privacy">We'll notify you when VIP features launch. No spam, unsubscribe anytime.</p>
+              <p className="vip-privacy">By signing up, you agree to receive emails from us about VIP features, exclusive drops, and collector updates. You can unsubscribe anytime.</p>
             </form>
           </div>
         </div>

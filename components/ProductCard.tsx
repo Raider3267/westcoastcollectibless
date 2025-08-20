@@ -11,7 +11,7 @@ import CartConfirmation from './CartConfirmation'
 import NotificationToast from './NotificationToast'
 import WishlistButton from './WishlistButton'
 import AuthLightModal from './AuthLightModal'
-import { AuthService } from '../lib/auth'
+import { authService, AuthUser } from '../lib/auth-new'
 import { useCart } from '../lib/cart'
 
 type Product = {
@@ -55,7 +55,7 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
   const [notificationMessage, setNotificationMessage] = useState('')
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [isInWishlist, setIsInWishlist] = useState(false)
-  const [user, setUser] = useState(AuthService.getCurrentUser())
+  const [user, setUser] = useState<AuthUser | null>(null)
   const { addItem, openCart, closeCart } = useCart()
   
   // Convert legacy status to new sale_state system
@@ -74,28 +74,38 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
   const releaseAt = product.release_at || product.drop_date
   
   useEffect(() => {
-    setUser(AuthService.getCurrentUser())
-    setIsInWishlist(AuthService.isInWishlist(product.id))
-  }, [])
-  
-  const handleWishlistToggle = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
+    // Subscribe to auth changes
+    const unsubscribe = authService.subscribe(setUser)
     
-    if (!user) {
-      // Could show auth modal here
-      alert('Please sign in to add items to your wishlist')
-      return
+    // Set initial user
+    setUser(authService.getCurrentUser())
+    
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe()
+      }
     }
-    
-    if (isInWishlist) {
-      AuthService.removeFromWishlist(product.id)
-      setIsInWishlist(false)
+  }, [])
+
+  useEffect(() => {
+    // Load wishlist status when user changes
+    if (user) {
+      loadWishlistStatus()
     } else {
-      AuthService.addToWishlist(product.id)
-      setIsInWishlist(true)
+      setIsInWishlist(false)
+    }
+  }, [user, product.id])
+
+  const loadWishlistStatus = async () => {
+    try {
+      const wishlist = await authService.getWishlist()
+      setIsInWishlist(wishlist.includes(product.id))
+    } catch (error) {
+      console.error('Failed to load wishlist:', error)
     }
   }
+  
+  // This function is replaced by WishlistButton component
   
   const handleAddToCart = () => {
     addItem({
@@ -120,16 +130,24 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
     openCart() // Open the cart sidebar
   }
   
-  const handleNotifyMe = () => {
-    // If user is signed in, directly create the alert
+  const handleNotifyMe = async () => {
+    // If user is signed in, add to wishlist automatically
     if (user) {
-      AuthService.createAlert(product.id, 'restock')
-      // Show success notification
-      setNotificationMessage(`You'll be notified when "${product.name}" is back in stock!`)
-      setShowNotification(true)
+      try {
+        const saved = await authService.toggleWishlist(product.id)
+        if (saved) {
+          // Show success notification
+          setNotificationMessage(`Added to your wishlist — you'll be notified about restocks, drops, and updates for "${product.name}".`)
+          setShowNotification(true)
+        }
+      } catch (error) {
+        console.error('Failed to add to wishlist:', error)
+        setNotificationMessage('Failed to add to wishlist. Please try again.')
+        setShowNotification(true)
+      }
     } else {
-      // If not signed in, show the notify modal
-      setIsNotifyModalOpen(true)
+      // If not signed in, show auth modal which will add to wishlist after signup
+      setShowAuthModal(true)
     }
   }
   
@@ -186,23 +204,25 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
           />
         </div>
         
-        {/* Wishlist button */}
-        <div style={{
-          position: 'absolute',
-          top: '8px',
-          left: '8px',
-          zIndex: 15,
-          background: 'rgba(255, 255, 255, 0.9)',
-          borderRadius: '50%',
-          backdropFilter: 'blur(4px)',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-        }}>
-          <WishlistButton
-            productId={product.id}
-            productName={product.name}
-            onSignInRequired={() => setShowAuthModal(true)}
-          />
-        </div>
+        {/* Wishlist button - hide for Coming Soon items since Notify Me adds to wishlist */}
+        {saleState !== 'PREVIEW' && (
+          <div style={{
+            position: 'absolute',
+            top: '8px',
+            left: '8px',
+            zIndex: 15,
+            background: 'rgba(255, 255, 255, 0.9)',
+            borderRadius: '50%',
+            backdropFilter: 'blur(4px)',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+          }}>
+            <WishlistButton
+              productId={product.id}
+              productName={product.name}
+              onSignInRequired={() => setShowAuthModal(true)}
+            />
+          </div>
+        )}
         
         {/* Featured badge */}
         {product.featured && (

@@ -9,7 +9,7 @@ import NotificationToast from './NotificationToast'
 import WishlistButton from './WishlistButton'
 import AuthLightModal from './AuthLightModal'
 import { useCart } from '../lib/cart'
-import { AuthService } from '../lib/auth'
+import { authService, AuthUser } from '../lib/auth-new'
 
 type Product = {
   id: string
@@ -41,14 +41,24 @@ interface ProductModalProps {
 
 export default function ProductModal({ product, isOpen, onClose, onAddToCart }: ProductModalProps) {
   const { addItem, openCart } = useCart()
-  const [user, setUser] = useState(AuthService.getCurrentUser())
+  const [user, setUser] = useState<AuthUser | null>(null)
   const [showNotifyModal, setShowNotifyModal] = useState(false)
   const [showNotification, setShowNotification] = useState(false)
   const [notificationMessage, setNotificationMessage] = useState('')
   const [showAuthModal, setShowAuthModal] = useState(false)
   
   useEffect(() => {
-    setUser(AuthService.getCurrentUser())
+    // Subscribe to auth changes
+    const unsubscribe = authService.subscribe(setUser)
+    
+    // Set initial user
+    setUser(authService.getCurrentUser())
+    
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe()
+      }
+    }
   }, [isOpen])
   
   // Convert legacy status to new sale_state system
@@ -80,18 +90,26 @@ export default function ProductModal({ product, isOpen, onClose, onAddToCart }: 
     }
   }
   
-  const handleNotifyMe = () => {
+  const handleNotifyMe = async () => {
     if (!product) return
     
-    // If user is signed in, directly create the alert
+    // If user is signed in, add to wishlist automatically
     if (user) {
-      AuthService.createAlert(product.id, 'restock')
-      // Show success notification
-      setNotificationMessage(`You'll be notified when "${product.name}" is back in stock!`)
-      setShowNotification(true)
+      try {
+        const saved = await authService.toggleWishlist(product.id)
+        if (saved) {
+          // Show success notification
+          setNotificationMessage(`Added to your wishlist — you'll be notified about restocks, drops, and updates for "${product.name}".`)
+          setShowNotification(true)
+        }
+      } catch (error) {
+        console.error('Failed to add to wishlist:', error)
+        setNotificationMessage('Failed to add to wishlist. Please try again.')
+        setShowNotification(true)
+      }
     } else {
-      // If not signed in, show the notify modal
-      setShowNotifyModal(true)
+      // If not signed in, show auth modal which will add to wishlist after signup
+      setShowAuthModal(true)
     }
   }
   
@@ -156,19 +174,22 @@ export default function ProductModal({ product, isOpen, onClose, onAddToCart }: 
                     </div>
                   )}
                 </div>
-                <div style={{
-                  background: 'rgba(255, 255, 255, 0.9)',
-                  borderRadius: '50%',
-                  backdropFilter: 'blur(4px)',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                  marginTop: '4px'
-                }}>
-                  <WishlistButton
-                    productId={product.id}
-                    productName={product.name}
-                    onSignInRequired={() => setShowAuthModal(true)}
-                  />
-                </div>
+                {/* Wishlist button - hide for Coming Soon items since Notify Me adds to wishlist */}
+                {getSaleState() !== 'PREVIEW' && (
+                  <div style={{
+                    background: 'rgba(255, 255, 255, 0.9)',
+                    borderRadius: '50%',
+                    backdropFilter: 'blur(4px)',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                    marginTop: '4px'
+                  }}>
+                    <WishlistButton
+                      productId={product.id}
+                      productName={product.name}
+                      onSignInRequired={() => setShowAuthModal(true)}
+                    />
+                  </div>
+                )}
               </div>
             </div>
             <button

@@ -72,7 +72,7 @@ export default function WishlistButton({
       
       // Show toast notification
       const message = saved 
-        ? 'Saved to your wishlist — we\'ll keep you posted.'
+        ? 'Saved to your wishlist — you\'ll be notified about restocks, drops, and updates for this item.'
         : 'Removed from your wishlist.'
       
       // You can emit an event here for the toast system

@@ -60,7 +60,7 @@ export default function AuthLightModal({
           // Show success toast
           window.dispatchEvent(new CustomEvent('wishlist-toast', {
             detail: { 
-              message: 'Saved to your wishlist — we\'ll keep you posted.',
+              message: 'Saved to your wishlist — you\'ll be notified about restocks, drops, and updates for this item.',
               type: 'success' 
             }
           }))
