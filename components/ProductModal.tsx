@@ -35,7 +35,7 @@ interface ProductModalProps {
 }
 
 export default function ProductModal({ product, isOpen, onClose }: ProductModalProps) {
-  const { addItem, setIsOpen: setCartOpen } = useCart()
+  const { addItem, openCart } = useCart()
   const [showCartConfirmation, setShowCartConfirmation] = useState(false)
   
   // Convert legacy status to new sale_state system
@@ -76,7 +76,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
   const handleViewCart = () => {
     setShowCartConfirmation(false)
     onClose() // Close the product modal
-    setCartOpen(true) // Open the cart sidebar
+    openCart() // Open the cart sidebar
   }
   // Close modal on Escape key
   useEffect(() => {

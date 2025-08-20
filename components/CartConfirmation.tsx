@@ -21,7 +21,8 @@ export default function CartConfirmation({
   onContinueShopping,
   onViewCart
 }: CartConfirmationProps) {
-  const { items } = useCart()
+  const { state } = useCart()
+  const items = state?.items || []
   
   useEffect(() => {
     if (isOpen) {
@@ -35,8 +36,8 @@ export default function CartConfirmation({
 
   if (!isOpen) return null
 
-  const cartTotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-  const cartCount = items.reduce((sum, item) => sum + item.quantity, 0)
+  const cartTotal = items?.reduce((sum, item) => sum + (item.price * item.quantity), 0) || 0
+  const cartCount = items?.reduce((sum, item) => sum + item.quantity, 0) || 0
 
   return createPortal(
     <div 
