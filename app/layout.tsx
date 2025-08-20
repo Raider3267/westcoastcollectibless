@@ -40,7 +40,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </div>
               <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
                 <a href="/" style={{ padding: '11px 16px', borderRadius: '999px', border: '1px solid var(--line)', background: '#fff', boxShadow: '0 6px 18px rgba(0,0,0,.05)', textDecoration: 'none', color: 'inherit' }}>Home</a>
-                <a href="/drops/calendar" style={{ padding: '11px 16px', borderRadius: '999px', border: '1px solid var(--line)', background: '#fff', boxShadow: '0 6px 18px rgba(0,0,0,.05)', textDecoration: 'none', color: 'inherit' }}>Drops</a>
                 <CartIcon />
                 <UserNav />
                 <a href="/admin/login" style={{ padding: '11px 16px', borderRadius: '999px', border: 'none', position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg,var(--accent-start), var(--accent-mid) 55%, var(--accent-end))', boxShadow: 'var(--shadow-soft)', textDecoration: 'none', color: '#0b0b0f' }}>Admin</a>
