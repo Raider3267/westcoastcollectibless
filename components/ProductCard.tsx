@@ -50,7 +50,7 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
   const [showCartConfirmation, setShowCartConfirmation] = useState(false)
   const [isInWishlist, setIsInWishlist] = useState(false)
   const [user, setUser] = useState(AuthService.getCurrentUser())
-  const { addItem, openCart } = useCart()
+  const { addItem, openCart, closeCart } = useCart()
   
   // Convert legacy status to new sale_state system
   const getSaleState = (): 'DRAFT' | 'PREVIEW' | 'LIVE' | 'ARCHIVED' => {
@@ -105,6 +105,8 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
   
   const handleContinueShopping = () => {
     setShowCartConfirmation(false)
+    // Also close the cart if it was automatically opened
+    closeCart()
   }
   
   const handleViewCart = () => {
