@@ -261,6 +261,7 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
         product={product}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        onAddToCart={() => setShowCartConfirmation(true)}
       />
       
       <NotifyMeModal

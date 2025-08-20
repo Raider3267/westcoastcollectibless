@@ -1,10 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import ImageCarousel from './ImageCarousel'
 import ProductCTAButton from './ProductCTAButton'
-import CartConfirmation from './CartConfirmation'
 import { useCart } from '../lib/cart'
 
 type Product = {
@@ -32,11 +31,11 @@ interface ProductModalProps {
   product: Product | null
   isOpen: boolean
   onClose: () => void
+  onAddToCart?: () => void
 }
 
-export default function ProductModal({ product, isOpen, onClose }: ProductModalProps) {
+export default function ProductModal({ product, isOpen, onClose, onAddToCart }: ProductModalProps) {
   const { addItem, openCart } = useCart()
-  const [showCartConfirmation, setShowCartConfirmation] = useState(false)
   
   // Convert legacy status to new sale_state system
   const getSaleState = (): 'DRAFT' | 'PREVIEW' | 'LIVE' | 'ARCHIVED' => {
@@ -59,8 +58,12 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
       image: product.image || undefined,
       weight: product.weight || 0.3
     })
-    // Show cart confirmation popup
-    setShowCartConfirmation(true)
+    // Close the product modal immediately
+    onClose()
+    // Trigger the cart confirmation in the parent component
+    if (onAddToCart) {
+      setTimeout(() => onAddToCart(), 100)
+    }
   }
   
   const handleNotifyMe = () => {
@@ -68,16 +71,6 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
     alert('Notify me functionality will be available soon!')
   }
   
-  const handleContinueShopping = () => {
-    setShowCartConfirmation(false)
-    onClose() // Close the product modal
-  }
-  
-  const handleViewCart = () => {
-    setShowCartConfirmation(false)
-    onClose() // Close the product modal
-    openCart() // Open the cart sidebar
-  }
   // Close modal on Escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -234,19 +227,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
 
   // Use createPortal to render modal at document.body level
   if (typeof document !== 'undefined') {
-    return (
-      <>
-        {createPortal(modalContent, document.body)}
-        <CartConfirmation
-          isOpen={showCartConfirmation}
-          onClose={() => setShowCartConfirmation(false)}
-          productName={product?.name || ''}
-          productImage={product?.image || undefined}
-          onContinueShopping={handleContinueShopping}
-          onViewCart={handleViewCart}
-        />
-      </>
-    )
+    return createPortal(modalContent, document.body)
   }
 
   return modalContent
