@@ -311,70 +311,75 @@ function HeroSection() {
         zIndex: 1
       }} />
 
-      {/* Big Centered Brand Wordmark */}
-      <div 
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          fontSize: 'clamp(4rem, 12vw, 16rem)',
-          fontWeight: 900,
-          color: 'rgba(255,255,255,0.12)',
-          letterSpacing: '-0.02em',
-          textAlign: 'center',
-          zIndex: 0,
-          pointerEvents: 'none',
-          userSelect: 'none',
-          filter: 'blur(0.5px)',
-          textShadow: '0 0 40px rgba(255,255,255,0.1)'
-        }}
-      >
-        WestCoastCollectibles
-      </div>
-
-      {/* Hero Content */}
+      {/* Hero Content - Centered Layout */}
       <div style={{ 
         position: 'relative', 
         zIndex: 2, 
         color: 'white', 
-        textAlign: 'left', 
-        maxWidth: '750px', 
+        textAlign: 'center', 
+        maxWidth: '900px', 
         padding: '0 60px',
-        width: '100%'
-      }}>
-        <div className="luxury-eyebrow" style={{ 
-          color: 'rgba(255,255,255,0.9)',
-          textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-          marginBottom: '20px',
-          fontSize: '0.9rem'
-        }}>
-          Curated • Limited • Authentic
-        </div>
-        
+        width: '100%',
+        margin: '0 auto'
+      }}>        
+        {/* Fun Colorful Business Name */}
         <h1 style={{ 
-          fontSize: 'clamp(2.8rem, 4.5vw, 4.5rem)', 
-          margin: '0 0 28px', 
+          fontSize: 'clamp(3rem, 8vw, 6rem)', 
+          margin: '0 0 32px', 
           lineHeight: 1.1, 
-          fontWeight: 800,
-          color: 'white',
+          fontWeight: 900,
           textShadow: '0 4px 8px rgba(0,0,0,0.4)',
-          animation: prefersReducedMotion ? 'none' : 'heroShimmer 12s ease-in-out infinite'
+          letterSpacing: '-0.02em'
         }}>
-          <span className="floating-collectible" style={{ display: 'inline-block' }}>🎯</span> Luxury Designer Toys with Playful Energy
+          <span style={{ 
+            background: 'linear-gradient(135deg, #ff6b6b, #ffa500, #ffeb3b, #4caf50, #2196f3, #9c27b0)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            display: 'inline-block',
+            animation: prefersReducedMotion ? 'none' : 'rainbowShift 3s ease-in-out infinite'
+          }}>
+            WestCoast
+          </span>
+          <span style={{ color: 'white', margin: '0 8px' }}>•</span>
+          <span style={{ 
+            background: 'linear-gradient(135deg, #9c27b0, #2196f3, #4caf50, #ffeb3b, #ffa500, #ff6b6b)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            display: 'inline-block',
+            animation: prefersReducedMotion ? 'none' : 'rainbowShift 3s ease-in-out infinite reverse'
+          }}>
+            Collectibles
+          </span>
         </h1>
+        
+        {/* Supporting Text */}
+        <p style={{ 
+          margin: '0 0 20px', 
+          fontSize: 'clamp(1.2rem, 3vw, 1.8rem)',
+          color: 'rgba(255,255,255,0.95)',
+          textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+          lineHeight: 1.4,
+          fontWeight: 600,
+          maxWidth: '700px',
+          margin: '0 auto 20px auto'
+        }}>
+          <span className="floating-collectible" style={{ display: 'inline-block', marginRight: '8px' }}>🎯</span>
+          Designer Toys • Limited Drops • Authentic Collectibles
+        </p>
         
         <p style={{ 
           margin: '0 0 16px', 
-          fontSize: '1.4rem',
-          color: 'rgba(255,255,255,0.95)',
+          fontSize: '1.1rem',
+          color: 'rgba(255,255,255,0.85)',
           textShadow: '0 2px 4px rgba(0,0,0,0.3)',
           lineHeight: 1.5,
-          fontWeight: 600,
-          maxWidth: '620px'
+          fontWeight: 500,
+          maxWidth: '600px',
+          margin: '0 auto 16px auto'
         }}>
-          Limited drops. Authentic releases. For serious collectors.
+          Premium collectibles with magical details for serious collectors worldwide
         </p>
 
         {/* Rotating Collector Tagline */}
@@ -552,9 +557,22 @@ function HeroSection() {
       </div>
 
       <style jsx>{`
-        @keyframes heroShimmer {
-          0%, 100% { text-shadow: 0 4px 8px rgba(0,0,0,0.4); }
-          50% { text-shadow: 0 4px 8px rgba(0,0,0,0.4), 0 0 20px rgba(255,255,255,0.1); }
+        @keyframes rainbowShift {
+          0%, 100% { 
+            background: linear-gradient(135deg, #ff6b6b, #ffa500, #ffeb3b, #4caf50, #2196f3, #9c27b0);
+            -webkit-background-clip: text;
+            background-clip: text;
+          }
+          33% { 
+            background: linear-gradient(135deg, #9c27b0, #ff6b6b, #ffa500, #ffeb3b, #4caf50, #2196f3);
+            -webkit-background-clip: text;
+            background-clip: text;
+          }
+          66% { 
+            background: linear-gradient(135deg, #2196f3, #9c27b0, #ff6b6b, #ffa500, #ffeb3b, #4caf50);
+            -webkit-background-clip: text;
+            background-clip: text;
+          }
         }
 
         @keyframes taglineFade {
@@ -576,27 +594,20 @@ function HeroSection() {
           .floating-collectible {
             animation: none;
           }
-        }
-
-        /* Responsive Layout */
-        @media (max-width: 1024px) {
-          .hero-content {
-            text-align: center;
+          
+          /* Static colors for reduced motion */
+          .rainbow-text {
+            background: linear-gradient(135deg, #ff6b6b, #ffa500, #ffeb3b, #4caf50, #2196f3, #9c27b0) !important;
+            -webkit-background-clip: text !important;
+            background-clip: text !important;
+            animation: none !important;
           }
         }
 
+        /* Mobile Responsive */
         @media (max-width: 768px) {
           .hero-content {
-            padding: 0 30px;
-          }
-          
-          .hero-content h1 {
-            font-size: clamp(2.2rem, 8vw, 3rem) !important;
-          }
-          
-          .hero-wordmark {
-            font-size: clamp(2.5rem, 8vw, 6rem) !important;
-            opacity: 0.08 !important;
+            padding: 0 30px !important;
           }
         }
       `}</style>
