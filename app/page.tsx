@@ -4,7 +4,6 @@ import { SITE } from '../lib/products'
 import { Listing } from '../lib/listings'
 import ProductCard from '../components/ProductCard'
 import FilterBar, { FilterOptions } from '../components/FilterBar'
-import RecentlySoldBanner from '../components/RecentlySoldBanner'
 import VIPSection from '../components/VIPSection'
 import { useEffect, useState, useRef } from 'react'
 
@@ -149,6 +148,459 @@ function ScrollableSection({ children, className = "wcc-scroll" }: { children: R
         {children}
       </div>
     </div>
+  )
+}
+
+// New Premium Hero Section Component
+function HeroSection() {
+  const [currentTagline, setCurrentTagline] = useState(0)
+  const [nextDrop, setNextDrop] = useState<Listing | null>(null)
+  const [spotlightItem, setSpotlightItem] = useState<Listing | null>(null)
+  const [timeLeft, setTimeLeft] = useState<{days: number, hours: number, minutes: number} | null>(null)
+  const [scrollY, setScrollY] = useState(0)
+
+  // Collector-focused taglines
+  const taglines = [
+    "For serious collectors worldwide.",
+    "Curated exclusives. No compromises.",
+    "Luxury toys. Limited drops. Legendary finds."
+  ]
+
+  // Check for reduced motion preference
+  const prefersReducedMotion = typeof window !== 'undefined' && 
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  useEffect(() => {
+    // Fetch preview products for Next Drop countdown
+    const fetchNextDrop = async () => {
+      try {
+        const previewResponse = await fetch('/api/preview')
+        const previewItems = await previewResponse.json()
+        
+        // Find the soonest PREVIEW item with release_at
+        const upcomingItems = previewItems
+          .filter((item: Listing) => item.release_at)
+          .sort((a: Listing, b: Listing) => new Date(a.release_at!).getTime() - new Date(b.release_at!).getTime())
+        
+        if (upcomingItems.length > 0) {
+          setNextDrop(upcomingItems[0])
+        } else {
+          // Fallback to spotlight collectible
+          const featuredResponse = await fetch('/api/featured')
+          const featuredItems = await featuredResponse.json()
+          if (featuredItems.length > 0) {
+            setSpotlightItem(featuredItems[0])
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching next drop:', error)
+        // Fallback to spotlight
+        try {
+          const featuredResponse = await fetch('/api/featured')
+          const featuredItems = await featuredResponse.json()
+          if (featuredItems.length > 0) {
+            setSpotlightItem(featuredItems[0])
+          }
+        } catch (fallbackError) {
+          console.error('Error fetching featured items:', error)
+        }
+      }
+    }
+
+    fetchNextDrop()
+  }, [])
+
+  // Rotating tagline effect
+  useEffect(() => {
+    if (prefersReducedMotion) return
+
+    const interval = setInterval(() => {
+      setCurrentTagline((prev) => (prev + 1) % taglines.length)
+    }, 4500) // 4.5 seconds
+
+    return () => clearInterval(interval)
+  }, [prefersReducedMotion])
+
+  // Countdown timer
+  useEffect(() => {
+    if (!nextDrop?.release_at) return
+
+    const updateCountdown = () => {
+      const now = new Date().getTime()
+      const dropTime = new Date(nextDrop.release_at!).getTime()
+      const difference = dropTime - now
+
+      if (difference > 0) {
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24))
+        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60))
+        
+        setTimeLeft({ days, hours, minutes })
+      } else {
+        setTimeLeft(null)
+        // Item should be live now
+      }
+    }
+
+    updateCountdown()
+    const interval = setInterval(updateCountdown, 60000) // Update every minute
+
+    return () => clearInterval(interval)
+  }, [nextDrop])
+
+  // Parallax scroll effect
+  useEffect(() => {
+    if (prefersReducedMotion) return
+
+    const handleScroll = () => setScrollY(window.scrollY)
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [prefersReducedMotion])
+
+  return (
+    <section style={{ 
+      position: 'relative', 
+      height: '100vh', 
+      overflow: 'hidden',
+      display: 'flex',
+      alignItems: 'center'
+    }}>
+      {/* Video Background with Parallax */}
+      <video 
+        autoPlay 
+        muted 
+        loop 
+        playsInline
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          minWidth: '100%',
+          minHeight: '100%',
+          width: 'auto',
+          height: 'auto',
+          zIndex: -1,
+          transform: `translate(-50%, -50%) translateY(${prefersReducedMotion ? 0 : scrollY * 0.05}px)`,
+          objectFit: 'cover',
+          transition: prefersReducedMotion ? 'none' : 'transform 0.1s ease-out'
+        }}
+      >
+        <source src="/hero-video.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+
+      {/* Overlay for better text readability */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.3) 100%)',
+        zIndex: 0
+      }} />
+
+      {/* Bottom vignette for smooth handoff */}
+      <div style={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: '120px',
+        background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent)',
+        zIndex: 1
+      }} />
+
+      {/* Big Centered Brand Wordmark */}
+      <div 
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          fontSize: 'clamp(4rem, 12vw, 16rem)',
+          fontWeight: 900,
+          color: 'rgba(255,255,255,0.12)',
+          letterSpacing: '-0.02em',
+          textAlign: 'center',
+          zIndex: 0,
+          pointerEvents: 'none',
+          userSelect: 'none',
+          filter: 'blur(0.5px)',
+          textShadow: '0 0 40px rgba(255,255,255,0.1)'
+        }}
+      >
+        WestCoastCollectibles
+      </div>
+
+      {/* Hero Content */}
+      <div style={{ 
+        position: 'relative', 
+        zIndex: 2, 
+        color: 'white', 
+        textAlign: 'left', 
+        maxWidth: '750px', 
+        padding: '0 60px',
+        width: '100%'
+      }}>
+        <div className="luxury-eyebrow" style={{ 
+          color: 'rgba(255,255,255,0.9)',
+          textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+          marginBottom: '20px',
+          fontSize: '0.9rem'
+        }}>
+          Curated • Limited • Authentic
+        </div>
+        
+        <h1 style={{ 
+          fontSize: 'clamp(2.8rem, 4.5vw, 4.5rem)', 
+          margin: '0 0 28px', 
+          lineHeight: 1.1, 
+          fontWeight: 800,
+          color: 'white',
+          textShadow: '0 4px 8px rgba(0,0,0,0.4)',
+          animation: prefersReducedMotion ? 'none' : 'heroShimmer 12s ease-in-out infinite'
+        }}>
+          <span className="floating-collectible" style={{ display: 'inline-block' }}>🎯</span> Luxury Designer Toys with Playful Energy
+        </h1>
+        
+        <p style={{ 
+          margin: '0 0 16px', 
+          fontSize: '1.4rem',
+          color: 'rgba(255,255,255,0.95)',
+          textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+          lineHeight: 1.5,
+          fontWeight: 600,
+          maxWidth: '620px'
+        }}>
+          Limited drops. Authentic releases. For serious collectors.
+        </p>
+
+        {/* Rotating Collector Tagline */}
+        <div 
+          aria-live="polite"
+          style={{ 
+            margin: '0 0 20px', 
+            fontSize: '1rem',
+            color: 'rgba(255,255,255,0.8)',
+            textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+            fontWeight: 500,
+            height: '1.5rem',
+            display: 'flex',
+            alignItems: 'center'
+          }}
+        >
+          <span style={{
+            opacity: prefersReducedMotion ? 1 : 0.9,
+            transition: prefersReducedMotion ? 'none' : 'opacity 0.5s ease-in-out',
+            animation: prefersReducedMotion ? 'none' : 'taglineFade 4.5s ease-in-out infinite'
+          }}>
+            {taglines[currentTagline]}
+          </span>
+        </div>
+
+        {/* Micro Trust Line */}
+        <div style={{
+          margin: '0 0 32px',
+          fontSize: '0.85rem',
+          color: 'rgba(255,255,255,0.7)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '16px',
+          flexWrap: 'wrap'
+        }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z"/>
+            </svg>
+            Authenticity Verified
+          </span>
+          <span>•</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M3,4A2,2 0 0,0 1,6V8H23V6A2,2 0 0,0 21,4H3M1,19A2,2 0 0,0 3,21H10.84L15.82,16H23V10H1V19Z"/>
+            </svg>
+            Fast Shipping
+          </span>
+          <span>•</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12,3C17.5,3 22,6.58 22,11C22,15.42 17.5,19 12,19C10.76,19 9.57,18.82 8.47,18.5C5.55,21 2,21 2,21C4.33,18.67 4.7,17.1 4.75,16.5C3.05,15.07 2,13.13 2,11C2,6.58 6.5,3 12,3Z"/>
+            </svg>
+            Collector Support
+          </span>
+        </div>
+
+        {/* Purpose Block: Next Drop Countdown OR Spotlight Collectible */}
+        {nextDrop && timeLeft ? (
+          <div style={{
+            background: 'rgba(255,255,255,0.1)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '16px',
+            padding: '20px',
+            maxWidth: '400px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
+          }}>
+            <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)', marginBottom: '8px', fontWeight: 600 }}>
+              Next Drop
+            </div>
+            <div style={{ fontSize: '1.2rem', color: 'white', marginBottom: '12px', fontWeight: 700 }}>
+              {nextDrop.name}
+            </div>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '12px', 
+              marginBottom: '16px',
+              fontSize: '1rem',
+              color: 'white',
+              fontWeight: 600
+            }}>
+              <time dateTime={nextDrop.release_at}>
+                {timeLeft.days > 0 && `${timeLeft.days}d `}
+                {timeLeft.hours}h {timeLeft.minutes}m
+              </time>
+            </div>
+            <button
+              onClick={() => {
+                // Open notify/signup flow
+                const notifyEvent = new CustomEvent('show-auth-modal')
+                window.dispatchEvent(notifyEvent)
+              }}
+              style={{
+                background: 'linear-gradient(135deg, var(--wcc-teal), var(--wcc-lilac))',
+                color: '#0b0b0f',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '8px 16px',
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-1px)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+            >
+              Set a reminder
+            </button>
+          </div>
+        ) : spotlightItem ? (
+          <div style={{
+            background: 'rgba(255,255,255,0.1)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '16px',
+            padding: '20px',
+            maxWidth: '400px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseEnter={(e) => {
+            if (!prefersReducedMotion) {
+              e.currentTarget.style.transform = 'translateY(-2px)'
+              e.currentTarget.style.boxShadow = '0 12px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15)'
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)'
+            e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
+          }}
+          >
+            <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)', marginBottom: '12px', fontWeight: 600 }}>
+              Spotlight Collectible
+            </div>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              {spotlightItem.image && (
+                <img 
+                  src={spotlightItem.image.split(',')[0].trim()} 
+                  alt={spotlightItem.name}
+                  style={{
+                    width: '60px',
+                    height: '60px',
+                    borderRadius: '8px',
+                    objectFit: 'cover'
+                  }}
+                />
+              )}
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '1.1rem', color: 'white', marginBottom: '4px', fontWeight: 600 }}>
+                  {spotlightItem.name}
+                </div>
+                {spotlightItem.price && (
+                  <div style={{ fontSize: '1rem', color: '#5ED0C0', fontWeight: 700 }}>
+                    ${spotlightItem.price}
+                  </div>
+                )}
+                <a
+                  href={`#product-${spotlightItem.id}`}
+                  style={{
+                    fontSize: '0.85rem',
+                    color: 'rgba(255,255,255,0.8)',
+                    textDecoration: 'underline',
+                    marginTop: '8px',
+                    display: 'inline-block'
+                  }}
+                >
+                  View details
+                </a>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </div>
+
+      <style jsx>{`
+        @keyframes heroShimmer {
+          0%, 100% { text-shadow: 0 4px 8px rgba(0,0,0,0.4); }
+          50% { text-shadow: 0 4px 8px rgba(0,0,0,0.4), 0 0 20px rgba(255,255,255,0.1); }
+        }
+
+        @keyframes taglineFade {
+          0%, 20% { opacity: 0.9; }
+          10% { opacity: 1; }
+          80%, 100% { opacity: 0.9; }
+        }
+
+        @keyframes floatingCollectible {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-3px); }
+        }
+
+        .floating-collectible {
+          animation: floatingCollectible 3s ease-in-out infinite;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .floating-collectible {
+            animation: none;
+          }
+        }
+
+        /* Responsive Layout */
+        @media (max-width: 1024px) {
+          .hero-content {
+            text-align: center;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .hero-content {
+            padding: 0 30px;
+          }
+          
+          .hero-content h1 {
+            font-size: clamp(2.2rem, 8vw, 3rem) !important;
+          }
+          
+          .hero-wordmark {
+            font-size: clamp(2.5rem, 8vw, 6rem) !important;
+            opacity: 0.08 !important;
+          }
+        }
+      `}</style>
+    </section>
   )
 }
 
@@ -1746,167 +2198,7 @@ export default function HomePage() {
   return (
     <div>      
       <main>
-        {/* Recently Sold Banner */}
-        <RecentlySoldBanner />
-
-        {/* Hero Video Section */}
-        <section style={{ 
-          position: 'relative', 
-          height: '100vh', 
-          overflow: 'hidden',
-          display: 'flex',
-          alignItems: 'center'
-        }}>
-          {/* Video Background */}
-          <video 
-            autoPlay 
-            muted 
-            loop 
-            playsInline
-            style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              minWidth: '100%',
-              minHeight: '100%',
-              width: 'auto',
-              height: 'auto',
-              zIndex: -1,
-              transform: 'translate(-50%, -50%)',
-              objectFit: 'cover'
-            }}
-          >
-            <source src="/hero-video.mp4" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-
-          {/* Overlay for better text readability */}
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.3) 100%)',
-            zIndex: 0
-          }} />
-
-          {/* Bottom vignette for handoff to Featured */}
-          <div style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: '120px',
-            background: 'linear-gradient(to top, rgba(0,0,0,0.4), transparent)',
-            zIndex: 1
-          }} />
-
-          {/* Hero Content */}
-          <div style={{ 
-            position: 'relative', 
-            zIndex: 2, 
-            color: 'white', 
-            textAlign: 'left', 
-            maxWidth: '750px', 
-            padding: '0 60px',
-            width: '100%'
-          }}>
-            <div className="luxury-eyebrow" style={{ 
-              color: 'rgba(255,255,255,0.9)',
-              textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-              marginBottom: '20px',
-              fontSize: '0.9rem'
-            }}>
-              Curated • Limited • Authentic
-            </div>
-            <h1 style={{ 
-              fontSize: 'clamp(2.8rem, 4.5vw, 4.5rem)', 
-              margin: '0 0 28px', 
-              lineHeight: 1.1, 
-              fontWeight: 800,
-              color: 'white',
-              textShadow: '0 4px 8px rgba(0,0,0,0.4)'
-            }}>
-              <span className="floating-collectible" style={{ display: 'inline-block' }}>🎯</span> Luxury Designer Toys with Playful Energy
-            </h1>
-            <p style={{ 
-              margin: '0 0 16px', 
-              fontSize: '1.4rem',
-              color: 'rgba(255,255,255,0.95)',
-              textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-              lineHeight: 1.5,
-              fontWeight: 600,
-              maxWidth: '620px'
-            }}>
-              Limited drops. Authentic releases. For serious collectors.
-            </p>
-            <p style={{ 
-              margin: '0 0 40px', 
-              fontSize: '1.15rem',
-              color: 'rgba(255,255,255,0.85)',
-              textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-              lineHeight: 1.6,
-              maxWidth: '580px'
-            }}>
-              Premium collectibles with elegant presentation and magical details.
-            </p>
-            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-              <a 
-                href="#featured"
-                className="luxury-btn"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '16px 24px',
-                  fontSize: '1.05rem',
-                  borderRadius: '999px',
-                  border: 'none',
-                  color: '#0b0b0f',
-                  background: 'linear-gradient(135deg, var(--wcc-teal), var(--wcc-grad-c))',
-                  boxShadow: '0 12px 28px rgba(94,208,192,.4)',
-                  textDecoration: 'none',
-                  fontWeight: 700,
-                  transition: 'all 0.3s ease'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-              >
-                Shop New Arrivals
-              </a>
-              <a 
-                href="#featured"
-                className="luxury-btn"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '16px 24px',
-                  fontSize: '1.05rem',
-                  borderRadius: '999px',
-                  border: '2px solid rgba(255,255,255,0.8)',
-                  color: 'white',
-                  background: 'rgba(255,255,255,0.1)',
-                  backdropFilter: 'blur(10px)',
-                  textDecoration: 'none',
-                  fontWeight: 700,
-                  transition: 'all 0.3s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.2)'
-                  e.currentTarget.style.transform = 'translateY(-2px)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.1)'
-                  e.currentTarget.style.transform = 'translateY(0)'
-                }}
-              >
-                Browse Featured
-              </a>
-            </div>
-          </div>
-        </section>
+        <HeroSection />
 
         {/* Featured Collection - Premium Spotlight */}
         <FeaturedHighlightsSection />
