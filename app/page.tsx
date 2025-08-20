@@ -6,7 +6,7 @@ import ProductCard from '../components/ProductCard'
 import FilterBar, { FilterOptions } from '../components/FilterBar'
 import VIPSection from '../components/VIPSection'
 import UserNav from '../components/UserNav'
-import CartIcon from '../components/CartIcon'
+import { useCart } from '../lib/cart'
 import { useEffect, useState, useRef } from 'react'
 
 // Scrollable section with navigation arrows component
@@ -154,7 +154,7 @@ function ScrollableSection({ children, className = "wcc-scroll" }: { children: R
 }
 
 // New Premium Hero Section Component
-function HeroSection() {
+function HeroSection({ toggleCart, cartState }: { toggleCart: () => void, cartState: any }) {
   const [nextDrop, setNextDrop] = useState<Listing | null>(null)
   const [timeLeft, setTimeLeft] = useState<{days: number, hours: number, minutes: number} | null>(null)
   const [scrollY, setScrollY] = useState(0)
@@ -248,82 +248,69 @@ function HeroSection() {
       display: 'flex',
       alignItems: 'center'
     }}>
-      {/* Floating Navigation */}
+      {/* Unified Floating Navigation */}
       <nav 
         id="floating-nav"
         role="navigation"
         aria-label="Main navigation"
+        className="floating-nav-container"
         style={{
-          position: 'fixed',
+          position: 'absolute',
           top: '20px',
           right: '20px',
-          zIndex: 1000,
+          zIndex: cartState?.isOpen ? 30 : 1000, // Lower z-index when cart is open
           display: 'flex',
-          gap: '12px',
+          gap: '8px',
           alignItems: 'center',
-          transition: 'all 0.3s ease'
+          transition: 'all 0.3s ease',
+          opacity: cartState?.isOpen ? 0.3 : 1, // Dim when cart is open
+          pointerEvents: cartState?.isOpen ? 'none' : 'auto' // Disable interaction when cart is open
         }}
       >
-        <div 
-          role="group" 
+        {/* Cart Pill */}
+        <button 
+          className="nav-pill cart-pill"
+          onClick={toggleCart}
           aria-label="Shopping cart"
-          style={{
-            background: 'rgba(255,255,255,0.1)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            borderRadius: '50px',
-            padding: '8px 16px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-            display: 'flex',
-            gap: '8px',
-            alignItems: 'center'
-          }}
         >
-          <CartIcon />
-        </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536 1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/>
+          </svg>
+          <span className="nav-pill-label">Cart</span>
+          {cartState?.totalItems > 0 && (
+            <span style={{
+              position: 'absolute',
+              top: '-6px',
+              right: '-6px',
+              padding: '2px 6px',
+              borderRadius: '999px',
+              background: 'linear-gradient(135deg, #10b981, #059669)',
+              color: 'white',
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              minWidth: '18px',
+              textAlign: 'center'
+            }}>
+              {cartState?.totalItems > 99 ? '99+' : cartState?.totalItems}
+            </span>
+          )}
+        </button>
         
-        <div 
-          role="group" 
-          aria-label="User account"
-          style={{
-            background: 'rgba(255,255,255,0.1)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            borderRadius: '50px',
-            padding: '4px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
-          }}
-        >
+        {/* Sign In/User Pill */}
+        <div className="nav-pill user-pill" style={{ padding: 0 }}>
           <UserNav />
         </div>
         
+        {/* Admin Pill */}
         <a 
           href="/admin/login" 
+          className="nav-pill admin-pill"
           aria-label="Admin panel login"
-          style={{ 
-            display: 'inline-block',
-            background: 'rgba(255,255,255,0.1)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            borderRadius: '50px',
-            padding: '10px 16px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-            textDecoration: 'none',
-            color: 'white',
-            fontSize: '0.9rem',
-            fontWeight: 600,
-            transition: 'all 0.3s ease'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'rgba(255,255,255,0.2)'
-            e.currentTarget.style.transform = 'translateY(-1px)'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'rgba(255,255,255,0.1)'
-            e.currentTarget.style.transform = 'translateY(0)'
-          }}
         >
-          Admin
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M10.5,17L6.5,13L7.91,11.59L10.5,14.17L16.09,8.59L17.5,10L10.5,17Z"/>
+          </svg>
+          <span className="nav-pill-label">Admin</span>
         </a>
       </nav>
 
@@ -521,6 +508,7 @@ function HeroSection() {
       </div>
 
       <style jsx>{`
+        /* Rainbow Animation */
         @keyframes rainbowShift {
           0%, 100% { 
             background: linear-gradient(135deg, #ff6b6b, #ffa500, #ffeb3b, #4caf50, #2196f3, #9c27b0);
@@ -539,7 +527,7 @@ function HeroSection() {
           }
         }
 
-
+        /* Floating Collectible Animation */
         @keyframes floatingCollectible {
           0%, 100% { transform: translateY(0px); }
           50% { transform: translateY(-3px); }
@@ -549,24 +537,179 @@ function HeroSection() {
           animation: floatingCollectible 3s ease-in-out infinite;
         }
 
+        /* Load-time glow pulse */
+        @keyframes loadGlowPulse {
+          0% { 
+            box-shadow: 0 6px 18px rgba(0,0,0,0.18), 0 0 0 0 rgba(255,255,255,0.25);
+          }
+          50% { 
+            box-shadow: 0 8px 22px rgba(0,0,0,0.2), 0 0 12px 4px rgba(255,255,255,0.25);
+          }
+          100% { 
+            box-shadow: 0 6px 18px rgba(0,0,0,0.18), 0 0 0 0 rgba(255,255,255,0.25);
+          }
+        }
+
+        /* Unified Navigation Pills */
+        .nav-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          height: 38px;
+          padding: 0 12px;
+          background: rgba(255,255,255,0.14);
+          border: 1px solid rgba(255,255,255,0.22);
+          border-radius: 50px;
+          backdrop-filter: blur(10px) contrast(1.08);
+          box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+          color: white;
+          font-size: 0.9rem;
+          font-weight: 500;
+          text-decoration: none;
+          text-shadow: 0 1px 1px rgba(0,0,0,0.35);
+          cursor: pointer;
+          transition: all 0.3s ease;
+          animation: loadGlowPulse 400ms ease-out;
+          min-width: 44px; /* Mobile tap target */
+          justify-content: center;
+        }
+
+        .nav-pill:hover,
+        .nav-pill:focus {
+          backdrop-filter: blur(12px) contrast(1.1);
+          box-shadow: 0 10px 28px rgba(0,0,0,0.22), 0 0 0 6px rgba(255,255,255,0.25);
+          transform: translateY(-1px);
+        }
+
+        .nav-pill:active {
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15), 0 0 0 6px rgba(255,255,255,0.25);
+          transform: translateY(0);
+        }
+
+        .nav-pill:focus {
+          outline: 2px solid rgba(255,255,255,0.4);
+          outline-offset: 2px;
+        }
+
+        .nav-pill svg {
+          width: 16px;
+          height: 16px;
+          color: currentColor;
+          flex-shrink: 0;
+        }
+
+        .nav-pill-label {
+          white-space: nowrap;
+          color: currentColor;
+        }
+
+        /* Scroll state adjustments */
+        #floating-nav.scrolled .nav-pill {
+          height: 34px;
+          padding: 0 10px;
+          font-size: 0.85rem;
+          box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+        }
+
+        #floating-nav.scrolled .nav-pill:hover {
+          box-shadow: 0 8px 20px rgba(0,0,0,0.18), 0 0 0 5px rgba(255,255,255,0.2);
+        }
+
+        /* Container responsive behavior */
+        .floating-nav-container {
+          animation-delay: 200ms;
+        }
+
+        /* Reduced motion preferences */
         @media (prefers-reduced-motion: reduce) {
           .floating-collectible {
             animation: none;
           }
           
-          /* Static colors for reduced motion */
           .rainbow-text {
             background: linear-gradient(135deg, #ff6b6b, #ffa500, #ffeb3b, #4caf50, #2196f3, #9c27b0) !important;
             -webkit-background-clip: text !important;
             background-clip: text !important;
             animation: none !important;
           }
+
+          .nav-pill {
+            animation: none;
+            transition-duration: 0.2s;
+          }
+
+          .nav-pill:hover,
+          .nav-pill:focus {
+            transition-duration: 0.2s;
+          }
         }
 
-        /* Mobile Responsive */
+        /* UserNav Integration */
+        .nav-pill.user-pill button {
+          all: unset;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          color: white;
+          font-size: 0.9rem;
+          font-weight: 500;
+          cursor: pointer;
+          padding: 0;
+          margin: 0;
+          background: transparent !important;
+          border: none !important;
+          box-shadow: none !important;
+          transform: none !important;
+          border-radius: 0 !important;
+          height: auto !important;
+          width: auto !important;
+        }
+
+        .nav-pill.user-pill button:hover {
+          transform: none !important;
+          background: transparent !important;
+          border-color: transparent !important;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+          .nav-pill {
+            padding: 0 10px;
+            font-size: 0.85rem;
+          }
+          
+          #floating-nav {
+            gap: 6px;
+          }
+        }
+
         @media (max-width: 768px) {
           .hero-content {
             padding: 0 30px !important;
+          }
+
+          .nav-pill-label {
+            display: none;
+          }
+
+          .nav-pill {
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            justify-content: center;
+          }
+
+          #floating-nav {
+            top: 12px;
+            right: 12px;
+            gap: 6px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          #floating-nav {
+            top: 8px;
+            right: 8px;
           }
         }
       `}</style>
@@ -2058,6 +2201,7 @@ function CollectorAssuranceSection() {
 }
 
 export default function HomePage() {
+  const { state, toggleCart } = useCart()
   const [items, setItems] = useState<Listing[]>([])
   const [filteredItems, setFilteredItems] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
@@ -2168,7 +2312,7 @@ export default function HomePage() {
   return (
     <div>      
       <main>
-        <HeroSection />
+        <HeroSection toggleCart={toggleCart} cartState={state} />
 
         {/* Featured Collection - Premium Spotlight */}
         <FeaturedHighlightsSection />
