@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { AuthService } from '../lib/auth'
 
 interface AuthModalProps {
@@ -64,7 +65,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
     setError('')
   }
 
-  return (
+  const modalContent = (
     <div style={{
       position: 'fixed',
       inset: 0,
@@ -74,7 +75,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
       alignItems: 'center',
       justifyContent: 'center',
       padding: '20px',
-      zIndex: 9999,
+      zIndex: 999999,
       overflowY: 'auto'
     }}>
       <div className="luxury-card accent-teal" style={{ 
@@ -84,7 +85,9 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
         position: 'relative',
         margin: 'auto',
         maxHeight: '90vh',
-        overflowY: 'auto'
+        overflowY: 'auto',
+        zIndex: 999999,
+        background: 'white'
       }}>
         <button
           onClick={onClose}
@@ -369,4 +372,11 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
       </div>
     </div>
   )
+
+  // Use createPortal to render modal at body level
+  if (typeof document !== 'undefined') {
+    return createPortal(modalContent, document.body)
+  }
+
+  return modalContent
 }
