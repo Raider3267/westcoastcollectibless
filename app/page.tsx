@@ -153,17 +153,9 @@ function ScrollableSection({ children, className = "wcc-scroll" }: { children: R
 
 // New Premium Hero Section Component
 function HeroSection() {
-  const [currentTagline, setCurrentTagline] = useState(0)
   const [nextDrop, setNextDrop] = useState<Listing | null>(null)
   const [timeLeft, setTimeLeft] = useState<{days: number, hours: number, minutes: number} | null>(null)
   const [scrollY, setScrollY] = useState(0)
-
-  // Collector-focused taglines
-  const taglines = [
-    "For serious collectors worldwide.",
-    "Curated exclusives. No compromises.",
-    "Luxury toys. Limited drops. Legendary finds."
-  ]
 
   // Check for reduced motion preference
   const prefersReducedMotion = typeof window !== 'undefined' && 
@@ -191,17 +183,6 @@ function HeroSection() {
 
     fetchNextDrop()
   }, [])
-
-  // Rotating tagline effect
-  useEffect(() => {
-    if (prefersReducedMotion) return
-
-    const interval = setInterval(() => {
-      setCurrentTagline((prev) => (prev + 1) % taglines.length)
-    }, 4500) // 4.5 seconds
-
-    return () => clearInterval(interval)
-  }, [prefersReducedMotion])
 
   // Countdown timer
   useEffect(() => {
@@ -363,28 +344,6 @@ function HeroSection() {
           Premium collectibles with magical details for serious collectors worldwide
         </p>
 
-        {/* Rotating Collector Tagline */}
-        <div 
-          aria-live="polite"
-          style={{ 
-            margin: '0 0 20px', 
-            fontSize: '1rem',
-            color: 'rgba(255,255,255,0.8)',
-            textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-            fontWeight: 500,
-            height: '1.5rem',
-            display: 'flex',
-            alignItems: 'center'
-          }}
-        >
-          <span style={{
-            opacity: prefersReducedMotion ? 1 : 0.9,
-            transition: prefersReducedMotion ? 'none' : 'opacity 0.5s ease-in-out',
-            animation: prefersReducedMotion ? 'none' : 'taglineFade 4.5s ease-in-out infinite'
-          }}>
-            {taglines[currentTagline]}
-          </span>
-        </div>
 
 
         {/* Purpose Block: Next Drop Countdown Only */}
@@ -467,11 +426,6 @@ function HeroSection() {
           }
         }
 
-        @keyframes taglineFade {
-          0%, 20% { opacity: 0.9; }
-          10% { opacity: 1; }
-          80%, 100% { opacity: 0.9; }
-        }
 
         @keyframes floatingCollectible {
           0%, 100% { transform: translateY(0px); }
