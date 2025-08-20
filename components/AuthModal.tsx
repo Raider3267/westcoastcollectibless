@@ -83,8 +83,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
           </h2>
           <p style={{ fontSize: '0.9rem', color: 'var(--muted)' }}>
             {mode === 'signin' 
-              ? 'Sign in to access your wishlist and alerts'
-              : 'Create an account to save favorites and get early access'
+              ? 'Sign in to access your wishlist, saved items and price alerts'
+              : 'Create an account to save your favorite collectibles to your wishlist and get early access drops'
             }
           </p>
         </div>
@@ -225,6 +225,37 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
             {loading ? 'Processing...' : (mode === 'signin' ? 'Sign In' : 'Create Account')}
           </button>
         </form>
+
+        {mode === 'signup' && (
+          <div style={{
+            marginTop: '20px',
+            padding: '16px',
+            background: 'linear-gradient(135deg, rgba(199,163,255,.08), rgba(94,208,192,.08))',
+            borderRadius: '12px',
+            border: '1px solid var(--line)'
+          }}>
+            <h4 style={{ 
+              fontSize: '0.95rem', 
+              fontWeight: 700, 
+              color: 'var(--ink)', 
+              marginBottom: '8px' 
+            }}>
+              ✨ Member Benefits
+            </h4>
+            <ul style={{ 
+              fontSize: '0.85rem', 
+              color: 'var(--muted)', 
+              margin: 0, 
+              paddingLeft: '20px',
+              lineHeight: '1.6'
+            }}>
+              <li>❤️ Save items to your wishlist</li>
+              <li>🔔 Get notified when items restock</li>
+              <li>⚡ Early access to new drops</li>
+              <li>📸 Track your collection</li>
+            </ul>
+          </div>
+        )}
 
         <div style={{ textAlign: 'center', marginTop: '20px' }}>
           <p style={{ fontSize: '0.9rem', color: 'var(--muted)' }}>
