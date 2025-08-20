@@ -9,6 +9,8 @@ import ProductCTAButton from './ProductCTAButton'
 import NotifyMeModal from './NotifyMeModal'
 import CartConfirmation from './CartConfirmation'
 import NotificationToast from './NotificationToast'
+import WishlistButton from './WishlistButton'
+import AuthLightModal from './AuthLightModal'
 import { AuthService } from '../lib/auth'
 import { useCart } from '../lib/cart'
 
@@ -51,6 +53,7 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
   const [showCartConfirmation, setShowCartConfirmation] = useState(false)
   const [showNotification, setShowNotification] = useState(false)
   const [notificationMessage, setNotificationMessage] = useState('')
+  const [showAuthModal, setShowAuthModal] = useState(false)
   const [isInWishlist, setIsInWishlist] = useState(false)
   const [user, setUser] = useState(AuthService.getCurrentUser())
   const { addItem, openCart, closeCart } = useCart()
@@ -183,6 +186,24 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
           />
         </div>
         
+        {/* Wishlist button */}
+        <div style={{
+          position: 'absolute',
+          top: '8px',
+          left: '8px',
+          zIndex: 15,
+          background: 'rgba(255, 255, 255, 0.9)',
+          borderRadius: '50%',
+          backdropFilter: 'blur(4px)',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+        }}>
+          <WishlistButton
+            productId={product.id}
+            productName={product.name}
+            onSignInRequired={() => setShowAuthModal(true)}
+          />
+        </div>
+        
         {/* Featured badge */}
         {product.featured && (
           <div className="luxury-badge featured" style={{
@@ -299,6 +320,16 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
         onClose={() => setShowNotification(false)}
         message={notificationMessage}
         type="success"
+      />
+      
+      <AuthLightModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        productId={product.id}
+        onSuccess={() => {
+          // Refresh wishlist state after successful auth
+          setShowAuthModal(false)
+        }}
       />
     </>
   )

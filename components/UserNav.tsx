@@ -1,36 +1,27 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { AuthService, User, VIP_TIERS } from '../lib/auth'
-import AuthModal from './AuthModal'
+import { authService, AuthUser } from '../lib/auth-new'
+import AuthLightModal from './AuthLightModal'
 
 export default function UserNav() {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<AuthUser | null>(null)
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
 
   useEffect(() => {
-    setUser(AuthService.getCurrentUser())
+    // Subscribe to auth changes
+    const unsubscribe = authService.subscribe(setUser)
+    
+    // Initialize auth
+    authService.initialize()
+    
+    return unsubscribe
   }, [])
 
-  const handleAuthSuccess = () => {
-    setUser(AuthService.getCurrentUser())
-  }
-
-  const handleSignOut = () => {
-    AuthService.signOut()
-    setUser(null)
+  const handleSignOut = async () => {
+    await authService.signOut()
     setShowUserMenu(false)
-  }
-
-  const getTierBadgeColor = (tier: string) => {
-    const tierData = VIP_TIERS.find(t => t.id === tier)
-    return tierData?.badge_color || 'linear-gradient(135deg, #94a3b8, #cbd5e1)'
-  }
-
-  const getTierName = (tier: string) => {
-    const tierData = VIP_TIERS.find(t => t.id === tier)
-    return tierData?.name || 'Collector'
   }
 
   if (!user) {
@@ -38,14 +29,13 @@ export default function UserNav() {
       <>
         <button
           onClick={() => setShowAuthModal(true)}
-          className="luxury-btn grad"
           style={{
             padding: '10px 16px',
             fontSize: '0.9rem',
             fontWeight: 600,
             borderRadius: '999px',
             border: 'none',
-            background: 'linear-gradient(135deg, var(--accent-teal), var(--accent-gold))',
+            background: 'linear-gradient(135deg, #5ED0C0, #F7E7C3)',
             color: '#0b0b0f',
             cursor: 'pointer',
             transition: 'all 0.3s ease',
@@ -57,10 +47,10 @@ export default function UserNav() {
           👤 Sign In
         </button>
         
-        <AuthModal 
+        <AuthLightModal 
           isOpen={showAuthModal}
           onClose={() => setShowAuthModal(false)}
-          onAuthSuccess={handleAuthSuccess}
+          onSuccess={() => setShowAuthModal(false)}
         />
       </>
     )
@@ -88,7 +78,7 @@ export default function UserNav() {
           width: '32px',
           height: '32px',
           borderRadius: '50%',
-          background: getTierBadgeColor(user.tier),
+          background: 'linear-gradient(135deg, #5ED0C0, #C7A3FF)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -103,7 +93,7 @@ export default function UserNav() {
             {user.name || 'Collector'}
           </div>
           <div style={{ fontSize: '0.7rem', color: 'var(--muted)' }}>
-            {getTierName(user.tier)}
+            {user.email_verified ? 'Verified' : 'Unverified'}
           </div>
         </div>
         <span style={{ fontSize: '0.7rem', color: 'var(--muted)' }}>▼</span>
@@ -132,12 +122,14 @@ export default function UserNav() {
               marginTop: '4px',
               padding: '2px 8px',
               borderRadius: '12px',
-              background: getTierBadgeColor(user.tier),
+              background: user.email_verified 
+                ? 'linear-gradient(135deg, #10b981, #059669)' 
+                : 'linear-gradient(135deg, #f59e0b, #d97706)',
               color: 'white',
               fontSize: '0.7rem',
               fontWeight: 600
             }}>
-              {getTierName(user.tier)}
+              {user.email_verified ? 'Verified Member' : 'Unverified'}
             </div>
           </div>
 
@@ -158,10 +150,10 @@ export default function UserNav() {
               onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(94,208,192,0.1)'}
               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
             >
-              ❤️ Wishlist ({user.wishlist.length})
+              ❤️ My Wishlist
             </a>
             <a 
-              href="/account/alerts"
+              href="/account"
               style={{ 
                 display: 'flex', 
                 alignItems: 'center', 
@@ -176,43 +168,7 @@ export default function UserNav() {
               onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(94,208,192,0.1)'}
               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
             >
-              🔔 Alerts ({user.alerts.filter(a => a.is_active).length})
-            </a>
-            <a 
-              href="/account/collection"
-              style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '8px', 
-                padding: '8px', 
-                borderRadius: '8px',
-                textDecoration: 'none',
-                color: 'var(--ink)',
-                fontSize: '0.9rem',
-                transition: 'background 0.2s ease'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(94,208,192,0.1)'}
-              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-            >
-              📸 My Collection
-            </a>
-            <a 
-              href="/drops/calendar"
-              style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '8px', 
-                padding: '8px', 
-                borderRadius: '8px',
-                textDecoration: 'none',
-                color: 'var(--ink)',
-                fontSize: '0.9rem',
-                transition: 'background 0.2s ease'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(94,208,192,0.1)'}
-              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-            >
-              📅 Drop Calendar
+              ⚙️ Account
             </a>
             <div style={{ height: '1px', background: 'var(--line)', margin: '8px 0' }} />
             <button

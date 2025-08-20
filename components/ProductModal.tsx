@@ -6,6 +6,8 @@ import ImageCarousel from './ImageCarousel'
 import ProductCTAButton from './ProductCTAButton'
 import NotifyMeModal from './NotifyMeModal'
 import NotificationToast from './NotificationToast'
+import WishlistButton from './WishlistButton'
+import AuthLightModal from './AuthLightModal'
 import { useCart } from '../lib/cart'
 import { AuthService } from '../lib/auth'
 
@@ -43,6 +45,7 @@ export default function ProductModal({ product, isOpen, onClose, onAddToCart }: 
   const [showNotifyModal, setShowNotifyModal] = useState(false)
   const [showNotification, setShowNotification] = useState(false)
   const [notificationMessage, setNotificationMessage] = useState('')
+  const [showAuthModal, setShowAuthModal] = useState(false)
   
   useEffect(() => {
     setUser(AuthService.getCurrentUser())
@@ -142,14 +145,31 @@ export default function ProductModal({ product, isOpen, onClose, onAddToCart }: 
         }}>
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <h2 className="text-2xl font-bold mb-2 pr-8" style={{ color: 'var(--wcc-ink)' }}>
-                {product.name}
-              </h2>
-              {product.price && (
-                <div className="text-3xl font-extrabold" style={{ color: '#ff8b2a' }}>
-                  💰 {new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(product.price)}
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                <div style={{ flex: 1 }}>
+                  <h2 className="text-2xl font-bold mb-2 pr-8" style={{ color: 'var(--wcc-ink)' }}>
+                    {product.name}
+                  </h2>
+                  {product.price && (
+                    <div className="text-3xl font-extrabold" style={{ color: '#ff8b2a' }}>
+                      💰 {new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(product.price)}
+                    </div>
+                  )}
                 </div>
-              )}
+                <div style={{
+                  background: 'rgba(255, 255, 255, 0.9)',
+                  borderRadius: '50%',
+                  backdropFilter: 'blur(4px)',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                  marginTop: '4px'
+                }}>
+                  <WishlistButton
+                    productId={product.id}
+                    productName={product.name}
+                    onSignInRequired={() => setShowAuthModal(true)}
+                  />
+                </div>
+              </div>
             </div>
             <button
               onClick={onClose}
@@ -264,6 +284,15 @@ export default function ProductModal({ product, isOpen, onClose, onAddToCart }: 
           onClose={() => setShowNotification(false)}
           message={notificationMessage}
           type="success"
+        />
+        
+        <AuthLightModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          productId={product?.id}
+          onSuccess={() => {
+            setShowAuthModal(false)
+          }}
         />
       </>
     )
