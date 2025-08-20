@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import ImageCarousel from './ImageCarousel'
 import ProductCTAButton from './ProductCTAButton'
+import CartConfirmation from './CartConfirmation'
 import { useCart } from '../lib/cart'
 
 type Product = {
@@ -34,7 +35,8 @@ interface ProductModalProps {
 }
 
 export default function ProductModal({ product, isOpen, onClose }: ProductModalProps) {
-  const { addItem } = useCart()
+  const { addItem, setIsOpen: setCartOpen } = useCart()
+  const [showCartConfirmation, setShowCartConfirmation] = useState(false)
   
   // Convert legacy status to new sale_state system
   const getSaleState = (): 'DRAFT' | 'PREVIEW' | 'LIVE' | 'ARCHIVED' => {
@@ -57,11 +59,24 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
       image: product.image || undefined,
       weight: product.weight || 0.3
     })
+    // Show cart confirmation popup
+    setShowCartConfirmation(true)
   }
   
   const handleNotifyMe = () => {
     // For now, just show an alert. This could be enhanced with a proper modal
     alert('Notify me functionality will be available soon!')
+  }
+  
+  const handleContinueShopping = () => {
+    setShowCartConfirmation(false)
+    onClose() // Close the product modal
+  }
+  
+  const handleViewCart = () => {
+    setShowCartConfirmation(false)
+    onClose() // Close the product modal
+    setCartOpen(true) // Open the cart sidebar
   }
   // Close modal on Escape key
   useEffect(() => {
@@ -189,26 +204,6 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
               onNotifyMe={handleNotifyMe}
               className="flex-1 text-lg font-bold py-4"
             />
-            {product.ebayUrl && (
-              <a
-                href={product.ebayUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="flex-1 text-center font-bold text-lg transition-all duration-300 hover:scale-105 text-decoration-none"
-                style={{
-                  padding: '16px 24px',
-                  borderRadius: '12px',
-                  background: 'linear-gradient(135deg, #e5e7eb, #f3f4f6)',
-                  color: '#4b5563',
-                  boxShadow: '0 4px 12px rgba(0,0,0,.1)',
-                  border: '2px solid #d1d5db'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-              >
-                🏪 View on eBay
-              </a>
-            )}
             <button
               onClick={onClose}
               className="font-bold text-lg transition-all duration-300 hover:scale-105"
@@ -239,7 +234,19 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
 
   // Use createPortal to render modal at document.body level
   if (typeof document !== 'undefined') {
-    return createPortal(modalContent, document.body)
+    return (
+      <>
+        {createPortal(modalContent, document.body)}
+        <CartConfirmation
+          isOpen={showCartConfirmation}
+          onClose={() => setShowCartConfirmation(false)}
+          productName={product?.name || ''}
+          productImage={product?.image || undefined}
+          onContinueShopping={handleContinueShopping}
+          onViewCart={handleViewCart}
+        />
+      </>
+    )
   }
 
   return modalContent

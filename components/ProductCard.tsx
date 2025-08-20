@@ -7,6 +7,7 @@ import ImageCarousel from './ImageCarousel'
 import ProductChip from './ProductChip'
 import ProductCTAButton from './ProductCTAButton'
 import NotifyMeModal from './NotifyMeModal'
+import CartConfirmation from './CartConfirmation'
 import { AuthService } from '../lib/auth'
 import { useCart } from '../lib/cart'
 
@@ -46,9 +47,10 @@ interface ProductCardProps {
 export default function ProductCard({ product, cardColor, randomEmoji }: ProductCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isNotifyModalOpen, setIsNotifyModalOpen] = useState(false)
+  const [showCartConfirmation, setShowCartConfirmation] = useState(false)
   const [isInWishlist, setIsInWishlist] = useState(false)
   const [user, setUser] = useState(AuthService.getCurrentUser())
-  const { addItem } = useCart()
+  const { addItem, setIsOpen: setCartOpen } = useCart()
   
   // Convert legacy status to new sale_state system
   const getSaleState = (): 'DRAFT' | 'PREVIEW' | 'LIVE' | 'ARCHIVED' => {
@@ -97,6 +99,17 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
       image: product.image || undefined,
       weight: product.weight || 0.3
     })
+    // Show cart confirmation popup
+    setShowCartConfirmation(true)
+  }
+  
+  const handleContinueShopping = () => {
+    setShowCartConfirmation(false)
+  }
+  
+  const handleViewCart = () => {
+    setShowCartConfirmation(false)
+    setCartOpen(true) // Open the cart sidebar
   }
   
   const handleNotifyMe = () => {
@@ -255,6 +268,15 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
         productId={product.id}
         productName={product.name}
         onClose={() => setIsNotifyModalOpen(false)}
+      />
+      
+      <CartConfirmation
+        isOpen={showCartConfirmation}
+        onClose={() => setShowCartConfirmation(false)}
+        productName={product.name}
+        productImage={product.image || undefined}
+        onContinueShopping={handleContinueShopping}
+        onViewCart={handleViewCart}
       />
     </>
   )
