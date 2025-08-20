@@ -1,10 +1,13 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import ImageCarousel from './ImageCarousel'
 import ProductCTAButton from './ProductCTAButton'
+import NotifyMeModal from './NotifyMeModal'
+import NotificationToast from './NotificationToast'
 import { useCart } from '../lib/cart'
+import { AuthService } from '../lib/auth'
 
 type Product = {
   id: string
@@ -36,6 +39,14 @@ interface ProductModalProps {
 
 export default function ProductModal({ product, isOpen, onClose, onAddToCart }: ProductModalProps) {
   const { addItem, openCart } = useCart()
+  const [user, setUser] = useState(AuthService.getCurrentUser())
+  const [showNotifyModal, setShowNotifyModal] = useState(false)
+  const [showNotification, setShowNotification] = useState(false)
+  const [notificationMessage, setNotificationMessage] = useState('')
+  
+  useEffect(() => {
+    setUser(AuthService.getCurrentUser())
+  }, [isOpen])
   
   // Convert legacy status to new sale_state system
   const getSaleState = (): 'DRAFT' | 'PREVIEW' | 'LIVE' | 'ARCHIVED' => {
@@ -67,8 +78,18 @@ export default function ProductModal({ product, isOpen, onClose, onAddToCart }: 
   }
   
   const handleNotifyMe = () => {
-    // For now, just show an alert. This could be enhanced with a proper modal
-    alert('Notify me functionality will be available soon!')
+    if (!product) return
+    
+    // If user is signed in, directly create the alert
+    if (user) {
+      AuthService.createAlert(product.id, 'restock')
+      // Show success notification
+      setNotificationMessage(`You'll be notified when "${product.name}" is back in stock!`)
+      setShowNotification(true)
+    } else {
+      // If not signed in, show the notify modal
+      setShowNotifyModal(true)
+    }
   }
   
   // Close modal on Escape key
@@ -227,7 +248,25 @@ export default function ProductModal({ product, isOpen, onClose, onAddToCart }: 
 
   // Use createPortal to render modal at document.body level
   if (typeof document !== 'undefined') {
-    return createPortal(modalContent, document.body)
+    return (
+      <>
+        {createPortal(modalContent, document.body)}
+        {product && (
+          <NotifyMeModal
+            isOpen={showNotifyModal}
+            productId={product.id}
+            productName={product.name}
+            onClose={() => setShowNotifyModal(false)}
+          />
+        )}
+        <NotificationToast
+          isOpen={showNotification}
+          onClose={() => setShowNotification(false)}
+          message={notificationMessage}
+          type="success"
+        />
+      </>
+    )
   }
 
   return modalContent

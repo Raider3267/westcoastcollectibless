@@ -8,6 +8,7 @@ import ProductChip from './ProductChip'
 import ProductCTAButton from './ProductCTAButton'
 import NotifyMeModal from './NotifyMeModal'
 import CartConfirmation from './CartConfirmation'
+import NotificationToast from './NotificationToast'
 import { AuthService } from '../lib/auth'
 import { useCart } from '../lib/cart'
 
@@ -48,6 +49,8 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isNotifyModalOpen, setIsNotifyModalOpen] = useState(false)
   const [showCartConfirmation, setShowCartConfirmation] = useState(false)
+  const [showNotification, setShowNotification] = useState(false)
+  const [notificationMessage, setNotificationMessage] = useState('')
   const [isInWishlist, setIsInWishlist] = useState(false)
   const [user, setUser] = useState(AuthService.getCurrentUser())
   const { addItem, openCart, closeCart } = useCart()
@@ -115,7 +118,16 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
   }
   
   const handleNotifyMe = () => {
-    setIsNotifyModalOpen(true)
+    // If user is signed in, directly create the alert
+    if (user) {
+      AuthService.createAlert(product.id, 'restock')
+      // Show success notification
+      setNotificationMessage(`You'll be notified when "${product.name}" is back in stock!`)
+      setShowNotification(true)
+    } else {
+      // If not signed in, show the notify modal
+      setIsNotifyModalOpen(true)
+    }
   }
   
   const handleCreateAlert = (e: React.MouseEvent) => {
@@ -280,6 +292,13 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
         productImage={product.image || undefined}
         onContinueShopping={handleContinueShopping}
         onViewCart={handleViewCart}
+      />
+      
+      <NotificationToast
+        isOpen={showNotification}
+        onClose={() => setShowNotification(false)}
+        message={notificationMessage}
+        type="success"
       />
     </>
   )
