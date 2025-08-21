@@ -11,6 +11,7 @@ export async function createSquareOrder(cartData: {
   customerEmail: string
   billingInfo: any
   shippingInfo: any
+  taxAmount?: number // Optional tax amount in dollars
 }) {
   try {
     // Purchase validation: Block checkout unless sale_state = LIVE and quantity > 0
@@ -101,6 +102,15 @@ export async function createSquareOrder(cartData: {
         name: `Shipping (${cheapestShipping.service})`,
         quantity: 1,
         unitAmountCents: cheapestShipping.cost
+      })
+    }
+    
+    // Add tax as a line item if there's a tax amount
+    if (cartData.taxAmount && cartData.taxAmount > 0) {
+      lineItems.push({
+        name: 'Sales Tax',
+        quantity: 1,
+        unitAmountCents: Math.round(cartData.taxAmount * 100) // Convert dollars to cents
       })
     }
 

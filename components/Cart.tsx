@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useCart } from '../lib/cart'
 import { createSquareOrder } from '../app/actions/fast-checkout'
 import SquarePayment from './SquarePayment'
+import { calculateSalesTax, formatTaxRate, shouldCollectTax } from '../lib/tax'
 
 export default function Cart() {
   const { state, removeItem, updateQuantity, clearCart, closeCart } = useCart()
@@ -48,6 +49,17 @@ export default function Cart() {
   const [shippingError, setShippingError] = useState('')
   const [showShippingSelection, setShowShippingSelection] = useState(false)
   const [needsShippingCalculation, setNeedsShippingCalculation] = useState(false)
+  
+  // Tax calculation state
+  const [taxInfo, setTaxInfo] = useState<{
+    taxRate: number
+    taxAmount: number
+    shouldCollect: boolean
+  }>({
+    taxRate: 0,
+    taxAmount: 0,
+    shouldCollect: false
+  })
 
   // Prevent body scroll when cart is open
   useEffect(() => {
@@ -61,6 +73,11 @@ export default function Cart() {
       document.body.style.overflow = ''
     }
   }, [state.isOpen])
+
+  // Recalculate tax when shipping address, cart contents, or shipping selection changes
+  useEffect(() => {
+    calculateTax()
+  }, [billingInfo.state, billingInfo.zipCode, shippingInfo.state, shippingInfo.zipCode, sameAsBilling, selectedShipping, state.totalPrice])
 
   const handleCheckout = async () => {
     setIsCheckingOut(true)
@@ -120,6 +137,46 @@ export default function Cart() {
     }
   }
 
+  // Calculate tax based on shipping address
+  const calculateTax = () => {
+    const shippingAddress = sameAsBilling ? billingInfo : shippingInfo
+    
+    // Check if we have the required address info for tax calculation
+    if (!shippingAddress.state || !shippingAddress.zipCode) {
+      setTaxInfo({
+        taxRate: 0,
+        taxAmount: 0,
+        shouldCollect: false
+      })
+      return
+    }
+    
+    const shouldCollect = shouldCollectTax(shippingAddress.state)
+    
+    if (!shouldCollect) {
+      setTaxInfo({
+        taxRate: 0,
+        taxAmount: 0,
+        shouldCollect: false
+      })
+      return
+    }
+    
+    const shippingCost = (selectedShipping?.cost || 0) / 100 // Convert cents to dollars
+    const taxResult = calculateSalesTax({
+      subtotal: state.totalPrice,
+      shippingCost: shippingCost,
+      state: shippingAddress.state,
+      zipCode: shippingAddress.zipCode
+    })
+    
+    setTaxInfo({
+      taxRate: taxResult.taxRate,
+      taxAmount: taxResult.taxAmount,
+      shouldCollect: true
+    })
+  }
+
   const handleCreateOrder = async () => {
     setPaymentError('')
     setIsCreatingOrder(true)
@@ -159,7 +216,8 @@ export default function Cart() {
         items: state.items,
         customerEmail: billingInfo.email,
         billingInfo,
-        shippingInfo: sameAsBilling ? billingInfo : shippingInfo
+        shippingInfo: sameAsBilling ? billingInfo : shippingInfo,
+        taxAmount: taxInfo.taxAmount
       })
 
       if (result.success && result.orderId) {
@@ -339,14 +397,20 @@ export default function Cart() {
                     <span>${state.totalPrice.toFixed(2)}</span>
                   </div>
                   {selectedShipping && (
-                    <div className="flex justify-between text-sm text-gray-600 mb-2">
+                    <div className="flex justify-between text-sm text-gray-600 mb-1">
                       <span>Shipping ({selectedShipping.service.replace('_', ' ')})</span>
                       <span>{selectedShipping.cost === 0 ? 'FREE' : `$${(selectedShipping.cost / 100).toFixed(2)}`}</span>
                     </div>
                   )}
+                  {taxInfo.shouldCollect && taxInfo.taxAmount > 0 && (
+                    <div className="flex justify-between text-sm text-gray-600 mb-2">
+                      <span>Tax ({formatTaxRate(taxInfo.taxRate)})</span>
+                      <span>${taxInfo.taxAmount.toFixed(2)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between font-semibold text-lg">
                     <span>Total</span>
-                    <span>${(((state.totalPrice * 100) + (selectedShipping?.cost || 0)) / 100).toFixed(2)}</span>
+                    <span>${(((state.totalPrice * 100) + (selectedShipping?.cost || 0) + (taxInfo.taxAmount * 100)) / 100).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -594,7 +658,7 @@ export default function Cart() {
                       disabled={isCreatingOrder || !showShippingSelection}
                       className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
                     >
-                      {isCreatingOrder ? 'Creating Order...' : `Continue to Payment - $${(((state.totalPrice * 100) + (selectedShipping?.cost || 0)) / 100).toFixed(2)}`}
+                      {isCreatingOrder ? 'Creating Order...' : `Continue to Payment - $${(((state.totalPrice * 100) + (selectedShipping?.cost || 0) + (taxInfo.taxAmount * 100)) / 100).toFixed(2)}`}
                     </button>
                     <p className="text-xs text-gray-500 mt-2 text-center">
                       Next step: Complete payment with Square
@@ -608,7 +672,7 @@ export default function Cart() {
                       </p>
                     </div>
                     <SquarePayment
-                      amount={Math.round((state.totalPrice * 100) + (selectedShipping?.cost || 0))} // Include shipping
+                      amount={Math.round((state.totalPrice * 100) + (selectedShipping?.cost || 0) + (taxInfo.taxAmount * 100))} // Include shipping and tax
                       currency="USD"
                       productName={`Order (${state.totalItems} items)`}
                       productSku={`cart-${Date.now()}`}
