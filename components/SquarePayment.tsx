@@ -5,9 +5,15 @@ import {
   CreditCard, 
   GooglePay, 
   ApplePay, 
-  PaymentForm,
-  type TokenResult
+  PaymentForm
+  // type TokenResult
 } from 'react-square-web-payments-sdk'
+
+// Define TokenResult type locally if not exported
+interface TokenResult {
+  token?: string
+  [key: string]: any
+}
 import { submitPayment, getSquareConfig } from '../app/actions/square'
 
 interface SquarePaymentProps {
@@ -61,7 +67,7 @@ export default function SquarePayment({
     try {
       console.log('Submitting payment with amount:', amount, 'currency:', currency)
       const result = await submitPayment(
-        token.token,
+        token.token || '',
         amount,
         currency,
         customerEmail ? {

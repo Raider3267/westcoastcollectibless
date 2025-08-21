@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     console.log(`Would send drop notification for: ${productName} to ${subscriberEmails.length} subscribers`)
 
     // Example: Send to a test list (you can add your email here for testing)
-    const testEmails = [
+    const testEmails: string[] = [
       // Add your email here for testing: 'your-email@example.com'
     ]
 

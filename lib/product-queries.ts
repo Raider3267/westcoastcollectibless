@@ -36,16 +36,29 @@ export async function getInStockProducts(filename = 'export.csv'): Promise<Listi
 export async function getPreviewProducts(filename = 'export.csv'): Promise<Listing[]> {
   const allProducts = await getListingsFromCsv(filename, true) // Include all for preview
   
-  return allProducts.filter(product => {
+  console.log(`getPreviewProducts: Processing ${allProducts.length} total products`)
+  
+  const previewProducts = allProducts.filter(product => {
     // Coming Soon: sale_state = PREVIEW (ordered but not yet received)
     // Quantity may be non-zero for tracking on-order units, but customers cannot purchase
     if (product.sale_state) {
-      return product.sale_state === 'PREVIEW'
+      const isPreview = product.sale_state === 'PREVIEW'
+      if (isPreview) {
+        console.log(`Found PREVIEW product: ${product.name} (sale_state: ${product.sale_state})`)
+      }
+      return isPreview
     }
     
     // Fallback to legacy field for backward compatibility
-    return product.show_in_coming_soon === true
+    const isComingSoon = product.show_in_coming_soon === true
+    if (isComingSoon) {
+      console.log(`Found coming-soon product: ${product.name} (show_in_coming_soon: ${product.show_in_coming_soon})`)
+    }
+    return isComingSoon
   })
+  
+  console.log(`getPreviewProducts: Filtered to ${previewProducts.length} preview products`)
+  return previewProducts
 }
 
 export async function getStaffPicksProducts(filename = 'export.csv'): Promise<Listing[]> {

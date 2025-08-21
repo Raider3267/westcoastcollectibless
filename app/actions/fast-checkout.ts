@@ -124,7 +124,21 @@ export async function createSquareOrder(cartData: {
       : "https://connect.squareupsandbox.com"
 
     // Create order using Square Orders API (direct HTTP)
-    const orderData = {
+    const orderData: {
+      idempotency_key: string
+      order: {
+        location_id: string | undefined
+        line_items: Array<{
+          name: string
+          quantity: string
+          base_price_money: {
+            amount: number
+            currency: string
+          }
+        }>
+        reference_id?: string
+      }
+    } = {
       idempotency_key: idempotencyKey,
       order: {
         location_id: locationId,
@@ -132,7 +146,7 @@ export async function createSquareOrder(cartData: {
           name: item.name.length > 60 ? item.name.slice(0, 57) + '...' : item.name, // Truncate long names
           quantity: String(item.quantity || 1),
           base_price_money: {
-            amount: parseInt(item.unitAmountCents),
+            amount: parseInt(String(item.unitAmountCents)),
             currency: "USD"
           }
         }))

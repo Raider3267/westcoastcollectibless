@@ -59,7 +59,7 @@ export async function addEmailSubscriber(email: string, firstName?: string): Pro
       console.error('Resend error:', error)
       // For development/testing, we'll return true even if email fails
       // This allows the user experience to work while testing
-      if (error.statusCode === 403 && error.error?.includes('only send testing emails')) {
+      if ((error as any).statusCode === 403 && (error as any).error?.includes('only send testing emails')) {
         console.log('Email subscription recorded (email sending limited in development)')
         return true
       }

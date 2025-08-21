@@ -387,7 +387,7 @@ export default function HomePage() {
         break
       case 'date':
       default:
-        filtered.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
+        filtered.sort((a, b) => new Date((b as any).created_at || 0).getTime() - new Date((a as any).created_at || 0).getTime())
         break
     }
     

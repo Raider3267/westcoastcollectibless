@@ -84,7 +84,7 @@ export async function GET() {
       profit_per_unit: (parseFloat(product.price) || 0) - (parseFloat(product.total_cost) || 0),
       total_inventory_value: (parseInt(product.quantity) || 0) * (parseFloat(product.total_cost) || 0),
       potential_profit: (parseInt(product.quantity) || 0) * ((parseFloat(product.price) || 0) - (parseFloat(product.total_cost) || 0))
-    })).filter(product => product.title) // Filter out empty products
+    })).filter((product: any) => product.title) // Filter out empty products
     
     return NextResponse.json(transformedProducts)
   } catch (error) {

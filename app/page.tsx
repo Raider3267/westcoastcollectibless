@@ -31,7 +31,7 @@ function ScrollableSection({ children, className = "wcc-scroll" }: { children: R
     
     const scrollElement = scrollRef.current
     if (scrollElement) {
-      scrollElement.addEventListener('scroll', checkScroll)
+      scrollElement.addEventListener('scroll', checkScroll, { passive: true })
       
       // Also check on window resize
       const handleResize = () => checkScroll()
@@ -236,7 +236,7 @@ function HeroSection({ toggleCart, cartState }: { toggleCart: () => void, cartSt
       }
     }
     
-    window.addEventListener('scroll', handleScroll)
+    window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
@@ -418,7 +418,6 @@ function HeroSection({ toggleCart, cartState }: { toggleCart: () => void, cartSt
         
         {/* Supporting Text */}
         <p style={{ 
-          margin: '0 0 20px', 
           fontSize: 'clamp(1.2rem, 3vw, 1.8rem)',
           color: 'rgba(255,255,255,0.95)',
           textShadow: '0 2px 4px rgba(0,0,0,0.3)',
@@ -432,7 +431,6 @@ function HeroSection({ toggleCart, cartState }: { toggleCart: () => void, cartSt
         </p>
         
         <p style={{ 
-          margin: '0 0 16px', 
           fontSize: '1.1rem',
           color: 'rgba(255,255,255,0.85)',
           textShadow: '0 2px 4px rgba(0,0,0,0.3)',
@@ -474,7 +472,7 @@ function HeroSection({ toggleCart, cartState }: { toggleCart: () => void, cartSt
               color: 'white',
               fontWeight: 600
             }}>
-              <time dateTime={nextDrop.release_at}>
+              <time dateTime={nextDrop.release_at || undefined}>
                 {timeLeft.days > 0 && `${timeLeft.days}d `}
                 {timeLeft.hours}h {timeLeft.minutes}m
               </time>
@@ -2271,7 +2269,7 @@ export default function HomePage() {
         break
       case 'date':
       default:
-        filtered.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
+        filtered.sort((a, b) => new Date((b as any).created_at || 0).getTime() - new Date((a as any).created_at || 0).getTime())
         break
     }
     

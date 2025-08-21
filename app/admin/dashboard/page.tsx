@@ -9,7 +9,7 @@ interface Product {
   title: string
   description: string
   quantity: number
-  price: number
+  price?: number
   images: string
   status: 'live' | 'coming-soon' | 'draft'
   sale_state?: 'DRAFT' | 'PREVIEW' | 'LIVE' | 'ARCHIVED'
@@ -43,7 +43,7 @@ interface ProductForm {
   title: string
   description: string
   quantity: number
-  price: number
+  price?: number
   images: string[]
   status: 'live' | 'coming-soon' | 'draft'
   sale_state?: 'DRAFT' | 'PREVIEW' | 'LIVE' | 'ARCHIVED'
@@ -113,9 +113,9 @@ export default function AdminDashboard() {
     show_in_limited_editions: product.show_in_limited_editions || false,
     out_of_stock: product.out_of_stock || false,
     show_in_featured_while_coming_soon: product.show_in_featured_while_coming_soon || false,
-    purchase_cost: parseFloat(product.purchase_cost) || 0,
-    shipping_cost: parseFloat(product.shipping_cost) || 0,
-    total_cost: parseFloat(product.total_cost) || 0,
+    purchase_cost: parseFloat(String(product.purchase_cost || 0)) || 0,
+    shipping_cost: parseFloat(String(product.shipping_cost || 0)) || 0,
+    total_cost: parseFloat(String(product.total_cost || 0)) || 0,
     purchase_date: product.purchase_date || '',
     supplier: product.supplier || '',
     tracking_number: product.tracking_number || ''
@@ -445,7 +445,7 @@ export default function AdminDashboard() {
           <div className="bg-white p-6 rounded-xl shadow-sm">
             <h3 className="text-sm font-medium text-gray-500">Inventory Value</h3>
             <p className="text-2xl font-bold text-blue-600">
-              ${products.reduce((sum, p) => sum + ((typeof p.total_cost === 'number' ? p.total_cost : parseFloat(p.total_cost) || 0) * p.quantity), 0).toFixed(2)}
+              ${products.reduce((sum, p) => sum + ((typeof p.total_cost === 'number' ? p.total_cost : parseFloat(String(p.total_cost || 0)) || 0) * (p.quantity || 0)), 0).toFixed(2)}
             </p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm">
@@ -457,7 +457,7 @@ export default function AdminDashboard() {
           <div className="bg-white p-6 rounded-xl shadow-sm">
             <h3 className="text-sm font-medium text-gray-500">Potential Profit</h3>
             <p className="text-2xl font-bold text-emerald-600">
-              ${products.reduce((sum, p) => sum + (((p.price && typeof p.price === 'number' ? p.price : 0) - (typeof p.total_cost === 'number' ? p.total_cost : parseFloat(p.total_cost) || 0)) * p.quantity), 0).toFixed(2)}
+              ${products.reduce((sum, p) => sum + (((p.price && typeof p.price === 'number' ? p.price : 0) - (typeof p.total_cost === 'number' ? p.total_cost : parseFloat(String(p.total_cost || 0)) || 0)) * (p.quantity || 0)), 0).toFixed(2)}
             </p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm">
@@ -465,7 +465,7 @@ export default function AdminDashboard() {
             <p className="text-2xl font-bold text-indigo-600">
               {products.length > 0 ? 
                 (products.reduce((sum, p) => {
-                  const margin = p.price > 0 ? ((p.price - (p.total_cost || 0)) / p.price) * 100 : 0
+                  const margin = (p.price && p.price > 0) ? ((p.price - (p.total_cost || 0)) / p.price) * 100 : 0
                   return sum + margin
                 }, 0) / products.length).toFixed(1) : 0}%
             </p>
@@ -595,7 +595,7 @@ export default function AdminDashboard() {
                           💰 ${product.price && typeof product.price === 'number' ? product.price.toFixed(2) : '0.00'}
                         </div>
                         <div className="text-xs text-gray-500">
-                          Cost: ${(typeof product.total_cost === 'number' ? product.total_cost : parseFloat(product.total_cost) || 0).toFixed(2)}
+                          Cost: ${(typeof product.total_cost === 'number' ? product.total_cost : parseFloat(String(product.total_cost || 0)) || 0).toFixed(2)}
                         </div>
                       </div>
                     </td>
@@ -622,15 +622,15 @@ export default function AdminDashboard() {
                     <td className="px-6 py-4 text-sm">
                       <div className="space-y-1">
                         <div className={`font-semibold ${
-                          ((product.price && typeof product.price === 'number' ? product.price : 0) - (typeof product.total_cost === 'number' ? product.total_cost : parseFloat(product.total_cost) || 0)) >= 0 
+                          ((product.price && typeof product.price === 'number' ? product.price : 0) - (typeof product.total_cost === 'number' ? product.total_cost : parseFloat(String(product.total_cost || 0)) || 0)) >= 0 
                             ? 'text-green-600' 
                             : 'text-red-600'
                         }`}>
-                          ${((product.price && typeof product.price === 'number' ? product.price : 0) - (typeof product.total_cost === 'number' ? product.total_cost : parseFloat(product.total_cost) || 0)).toFixed(2)}
+                          ${((product.price && typeof product.price === 'number' ? product.price : 0) - (typeof product.total_cost === 'number' ? product.total_cost : parseFloat(String(product.total_cost || 0)) || 0)).toFixed(2)}
                         </div>
                         <div className="text-xs text-gray-500">
                           {product.price && typeof product.price === 'number' && product.price > 0 ? 
-                            (((product.price - (typeof product.total_cost === 'number' ? product.total_cost : parseFloat(product.total_cost) || 0)) / product.price) * 100).toFixed(1) : 0}% margin
+                            (((product.price - (typeof product.total_cost === 'number' ? product.total_cost : parseFloat(String(product.total_cost || 0)) || 0)) / product.price) * 100).toFixed(1) : 0}% margin
                         </div>
                       </div>
                     </td>
@@ -948,7 +948,7 @@ export default function AdminDashboard() {
                       <div>
                         <span className="text-gray-600">Total Cost:</span>
                         <div className="font-semibold text-blue-600">
-                          ${((parseFloat(editingProduct.purchase_cost) || 0) + (parseFloat(editingProduct.shipping_cost) || 0)).toFixed(2)}
+                          ${((parseFloat(String(editingProduct.purchase_cost || 0)) || 0) + (parseFloat(String(editingProduct.shipping_cost || 0)) || 0)).toFixed(2)}
                         </div>
                       </div>
                       <div>
@@ -958,14 +958,14 @@ export default function AdminDashboard() {
                             ? 'text-green-600' 
                             : 'text-red-600'
                         }`}>
-                          ${((parseFloat(editingProduct.price) || 0) - ((parseFloat(editingProduct.purchase_cost) || 0) + (parseFloat(editingProduct.shipping_cost) || 0))).toFixed(2)}
+                          ${((parseFloat(String(editingProduct.price || 0)) || 0) - ((parseFloat(String(editingProduct.purchase_cost || 0)) || 0) + (parseFloat(String(editingProduct.shipping_cost || 0)) || 0))).toFixed(2)}
                         </div>
                       </div>
                       <div>
                         <span className="text-gray-600">Profit Margin:</span>
                         <div className="font-semibold text-purple-600">
                           {(editingProduct.price || 0) > 0 ? 
-                            (((parseFloat(editingProduct.price) || 0) - ((parseFloat(editingProduct.purchase_cost) || 0) + (parseFloat(editingProduct.shipping_cost) || 0))) / (parseFloat(editingProduct.price) || 0) * 100).toFixed(1) 
+                            (((parseFloat(String(editingProduct.price || 0)) || 0) - ((parseFloat(String(editingProduct.purchase_cost || 0)) || 0) + (parseFloat(String(editingProduct.shipping_cost || 0)) || 0))) / (parseFloat(String(editingProduct.price || 0)) || 1) * 100).toFixed(1) 
                             : 0}%
                         </div>
                       </div>
@@ -1390,7 +1390,7 @@ export default function AdminDashboard() {
                       <div>
                         <span className="text-gray-600">Total Cost:</span>
                         <div className="font-semibold text-blue-600">
-                          ${((parseFloat(newProduct.purchase_cost) || 0) + (parseFloat(newProduct.shipping_cost) || 0)).toFixed(2)}
+                          ${((parseFloat(String(newProduct.purchase_cost || 0)) || 0) + (parseFloat(String(newProduct.shipping_cost || 0)) || 0)).toFixed(2)}
                         </div>
                       </div>
                       <div>
@@ -1400,14 +1400,14 @@ export default function AdminDashboard() {
                             ? 'text-green-600' 
                             : 'text-red-600'
                         }`}>
-                          ${((parseFloat(newProduct.price) || 0) - ((parseFloat(newProduct.purchase_cost) || 0) + (parseFloat(newProduct.shipping_cost) || 0))).toFixed(2)}
+                          ${((parseFloat(String(newProduct.price || 0)) || 0) - ((parseFloat(String(newProduct.purchase_cost || 0)) || 0) + (parseFloat(String(newProduct.shipping_cost || 0)) || 0))).toFixed(2)}
                         </div>
                       </div>
                       <div>
                         <span className="text-gray-600">Profit Margin:</span>
                         <div className="font-semibold text-purple-600">
                           {(newProduct.price || 0) > 0 ? 
-                            (((parseFloat(newProduct.price) || 0) - ((parseFloat(newProduct.purchase_cost) || 0) + (parseFloat(newProduct.shipping_cost) || 0))) / (parseFloat(newProduct.price) || 0) * 100).toFixed(1) 
+                            (((parseFloat(String(newProduct.price || 0)) || 0) - ((parseFloat(String(newProduct.purchase_cost || 0)) || 0) + (parseFloat(String(newProduct.shipping_cost || 0)) || 0))) / (parseFloat(String(newProduct.price || 0)) || 1) * 100).toFixed(1) 
                             : 0}%
                         </div>
                       </div>

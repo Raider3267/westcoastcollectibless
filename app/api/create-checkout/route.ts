@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto"
+import { NextRequest } from "next/server"
 
-export async function POST(request) {
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { lineItems, customerEmail, successUrl, cancelUrl, metadata } = body
@@ -36,7 +37,21 @@ export async function POST(request) {
       : "https://connect.squareupsandbox.com"
 
     // Create order using Square Orders API (direct HTTP)
-    const orderData = {
+    const orderData: {
+      idempotency_key: string
+      order: {
+        location_id: string | undefined
+        line_items: Array<{
+          name: any
+          quantity: string
+          base_price_money: {
+            amount: number
+            currency: string
+          }
+        }>
+        reference_id?: string
+      }
+    } = {
       idempotency_key: idempotencyKey,
       order: {
         location_id: locationId,
@@ -87,7 +102,7 @@ export async function POST(request) {
   } catch (error) {
     console.error('Checkout creation error:', error)
     return Response.json(
-      { error: error.message || 'Failed to create checkout' },
+      { error: error instanceof Error ? error.message : 'Failed to create checkout' },
       { status: 500 }
     )
   }

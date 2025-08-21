@@ -15,6 +15,26 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        {/* Critical resource preloading for better LCP */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link rel="preconnect" href="https://connect.squareup.com" />
+        <link rel="preconnect" href="https://connect.squareupsandbox.com" />
+        <link rel="preconnect" href="https://www.ebay.com" />
+        
+        {/* Preload hero video */}
+        <link rel="preload" href="/hero-video.mp4" as="video" type="video/mp4" />
+        
+        {/* DNS prefetch for external domains */}
+        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+        <link rel="dns-prefetch" href="//fonts.gstatic.com" />
+        <link rel="dns-prefetch" href="//connect.squareup.com" />
+        <link rel="dns-prefetch" href="//www.ebay.com" />
+        
+        {/* Viewport meta for proper mobile rendering */}
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+      </head>
       <body>
         <CartProvider>
         <div>{children}</div>

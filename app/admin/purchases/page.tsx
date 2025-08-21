@@ -363,8 +363,8 @@ export default function PurchasesPage() {
     )
   }
 
-  const totalOrderValue = purchaseOrders.reduce((sum, order) => sum + (parseFloat(order.total_cost) || 0), 0)
-  const totalShippingCosts = shipments.reduce((sum, shipment) => sum + (parseFloat(shipment.total_shipping_cost) || 0), 0)
+  const totalOrderValue = purchaseOrders.reduce((sum, order) => sum + (parseFloat(String(order.total_cost || 0)) || 0), 0)
+  const totalShippingCosts = shipments.reduce((sum, shipment) => sum + (parseFloat(String(shipment.total_shipping_cost || 0)) || 0), 0)
   const pendingOrders = purchaseOrders.filter(order => order.status === 'pending').length
   const unallocatedShipments = shipments.filter(shipment => !shipment.allocated).length
 
@@ -487,9 +487,9 @@ export default function PurchasesPage() {
                         <td className="px-6 py-4 text-sm font-medium text-gray-900">{order.id}</td>
                         <td className="px-6 py-4 text-sm text-gray-900">{order.purchase_date}</td>
                         <td className="px-6 py-4 text-sm text-gray-900">{order.supplier}</td>
-                        <td className="px-6 py-4 text-sm text-gray-900">${(parseFloat(order.total_product_cost) || 0).toFixed(2)}</td>
-                        <td className="px-6 py-4 text-sm text-gray-900">${(parseFloat(order.allocated_shipping_cost) || 0).toFixed(2)}</td>
-                        <td className="px-6 py-4 text-sm font-semibold text-green-600">${(parseFloat(order.total_cost) || 0).toFixed(2)}</td>
+                        <td className="px-6 py-4 text-sm text-gray-900">${(parseFloat(String(order.total_product_cost || 0)) || 0).toFixed(2)}</td>
+                        <td className="px-6 py-4 text-sm text-gray-900">${(parseFloat(String(order.allocated_shipping_cost || 0)) || 0).toFixed(2)}</td>
+                        <td className="px-6 py-4 text-sm font-semibold text-green-600">${(parseFloat(String(order.total_cost || 0)) || 0).toFixed(2)}</td>
                         <td className="px-6 py-4">
                           <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                             order.status === 'delivered' ? 'bg-green-100 text-green-800' :
@@ -539,7 +539,7 @@ export default function PurchasesPage() {
                       <tr key={shipment.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 text-sm font-medium text-gray-900">{shipment.id}</td>
                         <td className="px-6 py-4 text-sm text-gray-900">{shipment.shipment_date}</td>
-                        <td className="px-6 py-4 text-sm font-semibold text-blue-600">${(parseFloat(shipment.total_shipping_cost) || 0).toFixed(2)}</td>
+                        <td className="px-6 py-4 text-sm font-semibold text-blue-600">${(parseFloat(String(shipment.total_shipping_cost || 0)) || 0).toFixed(2)}</td>
                         <td className="px-6 py-4 text-sm text-gray-500">{shipment.tracking_numbers || 'N/A'}</td>
                         <td className="px-6 py-4">
                           <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -990,7 +990,7 @@ export default function PurchasesPage() {
                     <p className="text-sm text-yellow-700">
                       Click "📋 Import with Pricing" to convert these to editable items with proportional pricing, or "Add Item" to add new items manually.
                       <br />
-                      <em>The total cost ($${(parseFloat(editingOrder.total_product_cost) || 0).toFixed(2)}) will be distributed among all items proportionally.</em>
+                      <em>The total cost ($${(parseFloat(String(editingOrder.total_product_cost || 0)) || 0).toFixed(2)}) will be distributed among all items proportionally.</em>
                     </p>
                   </div>
                 )}

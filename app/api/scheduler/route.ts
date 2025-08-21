@@ -20,7 +20,7 @@ export async function POST() {
     const currentTime = new Date()
     let updatedCount = 0
 
-    const updatedRecords = records.map(record => {
+    const updatedRecords = records.map((record: any) => {
       // Check if product is coming-soon and has a drop date
       if (record.status === 'coming-soon' && record.drop_date) {
         const dropDate = new Date(record.drop_date)
@@ -86,7 +86,7 @@ export async function POST() {
     console.error('Error checking drop dates:', error)
     return NextResponse.json({ 
       error: 'Failed to check drop dates',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error' 
     }, { status: 500 })
   }
 }

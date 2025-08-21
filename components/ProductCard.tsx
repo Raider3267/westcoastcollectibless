@@ -160,8 +160,9 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
       return
     }
     
-    AuthService.createAlert(product.id, 'restock')
-    alert('Alert created! You\'ll be notified when this item is restocked.')
+    // TODO: Implement alert creation
+    // authService.createAlert(product.id, 'restock')
+    alert('Alert feature coming soon! You\'ll be notified when this item is restocked.')
   }
   
   const isStripe = Boolean(product.stripeLink)
