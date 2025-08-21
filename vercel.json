@@ -68,12 +68,6 @@
       "permanent": false
     }
   ],
-  "crons": [
-    {
-      "path": "/api/scheduler",
-      "schedule": "0 */6 * * *"
-    }
-  ],
   "env": {
     "NODE_ENV": "production"
   },
