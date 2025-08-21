@@ -150,7 +150,12 @@ export default function NotifyMeModal({
                 disabled={isSubmitting}
                 className="flex-1 px-4 py-2 text-sm font-medium text-white bg-black rounded-md hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
               >
-                {isSubmitting ? 'Signing up...' : 'Notify Me'}
+                {isSubmitting ? (
+                  <div className="flex items-center justify-center">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                    Signing up...
+                  </div>
+                ) : 'Notify Me'}
               </button>
             </div>
           </form>

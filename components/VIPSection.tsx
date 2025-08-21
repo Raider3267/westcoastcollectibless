@@ -91,8 +91,9 @@ export default function VIPSection({ className = '' }: VIPSectionProps) {
                   <button 
                     onClick={handleSignUp}
                     className="vip-join-button"
+                    aria-label="Sign up for VIP collector program notifications"
                   >
-                    Sign Up to Get Notified
+                    Join VIP Collector Program
                   </button>
                   <p className="vip-privacy">Create an account to get notified about VIP features, exclusive drops, and collector updates.</p>
                 </div>

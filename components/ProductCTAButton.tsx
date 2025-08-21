@@ -125,7 +125,8 @@ export default function ProductCTAButton({
       {isLoading ? (
         <div className="flex items-center">
           <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
-          Loading...
+          <span className="sr-only">Loading, please wait</span>
+          {sale_state === 'PREVIEW' ? 'Adding...' : 'Adding to Cart...'}
         </div>
       ) : (
         buttonData.text

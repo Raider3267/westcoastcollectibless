@@ -676,9 +676,14 @@ export default function Cart() {
                       disabled={isCreatingOrder}
                       className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
                     >
-                      {isCreatingOrder ? 'Creating Order...' : 
+                      {isCreatingOrder ? (
+                        <div className="flex items-center justify-center">
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                          Creating Order...
+                        </div>
+                      ) : 
                         !showShippingSelection ? 'Continue to Payment' :
-                        `Continue to Payment - $${(((state.totalPrice * 100) + (selectedShipping?.cost || 0) + (taxInfo.taxAmount * 100)) / 100).toFixed(2)}`
+                        `Pay $${(((state.totalPrice * 100) + (selectedShipping?.cost || 0) + (taxInfo.taxAmount * 100)) / 100).toFixed(2)}`
                       }
                     </button>
                     <p className="text-xs text-gray-500 mt-2 text-center">
@@ -721,7 +726,13 @@ export default function Cart() {
                     </svg>
                   </div>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">Your cart is empty</h3>
-                  <p className="text-gray-500 text-center">Add some products to your cart to get started!</p>
+                  <p className="text-gray-500 text-center mb-4">Browse our collectibles and add items to get started!</p>
+                  <button
+                    onClick={closeCart}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                  >
+                    Continue Shopping
+                  </button>
                 </div>
               ) : (
                 <>
@@ -867,7 +878,7 @@ export default function Cart() {
                         disabled={state.items.length === 0}
                         className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
                       >
-                        Proceed to Checkout
+                        Secure Checkout
                       </button>
                       <button
                         onClick={clearCart}

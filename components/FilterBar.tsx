@@ -91,7 +91,7 @@ export default function FilterBar({ onFiltersChange, totalItems }: FilterBarProp
             🔍 Filter & Sort
           </h3>
           <div style={{ fontSize: '0.9rem', color: 'var(--muted)' }}>
-            {totalItems} items found
+            {totalItems === 0 ? 'No items found' : `${totalItems} ${totalItems === 1 ? 'item' : 'items'} found`}
           </div>
           {activeFilterCount > 0 && (
             <div style={{
