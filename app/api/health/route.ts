@@ -17,9 +17,10 @@ export async function GET() {
     const health = {
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV,
+      environment: process.env.NODE_ENV as 'development' | 'production' | 'test',
       version: process.env.VERCEL_GIT_COMMIT_SHA?.substring(0, 7) || 'local',
       phase: process.env.ENABLE_DATABASE === 'true' ? 2 : 1,
+      responseTime: '', // Will be calculated and updated before return
       checks: {
         server: 'ok',
         environment: 'ok',

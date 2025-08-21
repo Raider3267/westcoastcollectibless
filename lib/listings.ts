@@ -22,6 +22,8 @@ export interface Listing {
   show_in_new_releases?: boolean
   show_in_featured?: boolean
   show_in_coming_soon?: boolean
+  show_in_staff_picks?: boolean
+  show_in_limited_editions?: boolean
   out_of_stock?: boolean
   weight?: number
   length?: number

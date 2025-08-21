@@ -51,7 +51,7 @@ Sentry.init({
   },
   
   integrations: [
-    new Sentry.Replay({
+    Sentry.replayIntegration({
       // Mask sensitive data in replays
       maskAllText: true,
       blockAllMedia: true,
