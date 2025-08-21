@@ -71,14 +71,15 @@ function ScrollableSection({ children, className = "wcc-scroll" }: { children: R
       {canScrollLeft && (
         <button
           onClick={() => scroll('left')}
+          aria-label="Scroll left to view previous products"
           style={{
             position: 'absolute',
             left: '-20px',
             top: '50%',
             transform: 'translateY(-50%)',
             zIndex: 100,
-            width: '32px',
-            height: '32px',
+            width: '44px',
+            height: '44px',
             borderRadius: '50%',
             border: 'none',
             background: 'rgba(255,255,255,0.95)',
@@ -110,14 +111,15 @@ function ScrollableSection({ children, className = "wcc-scroll" }: { children: R
       {canScrollRight && (
         <button
           onClick={() => scroll('right')}
+          aria-label="Scroll right to view more products"
           style={{
             position: 'absolute',
             right: '-20px',
             top: '50%',
             transform: 'translateY(-50%)',
             zIndex: 100,
-            width: '32px',
-            height: '32px',
+            width: '44px',
+            height: '44px',
             borderRadius: '50%',
             border: 'none',
             background: 'rgba(255,255,255,0.95)',
@@ -146,7 +148,13 @@ function ScrollableSection({ children, className = "wcc-scroll" }: { children: R
       )}
 
       {/* Scrollable Content */}
-      <div ref={scrollRef} className={className}>
+      <div 
+        ref={scrollRef} 
+        className={className}
+        role="region"
+        aria-label="Product carousel"
+        tabIndex={0}
+      >
         {children}
       </div>
     </div>

@@ -52,6 +52,7 @@ export default function ProductCTAButton({
     if (sale_state === 'PREVIEW') {
       return {
         text: 'Notify Me',
+        ariaLabel: `Get notified when ${productName} becomes available`,
         style: 'border border-gray-300 text-gray-700 bg-white hover:bg-gray-50',
         disabled: false,
         onClick: handleClick
@@ -62,6 +63,7 @@ export default function ProductCTAButton({
     if (sale_state === 'LIVE' && quantity > 0) {
       return {
         text: 'Add to Cart',
+        ariaLabel: `Add ${productName} to cart${price ? ` for $${price}` : ''}`,
         style: 'bg-black text-white hover:bg-gray-800',
         disabled: false,
         onClick: handleClick
@@ -72,6 +74,7 @@ export default function ProductCTAButton({
     if (sale_state === 'LIVE' && quantity <= 0) {
       return {
         text: 'Sold Out',
+        ariaLabel: `${productName} is currently sold out`,
         style: 'bg-gray-300 text-gray-500 cursor-not-allowed',
         disabled: true,
         onClick: undefined
@@ -82,6 +85,7 @@ export default function ProductCTAButton({
     if (sale_state === 'DRAFT' || sale_state === 'ARCHIVED') {
       return {
         text: 'Unavailable',
+        ariaLabel: `${productName} is currently unavailable`,
         style: 'bg-gray-300 text-gray-500 cursor-not-allowed',
         disabled: true,
         onClick: undefined
@@ -91,6 +95,7 @@ export default function ProductCTAButton({
     // Fallback
     return {
       text: 'Unavailable',
+      ariaLabel: `${productName} is currently unavailable`,
       style: 'bg-gray-300 text-gray-500 cursor-not-allowed',
       disabled: true,
       onClick: undefined
@@ -103,12 +108,19 @@ export default function ProductCTAButton({
     <button
       onClick={buttonData.onClick}
       disabled={buttonData.disabled || isLoading}
+      aria-label={isLoading ? `Loading, please wait` : buttonData.ariaLabel}
+      aria-live={isLoading ? 'polite' : undefined}
       className={`
         inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg
         transition-colors duration-200 disabled:cursor-not-allowed
+        min-h-[44px] min-w-[44px]
         ${buttonData.style}
         ${className}
       `}
+      style={{
+        minHeight: '44px',
+        minWidth: '44px'
+      }}
     >
       {isLoading ? (
         <div className="flex items-center">

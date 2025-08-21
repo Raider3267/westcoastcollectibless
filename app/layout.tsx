@@ -17,9 +17,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <CartProvider>
-        <div>{children}</div>
-        <footer style={{ padding: '16px 24px', borderTop: '1px solid #eee', marginTop: 40, fontSize: 12, color: '#555' }}>
-          © {new Date().getFullYear()} WestCoastCollectibless • Santa Monica, CA
+        <div id="root">
+          <a href="#main-content" className="skip-link">Skip to main content</a>
+          <main id="main-content" role="main">
+            {children}
+          </main>
+        </div>
+        <footer 
+          role="contentinfo"
+          style={{ padding: '16px 24px', borderTop: '1px solid #eee', marginTop: 40, fontSize: 12, color: '#555' }}
+        >
+          <p style={{ margin: 0 }}>
+            © {new Date().getFullYear()} WestCoastCollectibless • Santa Monica, CA
+          </p>
         </footer>
         
         <Cart />

@@ -109,16 +109,20 @@ export default function FilterBar({ onFiltersChange, totalItems }: FilterBarProp
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           {/* Quick Sort */}
+          <label htmlFor="sort-select" className="sr-only">Sort products by</label>
           <select
+            id="sort-select"
             value={filters.sortBy}
             onChange={(e) => updateFilters({ sortBy: e.target.value as FilterOptions['sortBy'] })}
+            aria-label="Sort products by"
             style={{
               padding: '8px 12px',
               borderRadius: '8px',
               border: '1px solid var(--line)',
               background: '#fff',
               fontSize: '0.9rem',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              minHeight: '44px'
             }}
           >
             <option value="date">Latest First</option>
@@ -131,6 +135,7 @@ export default function FilterBar({ onFiltersChange, totalItems }: FilterBarProp
           {activeFilterCount > 0 && (
             <button
               onClick={clearAllFilters}
+              aria-label="Clear all filters"
               style={{
                 padding: '8px 12px',
                 borderRadius: '8px',
@@ -139,7 +144,9 @@ export default function FilterBar({ onFiltersChange, totalItems }: FilterBarProp
                 color: '#ff6b6b',
                 fontSize: '0.9rem',
                 cursor: 'pointer',
-                fontWeight: 600
+                fontWeight: 600,
+                minHeight: '44px',
+                minWidth: '44px'
               }}
             >
               Clear All
@@ -148,6 +155,9 @@ export default function FilterBar({ onFiltersChange, totalItems }: FilterBarProp
 
           <button
             onClick={() => setIsExpanded(!isExpanded)}
+            aria-expanded={isExpanded}
+            aria-controls="expanded-filters"
+            aria-label={isExpanded ? 'Hide additional filters' : 'Show additional filters'}
             style={{
               padding: '8px 12px',
               borderRadius: '8px',
@@ -157,7 +167,8 @@ export default function FilterBar({ onFiltersChange, totalItems }: FilterBarProp
               fontSize: '0.9rem',
               cursor: 'pointer',
               fontWeight: 600,
-              transition: 'all 0.3s ease'
+              transition: 'all 0.3s ease',
+              minHeight: '44px'
             }}
           >
             {isExpanded ? '▲ Less Filters' : '▼ More Filters'}
@@ -167,7 +178,12 @@ export default function FilterBar({ onFiltersChange, totalItems }: FilterBarProp
 
       {/* Expanded Filters */}
       {isExpanded && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px' }}>
+        <div 
+          id="expanded-filters"
+          role="group"
+          aria-labelledby="filter-heading"
+          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px' }}
+        >
           {/* Series Filter */}
           <div>
             <h4 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--ink)', marginBottom: '12px' }}>
@@ -178,6 +194,8 @@ export default function FilterBar({ onFiltersChange, totalItems }: FilterBarProp
                 <button
                   key={series}
                   onClick={() => toggleSeries(series)}
+                  aria-pressed={filters.series.includes(series)}
+                  aria-label={`${filters.series.includes(series) ? 'Remove' : 'Add'} ${series} filter`}
                   style={{
                     padding: '6px 12px',
                     borderRadius: '999px',
@@ -189,7 +207,8 @@ export default function FilterBar({ onFiltersChange, totalItems }: FilterBarProp
                     fontSize: '0.85rem',
                     cursor: 'pointer',
                     fontWeight: 600,
-                    transition: 'all 0.3s ease'
+                    transition: 'all 0.3s ease',
+                    minHeight: '36px'
                   }}
                 >
                   {series}
@@ -204,37 +223,45 @@ export default function FilterBar({ onFiltersChange, totalItems }: FilterBarProp
               Price Range
             </h4>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <label htmlFor="price-min" className="sr-only">Minimum price</label>
               <input
+                id="price-min"
                 type="number"
                 placeholder="Min"
                 value={filters.priceRange.min || ''}
                 onChange={(e) => updateFilters({ 
                   priceRange: { ...filters.priceRange, min: parseInt(e.target.value) || 0 }
                 })}
+                aria-label="Minimum price"
                 style={{
                   padding: '8px 12px',
                   borderRadius: '8px',
                   border: '1px solid var(--line)',
                   background: '#fff',
                   fontSize: '0.9rem',
-                  width: '80px'
+                  width: '80px',
+                  minHeight: '44px'
                 }}
               />
               <span style={{ color: 'var(--muted)' }}>to</span>
+              <label htmlFor="price-max" className="sr-only">Maximum price</label>
               <input
+                id="price-max"
                 type="number"
                 placeholder="Max"
                 value={filters.priceRange.max || ''}
                 onChange={(e) => updateFilters({ 
                   priceRange: { ...filters.priceRange, max: parseInt(e.target.value) || 1000 }
                 })}
+                aria-label="Maximum price"
                 style={{
                   padding: '8px 12px',
                   borderRadius: '8px',
                   border: '1px solid var(--line)',
                   background: '#fff',
                   fontSize: '0.9rem',
-                  width: '80px'
+                  width: '80px',
+                  minHeight: '44px'
                 }}
               />
             </div>
@@ -250,6 +277,8 @@ export default function FilterBar({ onFiltersChange, totalItems }: FilterBarProp
                 <button
                   key={rarity}
                   onClick={() => toggleRarity(rarity)}
+                  aria-pressed={filters.rarity.includes(rarity)}
+                  aria-label={`${filters.rarity.includes(rarity) ? 'Remove' : 'Add'} ${rarity} filter`}
                   style={{
                     padding: '6px 12px',
                     borderRadius: '999px',
@@ -261,7 +290,8 @@ export default function FilterBar({ onFiltersChange, totalItems }: FilterBarProp
                     fontSize: '0.85rem',
                     cursor: 'pointer',
                     fontWeight: 600,
-                    transition: 'all 0.3s ease'
+                    transition: 'all 0.3s ease',
+                    minHeight: '36px'
                   }}
                 >
                   {rarity}

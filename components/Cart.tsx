@@ -214,11 +214,12 @@ export default function Cart() {
   if (!state.isOpen) return null
 
   return (
-    <div>
+    <div role="dialog" aria-modal="true" aria-labelledby="cart-title">
       {/* Backdrop */}
       <div 
         className="fixed inset-0 bg-black bg-opacity-50 z-40"
         onClick={closeCart}
+        aria-hidden="true"
       />
       
       {/* Cart Panel */}
@@ -226,14 +227,16 @@ export default function Cart() {
         <div className="min-h-full flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 id="cart-title" className="text-lg font-semibold text-gray-900">
               {isCheckingOut ? 'Checkout' : 'Shopping Cart'}
             </h2>
             <button
               onClick={closeCart}
+              aria-label="Close cart"
               className="text-gray-400 hover:text-gray-600 transition-colors"
+              style={{ minHeight: '44px', minWidth: '44px' }}
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>

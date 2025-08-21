@@ -2,10 +2,72 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== ACCESSIBILITY ENHANCEMENTS ===== */
+/* Skip link for keyboard navigation */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--ink);
+  color: white;
+  padding: 8px;
+  text-decoration: none;
+  border-radius: 4px;
+  z-index: 10000;
+  font-weight: 600;
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/* Ensure focus rings are visible */
+*:focus-visible {
+  outline: 2px solid var(--accent-teal);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Remove default focus styles for mouse users */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* High contrast mode improvements */
+@media (prefers-contrast: high) {
+  :root {
+    --ink: #000000;
+    --muted: #333333;
+    --line: #999999;
+  }
+}
+
+/* Screen reader only text */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* ===== LUXURY THEME ===== */
 :root{
   --ink:#17171b; 
-  --muted:#686874; 
+  --muted:#4a4a55; /* Improved contrast: was #686874, now darker for better readability */
   --line:#ececf3;
   --accent-lilac:#C7A3FF; 
   --accent-teal:#5ED0C0; 
@@ -13,11 +75,19 @@
   --accent-start:#C7A3FF; 
   --accent-mid:#5ED0C0; 
   --accent-end:#F7E7C3;
+  /* Improved contrast colors for text on colored backgrounds */
+  --text-on-teal: #0a0a0a; /* High contrast text for teal backgrounds */
+  --text-on-lilac: #0a0a0a; /* High contrast text for lilac backgrounds */
+  --text-on-gold: #0a0a0a; /* High contrast text for gold backgrounds */
   --radius-xl:22px; 
   --radius-lg:18px; 
   --radius-md:14px;
   --shadow-soft:0 10px 28px rgba(199,163,255,.22);
   --shadow-card:0 18px 44px rgba(40,30,78,.16);
+  /* Error and success colors with proper contrast */
+  --error: #dc2626; /* Red with sufficient contrast */
+  --success: #16a34a; /* Green with sufficient contrast */
+  --warning: #d97706; /* Orange with sufficient contrast */
   color-scheme: light;
 }
 
@@ -38,21 +108,47 @@ body{
   50% { background-position: 100% 50%; }
 }
 
-/* Re-usable pills + buttons */
+/* Re-usable pills + buttons with consistent accessibility standards */
 .pill {
   @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium;
+  min-height: 32px; /* Ensure minimum touch target */
 }
 .btn {
   @apply inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition;
+  min-height: 44px; /* WCAG minimum touch target */
+  min-width: 44px;
+  position: relative;
+}
+.btn:focus-visible {
+  outline: 2px solid var(--accent-teal);
+  outline-offset: 2px;
 }
 .btn-primary {
   @apply text-white shadow-pop;
   background: linear-gradient(120deg, theme(colors.pop.purple), theme(colors.pop.pink), theme(colors.pop.orange));
   background-size: 200% 200%;
   animation: gradient-x 8s ease infinite;
+  color: white; /* Ensure high contrast */
 }
 .btn-secondary {
   @apply border border-gray-300 bg-white;
+  color: var(--ink);
+}
+.btn-secondary:hover {
+  background: #f9fafb;
+  border-color: var(--accent-teal);
+}
+
+/* Interactive element focus styles */
+button:focus-visible,
+[role="button"]:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent-teal);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 /* Card */
@@ -277,17 +373,30 @@ body{
   transform-origin: center;
 }
 
-/* Prefers reduced motion */
+/* Enhanced reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  .luxury-card {
-    transition: none;
-  }
+  .luxury-card,
   .luxury-card:hover {
-    transform: none;
+    transition: none !important;
+    transform: none !important;
+    animation: none !important;
   }
   .luxury-badge,
-  .floating-collectible {
-    animation: none;
+  .floating-collectible,
+  .bg-floater,
+  .btn-primary {
+    animation: none !important;
+  }
+  .luxury-thumb-inner,
+  .wcc-zoom {
+    transition: none !important;
+    transform: none !important;
+  }
+  /* Disable all transform-based animations */
+  *[style*="transform"],
+  *[style*="animation"] {
+    transition: none !important;
+    animation: none !important;
   }
 }
 
@@ -443,7 +552,8 @@ body{
 
 .wcc-btn{display:inline-flex; align-items:center; gap:8px; padding:12px 16px; font-size:.92rem;
   border-radius:999px; border:1px solid var(--wcc-line); background:#fff; position:relative; overflow:hidden;
-  cursor:pointer !important; pointer-events:all !important; z-index:100 !important; min-height:44px; font-weight:600; transition:all .3s ease;}
+  cursor:pointer !important; pointer-events:all !important; z-index:100 !important; min-height:44px; min-width:44px; font-weight:600; transition:all .3s ease;}
+.wcc-btn:focus-visible{outline:2px solid var(--wcc-teal); outline-offset:2px; border-radius:999px;}
 .wcc-btn--grad{border:none; color:#0b0b0f; background:linear-gradient(135deg,var(--wcc-teal),var(--wcc-grad-c)); box-shadow:0 10px 24px rgba(94,208,192,.22);}
 .wcc-btn--grad::after{content:""; position:absolute; inset:0; z-index: -1;
   background:linear-gradient(120deg,rgba(255,255,255,0) 30%, rgba(255,255,255,.5) 50%, rgba(255,255,255,0) 70%);

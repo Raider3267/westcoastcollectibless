@@ -43,6 +43,7 @@ export default function UserNav() {
       <>
         <button
           onClick={() => setShowAuthModal(true)}
+          aria-label="Sign in to your account"
           style={{
             padding: '10px 16px',
             fontSize: '0.9rem',
@@ -53,7 +54,8 @@ export default function UserNav() {
             color: '#0b0b0f',
             cursor: 'pointer',
             transition: 'all 0.3s ease',
-            minHeight: '40px'
+            minHeight: '44px',
+            minWidth: '44px'
           }}
           onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
           onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
@@ -77,6 +79,9 @@ export default function UserNav() {
     <div style={{ position: 'relative' }}>
       <button
         onClick={() => setShowUserMenu(!showUserMenu)}
+        aria-expanded={showUserMenu}
+        aria-haspopup="menu"
+        aria-label={`User menu for ${user.name || user.email}`}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -86,7 +91,8 @@ export default function UserNav() {
           border: '2px solid var(--line)',
           background: '#fff',
           cursor: 'pointer',
-          transition: 'all 0.3s ease'
+          transition: 'all 0.3s ease',
+          minHeight: '44px'
         }}
         onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--accent-teal)'}
         onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--line)'}
@@ -117,16 +123,20 @@ export default function UserNav() {
       </button>
 
       {showUserMenu && (
-        <div className="luxury-card accent-teal" style={{
-          position: 'absolute',
-          top: '100%',
-          right: '0',
-          marginTop: '8px',
-          minWidth: '220px',
-          padding: '16px',
-          zIndex: 1000,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.15)'
-        }}>
+        <div 
+          className="luxury-card accent-teal" 
+          role="menu"
+          aria-labelledby="user-menu-button"
+          style={{
+            position: 'absolute',
+            top: '100%',
+            right: '0',
+            marginTop: '8px',
+            minWidth: '220px',
+            padding: '16px',
+            zIndex: 1000,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.15)'
+          }}>
           <div style={{ marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid var(--line)' }}>
             <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--ink)' }}>
               {user.name || user.email}
@@ -153,6 +163,7 @@ export default function UserNav() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <a 
               href="/account/wishlist"
+              role="menuitem"
               style={{ 
                 display: 'flex', 
                 alignItems: 'center', 
@@ -162,7 +173,8 @@ export default function UserNav() {
                 textDecoration: 'none',
                 color: 'var(--ink)',
                 fontSize: '0.9rem',
-                transition: 'background 0.2s ease'
+                transition: 'background 0.2s ease',
+                minHeight: '44px'
               }}
               onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(94,208,192,0.1)'}
               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
@@ -171,6 +183,7 @@ export default function UserNav() {
             </a>
             <a 
               href="/account"
+              role="menuitem"
               style={{ 
                 display: 'flex', 
                 alignItems: 'center', 
@@ -180,7 +193,8 @@ export default function UserNav() {
                 textDecoration: 'none',
                 color: 'var(--ink)',
                 fontSize: '0.9rem',
-                transition: 'background 0.2s ease'
+                transition: 'background 0.2s ease',
+                minHeight: '44px'
               }}
               onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(94,208,192,0.1)'}
               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
@@ -190,6 +204,8 @@ export default function UserNav() {
             <div style={{ height: '1px', background: 'var(--line)', margin: '8px 0' }} />
             <button
               onClick={handleSignOut}
+              role="menuitem"
+              aria-label="Sign out of your account"
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -203,7 +219,8 @@ export default function UserNav() {
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
                 width: '100%',
-                textAlign: 'left'
+                textAlign: 'left',
+                minHeight: '44px'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = 'rgba(255,0,0,0.1)'
