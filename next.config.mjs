@@ -9,7 +9,15 @@ const withBundleAnalyzer = bundleAnalyzer({
 const nextConfig = {
   // Image optimization
   images: {
-    remotePatterns: [{ protocol: 'https', hostname: '**' }],
+    remotePatterns: [
+      // Allow all HTTPS domains for external images
+      { protocol: 'https', hostname: '**' },
+      // Specifically allow common image hosts
+      { protocol: 'https', hostname: 'i.frg.im' },
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: 'cdn.shopify.com' },
+      { protocol: 'https', hostname: 'files.squarecdn.com' },
+    ],
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],

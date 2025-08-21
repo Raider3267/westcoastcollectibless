@@ -42,7 +42,7 @@ export default function SquarePayment({
   const [errorMessage, setErrorMessage] = useState('')
   
   // Get Square credentials from environment variables
-  const appId = process.env.NEXT_PUBLIC_SQUARE_APP_ID!
+  const appId = process.env.NEXT_PUBLIC_SQUARE_APPLICATION_ID!
   const locationId = process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID!
   
   // Debug logging to check if credentials are loaded

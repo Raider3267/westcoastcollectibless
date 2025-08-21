@@ -163,6 +163,6 @@ export async function getSquareConfig() {
   return {
     appId: process.env.SQUARE_APP_ID!,
     locationId: process.env.SQUARE_LOCATION_ID!,
-    environment: process.env.SQUARE_ENVIRONMENT || 'sandbox',
+    environment: process.env.SQUARE_ENV || 'sandbox',
   }
 }

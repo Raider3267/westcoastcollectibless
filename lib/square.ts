@@ -6,7 +6,7 @@ import { randomUUID } from 'crypto'
 // Initialize Square Client
 const client = new SquareClient({
   token: process.env.SQUARE_ACCESS_TOKEN!,
-  environment: process.env.SQUARE_ENVIRONMENT === 'production' ? SquareEnvironment.Production : SquareEnvironment.Sandbox,
+  environment: process.env.SQUARE_ENV === 'production' ? SquareEnvironment.Production : SquareEnvironment.Sandbox,
 })
 
 export const paymentsApi = client.payments
@@ -88,7 +88,7 @@ export async function createPayment(paymentRequest: PaymentRequest) {
     console.log('Clean payment data:', JSON.stringify(paymentData, null, 2))
     
     // Use environment-aware endpoint
-    const baseUrl = process.env.SQUARE_ENVIRONMENT === 'production' 
+    const baseUrl = process.env.SQUARE_ENV === 'production' 
       ? 'https://connect.squareup.com' 
       : 'https://connect.squareupsandbox.com'
     

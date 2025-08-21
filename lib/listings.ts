@@ -34,39 +34,56 @@ export interface Listing {
 export async function getListingsFromCsv(filename?: string, includeOutOfStock?: boolean): Promise<Listing[]> {
   const fs = await import('fs').then(m => m.promises)
   const path = await import('path')
+  const Papa = await import('papaparse')
+  
   const csvFile = filename || 'export.csv'
   const csvPath = path.join(process.cwd(), csvFile)
   
   try {
     const fileContent = await fs.readFile(csvPath, 'utf-8')
-    const lines = fileContent.split('\n').filter(line => line.trim())
     
-    if (lines.length <= 1) return []
+    // Use PapaParse for proper CSV parsing with quoted field support
+    const parseResult = Papa.parse(fileContent, {
+      header: true,
+      skipEmptyLines: true,
+      transform: (value: string, field: string) => {
+        // Trim whitespace from all fields
+        return value?.trim() || ''
+      }
+    })
     
-    const headers = lines[0].split(',').map(h => h.trim())
+    if (parseResult.errors.length > 0) {
+      console.warn('CSV parsing errors:', parseResult.errors)
+    }
+    
     const listings: Listing[] = []
     
-    for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(',')
-      const row: any = {}
-      
-      headers.forEach((header, index) => {
-        row[header] = values[index]?.trim() || ''
-      })
-      
+    for (const row of parseResult.data as any[]) {
       // Parse the row data
       const quantity = parseInt(row.quantity) || 0
       const shouldInclude = includeOutOfStock || quantity > 0
       
-      if (shouldInclude) {
+      if (shouldInclude && row.sku) { // Only include rows with valid SKU
+        // Parse images - handle both comma-separated and single image formats
+        let imageUrls: string[] = []
+        let primaryImage: string | null = null
+        
+        if (row.images) {
+          imageUrls = row.images
+            .split(',')
+            .map((img: string) => img.trim())
+            .filter((img: string) => img && img !== '')
+          primaryImage = imageUrls[0] || null
+        }
+        
         listings.push({
-          id: row.sku || `item-${i}`,
+          id: row.sku,
           name: row.title || '',
-          price: parseFloat(row.price) || null,
+          price: row.price ? parseFloat(row.price) : null,
           description: row.description || '',
           quantity: quantity,
-          image: row.images?.split(',')[0]?.trim() || null,
-          images: row.images?.split(',').map((img: string) => img.trim()).filter(Boolean) || [],
+          image: primaryImage,
+          images: imageUrls,
           status: row.status || 'live',
           sale_state: row.sale_state || 'LIVE',
           drop_date: row.drop_date || null,
@@ -80,11 +97,15 @@ export async function getListingsFromCsv(filename?: string, includeOutOfStock?: 
           weight: parseFloat(row.weight) || 0.3,
           length: parseFloat(row.length) || 4,
           width: parseFloat(row.width) || 3,
-          height: parseFloat(row.height) || 5
+          height: parseFloat(row.height) || 5,
+          featured: row.featured === 'true',
+          staff_pick: row.staff_pick === 'true',
+          limited_edition: row.limited_edition === 'true'
         })
       }
     }
     
+    console.log(`Parsed ${listings.length} products from CSV`)
     return listings
   } catch (error) {
     console.error('Error reading CSV:', error)

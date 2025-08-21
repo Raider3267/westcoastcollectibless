@@ -119,7 +119,7 @@ export async function createSquareOrder(cartData: {
     const idempotencyKey = randomUUID()
     
     // Determine base URL for Square API
-    const baseUrl = process.env.SQUARE_ENVIRONMENT === "production" 
+    const baseUrl = process.env.SQUARE_ENV === "production" 
       ? "https://connect.squareup.com"
       : "https://connect.squareupsandbox.com"
 
