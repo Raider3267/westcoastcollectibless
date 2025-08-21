@@ -1,0 +1,217 @@
+name: Deploy to Vercel
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  # Phase 1: Build and Test
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm tsc --noEmit
+
+      - name: Lint code
+        run: pnpm lint
+
+      - name: Build application
+        env:
+          # Mock environment variables for build
+          SQUARE_ENV: sandbox
+          SQUARE_ACCESS_TOKEN: mock_token
+          SQUARE_LOCATION_ID: mock_location
+          NEXT_PUBLIC_SQUARE_APPLICATION_ID: mock_app_id
+          NEXT_PUBLIC_SQUARE_LOCATION_ID: mock_location
+          NEXT_PUBLIC_SITE_NAME: "West Coast Collectibles"
+          NEXT_PUBLIC_BASE_URL: https://example.com
+          AUTH_SECRET: mock_auth_secret_for_build_only_32chars
+          NEXTAUTH_URL: https://example.com
+          ADMIN_EMAILS: admin@example.com
+        run: pnpm build
+
+      - name: Cache build artifacts
+        uses: actions/cache@v3
+        with:
+          path: |
+            .next/cache
+            .next/static
+            .next/standalone
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/pnpm-lock.yaml') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/pnpm-lock.yaml') }}-
+
+  # Phase 2: Deploy to Vercel
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: always() && needs.build-and-test.result == 'success'
+    
+    outputs:
+      preview-url: ${{ steps.deploy.outputs.preview-url }}
+      production-url: ${{ steps.deploy.outputs.production-url }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Install Vercel CLI
+        run: pnpm add -g vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }} --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build ${{ github.ref == 'refs/heads/main' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy Project Artifacts to Vercel
+        id: deploy
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            # Production deployment
+            URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+            echo "production-url=$URL" >> $GITHUB_OUTPUT
+            echo "🚀 **Production Deployment Successful!**" >> $GITHUB_STEP_SUMMARY
+            echo "Production URL: $URL" >> $GITHUB_STEP_SUMMARY
+          else
+            # Preview deployment
+            URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+            echo "preview-url=$URL" >> $GITHUB_OUTPUT
+            echo "🔍 **Preview Deployment Successful!**" >> $GITHUB_STEP_SUMMARY
+            echo "Preview URL: $URL" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "deployment-url=$URL" >> $GITHUB_OUTPUT
+
+  # Phase 3: Health Check and Smoke Tests
+  health-check:
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: always() && needs.deploy.result == 'success'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Wait for deployment
+        run: sleep 30
+
+      - name: Run smoke tests
+        env:
+          DEPLOYMENT_URL: ${{ needs.deploy.outputs.deployment-url }}
+          TEST_TIMEOUT: 30000
+        run: node scripts/smoke.mjs
+
+      - name: Update deployment status
+        if: always()
+        run: |
+          if [[ "${{ job.status }}" == "success" ]]; then
+            echo "✅ **Health Checks Passed**" >> $GITHUB_STEP_SUMMARY
+            echo "All smoke tests completed successfully" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Health Checks Failed**" >> $GITHUB_STEP_SUMMARY
+            echo "Some smoke tests failed - investigate before proceeding" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # Phase 4: Post-deployment notifications (PR comments)
+  notify:
+    needs: [deploy, health-check]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && needs.deploy.result == 'success'
+    
+    steps:
+      - name: Comment PR with preview URL
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('🚀 Preview Deployment')
+            );
+            
+            const healthStatus = '${{ needs.health-check.result }}' === 'success' ? '✅ Passed' : '❌ Failed';
+            const previewUrl = '${{ needs.deploy.outputs.preview-url }}';
+            
+            const body = `## 🚀 Preview Deployment Ready!
+            
+            **Preview URL:** ${previewUrl}
+            **Health Checks:** ${healthStatus}
+            
+            ### 🧪 Test Checklist
+            - [ ] Authentication flow works correctly
+            - [ ] Product listings load properly  
+            - [ ] Cart functionality operates
+            - [ ] Admin panel accessible (for admin users)
+            - [ ] Payment integration functional
+            - [ ] Mobile responsiveness verified
+            
+            ### 📊 Performance
+            - Build completed successfully
+            - All type checks passed
+            - Linting completed without errors
+            
+            ---
+            *This preview will be automatically updated when you push new commits to this PR.*`;
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }

@@ -1,6 +1,6 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
 export interface EmailSubscriber {
   email: string
@@ -12,6 +12,11 @@ export async function addEmailSubscriber(email: string, firstName?: string): Pro
   try {
     // In a real app, you'd store this in a database
     // For now, we'll just send a welcome email
+    
+    if (!resend) {
+      console.log('Email service not configured - skipping email send')
+      return true // Return success for development
+    }
     
     const { data, error } = await resend.emails.send({
       from: 'WestCoast Collectibles <onboarding@resend.dev>',
@@ -102,6 +107,11 @@ export interface EmailReceiptData {
 
 export async function sendEmailReceipt(receiptData: EmailReceiptData) {
   try {
+    if (!resend) {
+      console.log('Email service not configured - skipping receipt email')
+      return { success: true, data: null }
+    }
+    
     const { customerEmail, receiptNumber, receiptUrl, orderTotal, currency, orderItems, paymentMethod, transactionId, orderDate, shippingAddress, shippingCost } = receiptData
     
     const orderSubtotal = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
@@ -230,6 +240,11 @@ export async function sendProductDropNotification(
   productUrl: string
 ): Promise<boolean> {
   try {
+    if (!resend) {
+      console.log('Email service not configured - skipping drop notification')
+      return true
+    }
+    
     const { data, error } = await resend.emails.send({
       from: 'WestCoast Collectibles <onboarding@resend.dev>',
       to: [email],
