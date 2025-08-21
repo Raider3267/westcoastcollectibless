@@ -190,7 +190,12 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
 
   return (
     <>
-      <article className={`product-card wcc-card ${accentClass} group`} style={{ overflow: 'hidden' }}>
+      <article 
+        className={`product-card wcc-card ${accentClass} group`} 
+        style={{ overflow: 'hidden' }}
+        aria-labelledby={`product-title-${product.id}`}
+        role="group"
+      >
         {/* Product status chip */}
         <div style={{
           position: 'absolute',
@@ -264,7 +269,10 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
         </div>
 
         <div className="product-body wcc-body">
-          <h3 className="product-title wcc-title">
+          <h3 
+            id={`product-title-${product.id}`}
+            className="product-title wcc-title"
+          >
             <span className="wcc-brand">{brand}</span> {titleWithoutBrand}
           </h3>
         </div>
@@ -298,13 +306,16 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
                 position: 'relative',
                 zIndex: 11,
                 fontSize: '0.9rem',
-                fontWeight: 600
+                fontWeight: 600,
+                minHeight: '44px',
+                minWidth: '44px'
               }}
               onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
                 setIsModalOpen(true)
               }}
+              aria-label={`View details for ${product.name}`}
             >
               Details
             </button>
