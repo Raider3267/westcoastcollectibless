@@ -12,6 +12,7 @@ export interface ShippingRate {
   cost: number // in cents
   estimatedDays: string
   description: string
+  details?: string // Additional service details
 }
 
 export interface CartItem {
@@ -30,61 +31,84 @@ export function calculateCartWeight(items: CartItem[]): number {
   }, 0)
 }
 
-// Weight-based shipping rates (base cost + per lb cost, all in cents)
+// USPS shipping rates (base cost + per lb cost, all in cents)
 const SHIPPING_ZONES = {
   US: {
-    'standard': { 
-      baseCost: 399, // $3.99 base
-      perLbCost: 200, // $2.00 per lb
-      days: '5-7', 
-      description: 'Standard Ground Shipping',
-      maxWeight: 50 // 50 lbs max
+    'ground_advantage': { 
+      baseCost: 499, // $4.99 base
+      perLbCost: 150, // $1.50 per lb
+      days: '2-5', 
+      description: 'USPS Ground Advantage®',
+      maxWeight: 70, // 70 lbs max (USPS limit)
+      details: 'Most affordable option • Includes tracking & insurance up to $100'
     },
-    'expedited': { 
+    'priority': { 
       baseCost: 899, // $8.99 base
-      perLbCost: 300, // $3.00 per lb
-      days: '2-3', 
-      description: 'Expedited Shipping',
-      maxWeight: 30 // 30 lbs max
+      perLbCost: 250, // $2.50 per lb
+      days: '1-3', 
+      description: 'USPS Priority Mail®',
+      maxWeight: 70, // 70 lbs max
+      details: 'Fast delivery • Includes tracking & insurance up to $100 • Free USPS boxes available'
     },
-    'overnight': { 
-      baseCost: 1899, // $18.99 base
-      perLbCost: 500, // $5.00 per lb
-      days: '1', 
-      description: 'Overnight Express',
-      maxWeight: 20 // 20 lbs max
+    'express': { 
+      baseCost: 2899, // $28.99 base
+      perLbCost: 400, // $4.00 per lb
+      days: '1-2', 
+      description: 'USPS Priority Mail Express®',
+      maxWeight: 70, // 70 lbs max
+      details: 'Fastest USPS service • Next-day to 2-day delivery • Money-back guarantee • Insurance up to $100'
     }
   },
   CA: {
-    'standard': { 
-      baseCost: 999, // $9.99 base
-      perLbCost: 350, // $3.50 per lb
-      days: '7-14', 
-      description: 'International Standard',
-      maxWeight: 40
+    'first_class_intl': { 
+      baseCost: 1499, // $14.99 base
+      perLbCost: 400, // $4.00 per lb
+      days: '7-21', 
+      description: 'USPS First-Class Package International®',
+      maxWeight: 4, // 4 lbs max for First-Class International
+      details: 'Affordable international • For packages under 4 lbs • Tracking to major countries'
     },
-    'expedited': { 
-      baseCost: 1999, // $19.99 base
+    'priority_intl': { 
+      baseCost: 2999, // $29.99 base
       perLbCost: 600, // $6.00 per lb
+      days: '6-10', 
+      description: 'USPS Priority Mail International®',
+      maxWeight: 70,
+      details: 'Reliable international service • Tracking included • Insurance available'
+    },
+    'express_intl': { 
+      baseCost: 4999, // $49.99 base
+      perLbCost: 800, // $8.00 per lb
       days: '3-5', 
-      description: 'International Express',
-      maxWeight: 25
+      description: 'USPS Priority Mail Express International®',
+      maxWeight: 70,
+      details: 'Fastest international • Money-back guarantee to many countries • Full tracking'
     }
   },
   INTERNATIONAL: {
-    'standard': { 
-      baseCost: 1499, // $14.99 base
-      perLbCost: 500, // $5.00 per lb
-      days: '10-21', 
-      description: 'International Standard',
-      maxWeight: 30
+    'first_class_intl': { 
+      baseCost: 1699, // $16.99 base
+      perLbCost: 450, // $4.50 per lb
+      days: '7-21', 
+      description: 'USPS First-Class Package International®',
+      maxWeight: 4,
+      details: 'Economical option for light packages • Limited tracking'
     },
-    'expedited': { 
-      baseCost: 2999, // $29.99 base
-      perLbCost: 800, // $8.00 per lb
-      days: '5-10', 
-      description: 'International Express',
-      maxWeight: 20
+    'priority_intl': { 
+      baseCost: 3499, // $34.99 base
+      perLbCost: 700, // $7.00 per lb
+      days: '6-10', 
+      description: 'USPS Priority Mail International®',
+      maxWeight: 70,
+      details: 'Standard international service • Tracking to most countries'
+    },
+    'express_intl': { 
+      baseCost: 5999, // $59.99 base
+      perLbCost: 900, // $9.00 per lb
+      days: '3-5', 
+      description: 'USPS Priority Mail Express International®',
+      maxWeight: 70,
+      details: 'Premium international service • Full tracking • Date-certain delivery'
     }
   }
 }
@@ -135,15 +159,13 @@ export function calculateShippingRates(
     // Calculate weight-based cost: base cost + (weight * per-lb cost)
     let cost = rate.baseCost + Math.ceil(totalWeight * rate.perLbCost)
     
-    // Apply free shipping for qualifying US orders
-    if (qualifiesForFreeShipping && service === 'standard') {
+    // Apply free shipping for qualifying US orders (Ground Advantage only)
+    if (qualifiesForFreeShipping && service === 'ground_advantage') {
       cost = 0
     }
     
     // Add weight info to description
-    const weightInfo = totalWeight > rate.maxWeight ? 
-      ` (Exceeds ${rate.maxWeight}lb limit)` : 
-      ` (${totalWeight}lbs)`
+    const weightInfo = ` (${totalWeight.toFixed(1)} lbs)`
     
     shippingRates.push({
       service,
@@ -151,7 +173,8 @@ export function calculateShippingRates(
       estimatedDays: rate.days,
       description: cost === 0 ? 
         `${rate.description} (FREE!)${weightInfo}` : 
-        `${rate.description}${weightInfo}`
+        `${rate.description}${weightInfo}`,
+      details: (rate as any).details // Include the details field if it exists
     })
   })
   

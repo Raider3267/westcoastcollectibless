@@ -48,7 +48,6 @@ export default function Cart() {
   const [isCalculatingShipping, setIsCalculatingShipping] = useState(false)
   const [shippingError, setShippingError] = useState('')
   const [showShippingSelection, setShowShippingSelection] = useState(false)
-  const [needsShippingCalculation, setNeedsShippingCalculation] = useState(false)
   
   // Tax calculation state
   const [taxInfo, setTaxInfo] = useState<{
@@ -197,12 +196,17 @@ export default function Cart() {
       }
     }
     
-    // Check if shipping has been calculated
+    // Auto-calculate shipping if not done yet
     if (!showShippingSelection) {
-      setPaymentError('Please calculate shipping costs first.')
-      setIsCreatingOrder(false)
-      setNeedsShippingCalculation(true)
-      return
+      setIsCreatingOrder(false) // Stop the order creation loading
+      try {
+        await calculateShipping()
+        setPaymentError('Please select a shipping option below.')
+        return
+      } catch (error) {
+        setPaymentError('Failed to calculate shipping. Please check your address and try again.')
+        return
+      }
     }
     
     if (!selectedShipping) {
@@ -398,7 +402,7 @@ export default function Cart() {
                   </div>
                   {selectedShipping && (
                     <div className="flex justify-between text-sm text-gray-600 mb-1">
-                      <span>Shipping ({selectedShipping.service.replace('_', ' ')})</span>
+                      <span>{selectedShipping.description.replace(/ \([^)]*\)/g, '')}</span>
                       <span>{selectedShipping.cost === 0 ? 'FREE' : `$${(selectedShipping.cost / 100).toFixed(2)}`}</span>
                     </div>
                   )}
@@ -583,22 +587,6 @@ export default function Cart() {
                     </div>
                   </div>
                 )}
-                
-                {/* Calculate Shipping Button */}
-                <div className="mt-4">
-                  <button
-                    onClick={calculateShipping}
-                    disabled={isCalculatingShipping}
-                    className="w-full py-2 px-4 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
-                  >
-                    {isCalculatingShipping ? 'Calculating...' : 'Calculate Shipping Costs'}
-                  </button>
-                  {needsShippingCalculation && (
-                    <p className="text-sm text-amber-600 mt-2">
-                      Please calculate shipping costs before proceeding to payment.
-                    </p>
-                  )}
-                </div>
               </div>
               
               {/* Shipping Options Selection */}
@@ -613,30 +601,57 @@ export default function Cart() {
                   )}
                   
                   <div className="space-y-2">
-                    {shippingRates.map((rate, index) => (
-                      <label key={index} className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-                        <input
-                          type="radio"
-                          name="shipping"
-                          checked={selectedShipping?.service === rate.service}
-                          onChange={() => setSelectedShipping(rate)}
-                          className="mr-3"
-                        />
-                        <div className="flex-1">
-                          <div className="flex justify-between items-center">
-                            <span className="font-medium text-gray-900 capitalize">
-                              {rate.service.replace('_', ' ')}
-                            </span>
-                            <span className="font-semibold text-gray-900">
-                              {rate.cost === 0 ? 'FREE' : `$${(rate.cost / 100).toFixed(2)}`}
-                            </span>
+                    {shippingRates.map((rate, index) => {
+                      // Calculate estimated delivery date
+                      const today = new Date()
+                      const minDays = parseInt(rate.estimatedDays.split('-')[0])
+                      const maxDays = parseInt(rate.estimatedDays.split('-')[1] || rate.estimatedDays)
+                      const minDate = new Date(today)
+                      const maxDate = new Date(today)
+                      minDate.setDate(minDate.getDate() + minDays)
+                      maxDate.setDate(maxDate.getDate() + maxDays)
+                      
+                      const formatDate = (date: Date) => {
+                        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                      }
+                      
+                      return (
+                        <label key={index} className="flex items-start p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                          <input
+                            type="radio"
+                            name="shipping"
+                            checked={selectedShipping?.service === rate.service}
+                            onChange={() => setSelectedShipping(rate)}
+                            className="mt-1 mr-3"
+                          />
+                          <div className="flex-1">
+                            <div className="flex justify-between items-start mb-1">
+                              <div>
+                                <span className="font-semibold text-gray-900">
+                                  {rate.description.replace(' (FREE!)', '')}
+                                </span>
+                                {rate.cost === 0 && (
+                                  <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                    FREE
+                                  </span>
+                                )}
+                              </div>
+                              <span className="font-bold text-gray-900">
+                                {rate.cost === 0 ? 'FREE' : `$${(rate.cost / 100).toFixed(2)}`}
+                              </span>
+                            </div>
+                            <p className="text-sm text-blue-600 font-medium mb-1">
+                              📅 Estimated delivery: {formatDate(minDate)} - {formatDate(maxDate)}
+                            </p>
+                            {rate.details && (
+                              <p className="text-xs text-gray-500">
+                                {rate.details}
+                              </p>
+                            )}
                           </div>
-                          <p className="text-sm text-gray-600">
-                            {rate.description} • Estimated {rate.estimatedDays} business days
-                          </p>
-                        </div>
-                      </label>
-                    ))}
+                        </label>
+                      )
+                    })}
                   </div>
                 </div>
               )}
@@ -655,13 +670,19 @@ export default function Cart() {
                   <>
                     <button
                       onClick={handleCreateOrder}
-                      disabled={isCreatingOrder || !showShippingSelection}
+                      disabled={isCreatingOrder}
                       className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
                     >
-                      {isCreatingOrder ? 'Creating Order...' : `Continue to Payment - $${(((state.totalPrice * 100) + (selectedShipping?.cost || 0) + (taxInfo.taxAmount * 100)) / 100).toFixed(2)}`}
+                      {isCreatingOrder ? 'Creating Order...' : 
+                        !showShippingSelection ? 'Continue to Payment' :
+                        `Continue to Payment - $${(((state.totalPrice * 100) + (selectedShipping?.cost || 0) + (taxInfo.taxAmount * 100)) / 100).toFixed(2)}`
+                      }
                     </button>
                     <p className="text-xs text-gray-500 mt-2 text-center">
-                      Next step: Complete payment with Square
+                      {!showShippingSelection ? 
+                        'Review shipping options and complete payment' :
+                        'Next step: Complete payment with Square'
+                      }
                     </p>
                   </>
                 ) : (
@@ -754,6 +775,74 @@ export default function Cart() {
                     ))}
                   </div>
 
+                  {/* Free Shipping Progress */}
+                  {state.totalPrice < 75 && (
+                    <div className="px-4 py-3 bg-gradient-to-r from-blue-50 to-green-50 border-t border-gray-200">
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="font-medium text-gray-700">
+                            {state.totalPrice === 0 
+                              ? '🚚 Free USPS Ground Advantage® on orders over $75'
+                              : `🚚 Add $${(75 - state.totalPrice).toFixed(2)} for FREE USPS shipping!`
+                            }
+                          </span>
+                          <span className="text-xs text-gray-500">Under 5 lbs</span>
+                        </div>
+                        
+                        {/* Progress Bar */}
+                        <div className="relative w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                          <div 
+                            className="absolute left-0 top-0 h-full bg-gradient-to-r from-blue-500 to-green-500 rounded-full transition-all duration-500 ease-out"
+                            style={{ 
+                              width: `${Math.min((state.totalPrice / 75) * 100, 100)}%`,
+                            }}
+                          />
+                          {/* Animated shimmer effect */}
+                          <div 
+                            className="absolute left-0 top-0 h-full w-full opacity-30"
+                            style={{
+                              background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
+                              animation: 'shimmer 2s infinite'
+                            }}
+                          />
+                        </div>
+                        
+                        {/* Progress Text */}
+                        <div className="flex justify-between text-xs text-gray-500">
+                          <span>${state.totalPrice.toFixed(2)}</span>
+                          <span className="font-medium">$75.00</span>
+                        </div>
+                      </div>
+                      
+                      {/* Suggestion when close to free shipping */}
+                      {state.totalPrice >= 55 && state.totalPrice < 75 && (
+                        <div className="mt-2 p-2 bg-yellow-50 rounded-md border border-yellow-200">
+                          <p className="text-xs text-yellow-800 font-medium">
+                            💡 You're so close! Add one more item to unlock free shipping.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Success Message - Already Qualified */}
+                  {state.totalPrice >= 75 && (
+                    <div className="px-4 py-3 bg-gradient-to-r from-green-50 to-emerald-50 border-t border-green-200">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                          <span className="font-medium text-green-700">
+                            🎉 You qualify for FREE shipping!
+                          </span>
+                        </div>
+                        <span className="text-xs text-green-600">Saved $3.99+</span>
+                      </div>
+                      <p className="text-xs text-gray-600 mt-1">Standard shipping (5-7 days) • Orders under 5 lbs</p>
+                    </div>
+                  )}
+
                   {/* Cart Summary & Checkout */}
                   <div className="border-t border-gray-200 p-4 space-y-4">
                     {/* Totals */}
@@ -791,6 +880,14 @@ export default function Cart() {
           )}
         </div>
       </div>
+      
+      {/* Shimmer Animation */}
+      <style jsx>{`
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+      `}</style>
     </div>
   )
 }
