@@ -6,6 +6,7 @@ import ProductCard from '../components/ProductCard'
 import FilterBar, { FilterOptions } from '../components/FilterBar'
 import VIPSection from '../components/VIPSection'
 import UserNav from '../components/UserNav'
+import HeaderActionButton from '../components/ui/HeaderActionButton'
 import { useCart } from '../lib/cart'
 import { useEffect, useState, useRef } from 'react'
 
@@ -256,71 +257,32 @@ function HeroSection({ toggleCart, cartState }: { toggleCart: () => void, cartSt
       display: 'flex',
       alignItems: 'center'
     }}>
-      {/* Unified Floating Navigation */}
-      <nav 
-        id="floating-nav"
-        role="navigation"
-        aria-label="Main navigation"
-        className="floating-nav-container"
+      {/* Header Actions - Floating */}
+      <div 
+        className="absolute top-5 right-5 z-[100] flex items-center gap-2 sm:gap-3 ml-auto min-w-0"
         style={{
-          position: 'absolute',
-          top: '20px',
-          right: '20px',
-          zIndex: cartState?.isOpen ? 30 : 1000, // Lower z-index when cart is open
-          display: 'flex',
-          gap: '8px',
-          alignItems: 'center',
+          opacity: cartState?.isOpen ? 0.3 : 1,
+          pointerEvents: cartState?.isOpen ? 'none' : 'auto',
           transition: 'all 0.3s ease',
-          opacity: cartState?.isOpen ? 0.3 : 1, // Dim when cart is open
-          pointerEvents: cartState?.isOpen ? 'none' : 'auto' // Disable interaction when cart is open
+          zIndex: cartState?.isOpen ? 30 : 1000
         }}
       >
-        {/* Cart Pill */}
-        <button 
-          className="nav-pill cart-pill"
+        {/* Cart Button */}
+        <HeaderActionButton
           onClick={toggleCart}
-          aria-label="Shopping cart"
+          aria-label="Open cart"
+          badge={cartState?.totalItems > 0 ? cartState.totalItems : undefined}
+          variant="ghost"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536 1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/>
+          <svg className="shrink-0 w-4 h-4 md:w-[18px] md:h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536 1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/>
           </svg>
-          <span className="nav-pill-label">Cart</span>
-          {cartState?.totalItems > 0 && (
-            <span style={{
-              position: 'absolute',
-              top: '-6px',
-              right: '-6px',
-              padding: '2px 6px',
-              borderRadius: '999px',
-              background: 'linear-gradient(135deg, #10b981, #059669)',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: 700,
-              minWidth: '18px',
-              textAlign: 'center'
-            }}>
-              {cartState?.totalItems > 99 ? '99+' : cartState?.totalItems}
-            </span>
-          )}
-        </button>
+          <span className="hidden sm:inline">Cart</span>
+        </HeaderActionButton>
         
-        {/* Sign In/User Pill */}
-        <div className="nav-pill user-pill" style={{ padding: 0 }}>
-          <UserNav />
-        </div>
-        
-        {/* Admin Pill */}
-        <a 
-          href="/admin/login" 
-          className="nav-pill admin-pill"
-          aria-label="Admin panel login"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M10.5,17L6.5,13L7.91,11.59L10.5,14.17L16.09,8.59L17.5,10L10.5,17Z"/>
-          </svg>
-          <span className="nav-pill-label">Admin</span>
-        </a>
-      </nav>
+        {/* Sign In/User */}
+        <UserNav />
+      </div>
 
       {/* Video Background with Parallax */}
       <video 
@@ -558,76 +520,6 @@ function HeroSection({ toggleCart, cartState }: { toggleCart: () => void, cartSt
           }
         }
 
-        /* Unified Navigation Pills */
-        .nav-pill {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          height: 38px;
-          padding: 0 12px;
-          background: rgba(255,255,255,0.14);
-          border: 1px solid rgba(255,255,255,0.22);
-          border-radius: 50px;
-          backdrop-filter: blur(10px) contrast(1.08);
-          box-shadow: 0 6px 18px rgba(0,0,0,0.18);
-          color: white;
-          font-size: 0.9rem;
-          font-weight: 500;
-          text-decoration: none;
-          text-shadow: 0 1px 1px rgba(0,0,0,0.35);
-          cursor: pointer;
-          transition: all 0.3s ease;
-          animation: loadGlowPulse 400ms ease-out;
-          min-width: 44px; /* Mobile tap target */
-          justify-content: center;
-        }
-
-        .nav-pill:hover,
-        .nav-pill:focus {
-          backdrop-filter: blur(12px) contrast(1.1);
-          box-shadow: 0 10px 28px rgba(0,0,0,0.22), 0 0 0 6px rgba(255,255,255,0.25);
-          transform: translateY(-1px);
-        }
-
-        .nav-pill:active {
-          box-shadow: 0 4px 12px rgba(0,0,0,0.15), 0 0 0 6px rgba(255,255,255,0.25);
-          transform: translateY(0);
-        }
-
-        .nav-pill:focus {
-          outline: 2px solid rgba(255,255,255,0.4);
-          outline-offset: 2px;
-        }
-
-        .nav-pill svg {
-          width: 16px;
-          height: 16px;
-          color: currentColor;
-          flex-shrink: 0;
-        }
-
-        .nav-pill-label {
-          white-space: nowrap;
-          color: currentColor;
-        }
-
-        /* Scroll state adjustments */
-        #floating-nav.scrolled .nav-pill {
-          height: 34px;
-          padding: 0 10px;
-          font-size: 0.85rem;
-          box-shadow: 0 4px 14px rgba(0,0,0,0.15);
-        }
-
-        #floating-nav.scrolled .nav-pill:hover {
-          box-shadow: 0 8px 20px rgba(0,0,0,0.18), 0 0 0 5px rgba(255,255,255,0.2);
-        }
-
-        /* Container responsive behavior */
-        .floating-nav-container {
-          animation-delay: 200ms;
-        }
-
         /* Reduced motion preferences */
         @media (prefers-reduced-motion: reduce) {
           .floating-collectible {
@@ -640,84 +532,11 @@ function HeroSection({ toggleCart, cartState }: { toggleCart: () => void, cartSt
             background-clip: text !important;
             animation: none !important;
           }
-
-          .nav-pill {
-            animation: none;
-            transition-duration: 0.2s;
-          }
-
-          .nav-pill:hover,
-          .nav-pill:focus {
-            transition-duration: 0.2s;
-          }
-        }
-
-        /* UserNav Integration */
-        .nav-pill.user-pill button {
-          all: unset;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          color: white;
-          font-size: 0.9rem;
-          font-weight: 500;
-          cursor: pointer;
-          padding: 0;
-          margin: 0;
-          background: transparent !important;
-          border: none !important;
-          box-shadow: none !important;
-          transform: none !important;
-          border-radius: 0 !important;
-          height: auto !important;
-          width: auto !important;
-        }
-
-        .nav-pill.user-pill button:hover {
-          transform: none !important;
-          background: transparent !important;
-          border-color: transparent !important;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 1024px) {
-          .nav-pill {
-            padding: 0 10px;
-            font-size: 0.85rem;
-          }
-          
-          #floating-nav {
-            gap: 6px;
-          }
-        }
-
-        @media (max-width: 768px) {
-          .hero-content {
-            padding: 0 30px !important;
-          }
-
-          .nav-pill-label {
-            display: none;
-          }
-
-          .nav-pill {
-            width: 44px;
-            height: 44px;
-            padding: 0;
-            justify-content: center;
-          }
-
-          #floating-nav {
-            top: 12px;
-            right: 12px;
-            gap: 6px;
-          }
         }
 
         @media (max-width: 480px) {
-          #floating-nav {
-            top: 8px;
-            right: 8px;
+          .hero-content {
+            padding: 0 20px !important;
           }
         }
       `}</style>

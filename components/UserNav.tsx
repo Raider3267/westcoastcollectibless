@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { authService, AuthUser } from '../lib/auth-new'
 import AuthLightModal from './AuthLightModal'
+import HeaderActionButton from './ui/HeaderActionButton'
 
 export default function UserNav() {
   const [user, setUser] = useState<AuthUser | null>(null)
@@ -41,27 +42,16 @@ export default function UserNav() {
   if (!user) {
     return (
       <>
-        <button
+        <HeaderActionButton
           onClick={() => setShowAuthModal(true)}
-          aria-label="Sign in to your account"
-          style={{
-            padding: '10px 16px',
-            fontSize: '0.9rem',
-            fontWeight: 600,
-            borderRadius: '999px',
-            border: 'none',
-            background: 'linear-gradient(135deg, #5ED0C0, #F7E7C3)',
-            color: '#0b0b0f',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            minHeight: '44px',
-            minWidth: '44px'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-          onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+          aria-label="Sign in"
+          variant="ghost"
         >
-          👤 Sign In
-        </button>
+          <svg className="shrink-0 w-4 h-4 md:w-[18px] md:h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+          </svg>
+          <span className="hidden sm:inline">Sign In</span>
+        </HeaderActionButton>
         
         <AuthLightModal 
           isOpen={showAuthModal}
@@ -77,50 +67,20 @@ export default function UserNav() {
 
   return (
     <div style={{ position: 'relative' }}>
-      <button
+      <HeaderActionButton
         onClick={() => setShowUserMenu(!showUserMenu)}
         aria-expanded={showUserMenu}
         aria-haspopup="menu"
         aria-label={`User menu for ${user.name || user.email}`}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          padding: '8px 12px',
-          borderRadius: '999px',
-          border: '2px solid var(--line)',
-          background: '#fff',
-          cursor: 'pointer',
-          transition: 'all 0.3s ease',
-          minHeight: '44px'
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--accent-teal)'}
-        onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--line)'}
+        variant="ghost"
       >
-        <div style={{
-          width: '32px',
-          height: '32px',
-          borderRadius: '50%',
-          background: 'linear-gradient(135deg, #5ED0C0, #C7A3FF)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '0.8rem',
-          fontWeight: 600,
-          color: 'white'
-        }}>
+        <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-gradient-to-r from-teal-400 to-purple-400 flex items-center justify-center text-white text-xs font-semibold shrink-0">
           {user.name ? user.name.charAt(0).toUpperCase() : '👤'}
         </div>
-        <div style={{ textAlign: 'left' }}>
-          <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--ink)' }}>
-            {user.name || 'Collector'}
-          </div>
-          <div style={{ fontSize: '0.7rem', color: 'var(--muted)' }}>
-            {user.email_verified ? 'Verified' : 'Unverified'}
-          </div>
-        </div>
-        <span style={{ fontSize: '0.7rem', color: 'var(--muted)' }}>▼</span>
-      </button>
+        <span className="hidden sm:inline truncate max-w-20">
+          {user.name || 'Account'}
+        </span>
+      </HeaderActionButton>
 
       {showUserMenu && (
         <div 
@@ -201,6 +161,29 @@ export default function UserNav() {
             >
               ⚙️ Account
             </a>
+            {/* Admin Dashboard Link - Only show if user has admin role */}
+            {user.roles?.includes('admin') && (
+              <a 
+                href="/admin/dashboard"
+                role="menuitem"
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '8px', 
+                  padding: '8px', 
+                  borderRadius: '8px',
+                  textDecoration: 'none',
+                  color: 'var(--ink)',
+                  fontSize: '0.9rem',
+                  transition: 'background 0.2s ease',
+                  minHeight: '44px'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(124,58,237,0.1)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+              >
+                🛡️ Admin Dashboard
+              </a>
+            )}
             <div style={{ height: '1px', background: 'var(--line)', margin: '8px 0' }} />
             <button
               onClick={handleSignOut}

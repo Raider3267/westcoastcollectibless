@@ -6,6 +6,7 @@ export interface AuthUser {
   name?: string
   email_verified: boolean
   marketing_opt_in: boolean
+  roles?: string[]
 }
 
 export interface SignUpData {
