@@ -1,0 +1,63 @@
+name: Verify pnpm Setup
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  verify-pnpm:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Read Node version from .nvmrc
+      run: echo "NODE_VERSION=$(cat .nvmrc)" >> $GITHUB_ENV
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8
+        run_install: false
+        
+    - name: Verify no conflicting lockfiles exist
+      run: |
+        if [ -f "package-lock.json" ]; then
+          echo "Error: package-lock.json found! This project should use pnpm only."
+          exit 1
+        fi
+        if [ -f "yarn.lock" ]; then
+          echo "Error: yarn.lock found! This project should use pnpm only."
+          exit 1
+        fi
+        echo "✓ No conflicting lockfiles found"
+        
+    - name: Verify pnpm-lock.yaml exists
+      run: |
+        if [ ! -f "pnpm-lock.yaml" ]; then
+          echo "Error: pnpm-lock.yaml not found!"
+          exit 1
+        fi
+        echo "✓ pnpm-lock.yaml exists"
+        
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+      
+    - name: Build project
+      run: pnpm build
+      
+    - name: Verify package manager in package.json
+      run: |
+        if ! grep -q '"packageManager": "pnpm@8"' package.json; then
+          echo "Error: packageManager field not set to pnpm@8 in package.json"
+          exit 1
+        fi
+        echo "✓ packageManager correctly set to pnpm@8"
