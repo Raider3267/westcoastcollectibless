@@ -52,6 +52,6 @@ westcoastcollectibless/
 eBay-all-active-listings-report-*.csv
 westcoastcollectibless/eBay-all-active-listings-report-*.csv
 
-# Uploaded images
-public/uploads/
+# Uploaded images - keep for deployment
+# public/uploads/
 .vercel
