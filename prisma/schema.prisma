@@ -1,0 +1,283 @@
+// =============================================================================
+// WEST COAST COLLECTIBLES - DATABASE SCHEMA (PHASE 2)
+// =============================================================================
+// This schema is prepared for Phase 2 migration from JSON to PostgreSQL
+// Currently DISABLED - JSON storage remains active until migration
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================================
+// USER MANAGEMENT & AUTHENTICATION
+// =============================================================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String?   // Optional for OAuth users
+  firstName     String?
+  lastName      String?
+  isAdmin       Boolean   @default(false)
+  isVerified    Boolean   @default(false)
+  
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+  
+  // Relationships
+  sessions      Session[]
+  wishlists     WishlistItem[]
+  orders        Order[]
+  notifications NotificationSubscription[]
+  
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  
+  // Relationships
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("sessions")
+}
+
+// =============================================================================
+// PRODUCT CATALOG & INVENTORY
+// =============================================================================
+
+model Product {
+  id              String   @id @default(cuid())
+  
+  // Basic product information
+  title           String
+  description     String?
+  brand           String?
+  category        String?
+  subcategory     String?
+  
+  // Pricing
+  price           Decimal  @db.Decimal(10, 2)
+  salePrice       Decimal? @db.Decimal(10, 2)
+  cost            Decimal? @db.Decimal(10, 2) // For admin only
+  
+  // Inventory
+  stock           Int      @default(0)
+  sku             String?  @unique
+  barcode         String?
+  
+  // Physical attributes
+  weight          Decimal? @db.Decimal(8, 3) // in pounds
+  dimensions      String?  // "L x W x H"
+  
+  // Media
+  images          String[] // Cloudinary URLs
+  heroImage       String?  // Primary image URL
+  
+  // Status flags
+  isActive        Boolean  @default(true)
+  isFeatured      Boolean  @default(false)
+  isStaffPick     Boolean  @default(false)
+  isLimitedEdition Boolean @default(false)
+  isNewRelease    Boolean  @default(false)
+  isComingSoon    Boolean  @default(false)
+  
+  // Dates
+  releaseDate     DateTime?
+  dropDate        DateTime? // For scheduled releases
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relationships
+  wishlistItems   WishlistItem[]
+  orderItems      OrderItem[]
+  notifications   NotificationSubscription[]
+  
+  // Search optimization
+  searchVector    String?  // For full-text search
+  
+  @@map("products")
+  @@index([isActive, isFeatured])
+  @@index([isActive, isStaffPick])
+  @@index([isActive, isNewRelease])
+  @@index([isActive, isComingSoon])
+  @@index([category, subcategory])
+  @@index([releaseDate, dropDate])
+}
+
+// =============================================================================
+// WISHLIST & USER PREFERENCES
+// =============================================================================
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  
+  // Notifications
+  notifyOnRestock Boolean @default(true)
+  notifyOnSale    Boolean @default(true)
+  
+  // Timestamps
+  addedAt   DateTime @default(now())
+  
+  // Relationships
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, productId])
+  @@map("wishlist_items")
+}
+
+// =============================================================================
+// ORDERS & FULFILLMENT
+// =============================================================================
+
+enum OrderStatus {
+  PENDING
+  PAID
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  userId          String
+  
+  // Square integration
+  squareOrderId   String?     @unique
+  squarePaymentId String?
+  
+  // Order details
+  status          OrderStatus @default(PENDING)
+  subtotal        Decimal     @db.Decimal(10, 2)
+  taxAmount       Decimal     @db.Decimal(10, 2)
+  shippingAmount  Decimal     @db.Decimal(10, 2)
+  totalAmount     Decimal     @db.Decimal(10, 2)
+  
+  // Shipping information
+  shippingAddress Json        // Flexible address structure
+  billingAddress  Json?       // Optional separate billing
+  trackingNumber  String?
+  shippingMethod  String?
+  
+  // Timestamps
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  shippedAt       DateTime?
+  deliveredAt     DateTime?
+  
+  // Relationships
+  user            User        @relation(fields: [userId], references: [id])
+  items           OrderItem[]
+  
+  @@map("orders")
+  @@index([userId, status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String
+  
+  // Item details at time of purchase
+  quantity  Int
+  price     Decimal @db.Decimal(10, 2)
+  title     String  // Snapshot of product title
+  image     String? // Snapshot of product image
+  
+  // Relationships
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id])
+  
+  @@map("order_items")
+}
+
+// =============================================================================
+// NOTIFICATIONS & COMMUNICATIONS
+// =============================================================================
+
+enum NotificationType {
+  RESTOCK
+  PRICE_DROP
+  NEW_DROP
+  BACK_IN_STOCK
+  SALE
+}
+
+model NotificationSubscription {
+  id         String           @id @default(cuid())
+  userId     String
+  productId  String?          // Null for general notifications
+  type       NotificationType
+  
+  // Contact preferences
+  email      String
+  isActive   Boolean          @default(true)
+  
+  // Timestamps
+  createdAt  DateTime         @default(now())
+  lastSentAt DateTime?
+  
+  // Relationships
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product    Product?         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  @@map("notification_subscriptions")
+  @@index([type, isActive])
+  @@index([productId, type])
+}
+
+// =============================================================================
+// ADMIN & ANALYTICS
+// =============================================================================
+
+model AdminLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String   // e.g., "PRODUCT_CREATED", "ORDER_UPDATED"
+  details   Json     // Flexible metadata
+  ipAddress String?
+  userAgent String?
+  
+  createdAt DateTime @default(now())
+  
+  @@map("admin_logs")
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+}
+
+model AnalyticsEvent {
+  id          String   @id @default(cuid())
+  eventType   String   // e.g., "page_view", "product_view", "add_to_cart"
+  properties  Json     // Event-specific data
+  userId      String?  // If user is logged in
+  sessionId   String?
+  ipAddress   String?
+  userAgent   String?
+  
+  createdAt   DateTime @default(now())
+  
+  @@map("analytics_events")
+  @@index([eventType, createdAt])
+  @@index([userId, createdAt])
+}

@@ -6,6 +6,7 @@ import { CartProvider } from '../lib/cart'
 import Cart from '../components/Cart'
 import CartIcon from '../components/CartIcon'
 import GlobalToastProvider from '../components/GlobalToastProvider'
+import { Analytics } from '@vercel/analytics/react'
 
 export const metadata: Metadata = {
   title: 'WestCoastCollectibless',
@@ -126,6 +127,7 @@ document.addEventListener('DOMContentLoaded', function(){
 `}} />
         </CartProvider>
         <GlobalToastProvider />
+        <Analytics />
       </body>
     </html>
   )

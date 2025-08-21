@@ -9,7 +9,15 @@
     "lint": "next lint",
     "analyze": "ANALYZE=true npm run build",
     "lighthouse": "npx lighthouse http://localhost:3000 --output json --output html --output-path ./lighthouse-report",
-    "perf-check": "node scripts/performance-check.js"
+    "perf-check": "node scripts/performance-check.js",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:prod": "prisma migrate deploy",
+    "db:studio": "prisma studio",
+    "db:seed": "node scripts/seed.mjs",
+    "db:backfill": "node scripts/backfill.mjs",
+    "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -24,7 +32,11 @@
     "react-dom": "^18.2.0",
     "react-square-web-payments-sdk": "^3.2.4-beta.1",
     "resend": "^6.0.1",
-    "square": "^43.0.1"
+    "square": "^43.0.1",
+    "@prisma/client": "^5.8.0",
+    "cloudinary": "^2.0.0",
+    "@sentry/nextjs": "^8.0.0",
+    "@vercel/analytics": "^1.0.0"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^15.5.0",
@@ -36,6 +48,7 @@
     "autoprefixer": "^10.4.19",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.4",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "prisma": "^5.8.0"
   }
 }
