@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { getImageUrls, getImageUrl, TRANSFORMATIONS } from '../lib/cloudinary'
 
 interface ImageCarouselProps {
   images: string[]
@@ -20,9 +21,10 @@ export default function ImageCarousel({
   const [currentIndex, setCurrentIndex] = useState(0)
   const [imageError, setImageError] = useState<Set<number>>(new Set())
 
-  // Filter out broken images - TEMPORARILY DISABLED FOR DEBUGGING
-  const validImages = images // Don't filter anything for now
-  const currentImage = validImages[currentIndex] || images[0]
+  // Process images through Cloudinary helpers
+  const processedImages = getImageUrls(images, TRANSFORMATIONS.PRODUCT_CARD)
+  const validImages = processedImages.filter((_, index) => !imageError.has(index))
+  const currentImage = validImages[currentIndex] || processedImages[0]
   
   
 
@@ -110,24 +112,28 @@ export default function ImageCarousel({
       {/* Thumbnail Navigation */}
       {showThumbnails && validImages.length > 1 && validImages.length <= 6 && (
         <div className="flex gap-2 mt-2 justify-center">
-          {validImages.map((image, index) => (
-            <button
-              key={index}
-              onClick={() => goToSlide(index)}
-              className={`w-12 h-12 rounded border-2 overflow-hidden transition-all ${
-                index === currentIndex 
-                  ? 'border-pop-purple shadow-md' 
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              <img
-                src={image}
-                alt={`${productName} thumbnail ${index + 1}`}
-                className="w-full h-full object-cover"
-                onError={() => handleImageError(index)}
-              />
-            </button>
-          ))}
+          {validImages.map((image, index) => {
+            // Use thumbnail transformation for thumbnails
+            const thumbnailUrl = getImageUrl(processedImages[index], TRANSFORMATIONS.PRODUCT_THUMBNAIL)
+            return (
+              <button
+                key={index}
+                onClick={() => goToSlide(index)}
+                className={`w-12 h-12 rounded border-2 overflow-hidden transition-all ${
+                  index === currentIndex 
+                    ? 'border-pop-purple shadow-md' 
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <img
+                  src={thumbnailUrl}
+                  alt={`${productName} thumbnail ${index + 1}`}
+                  className="w-full h-full object-cover"
+                  onError={() => handleImageError(index)}
+                />
+              </button>
+            )
+          })}
         </div>
       )}
 

@@ -1,0 +1,238 @@
+{
+  "version": "1.0.0",
+  "generated_at": "2025-08-21T22:50:35.050Z",
+  "total_images": 21,
+  "images": {
+    "/uploads/products/1755408423379_7047zn.jpeg": {
+      "original_url": "/uploads/products/1755408423379_7047zn.jpeg",
+      "cloudinary_public_id": "westcoast/products/migrated_1755408423379_7047zn",
+      "cloudinary_url": "https://res.cloudinary.com/dxnp1razh/image/upload/v1755816606/westcoast/products/migrated_1755408423379_7047zn.jpg",
+      "version": 1755816606,
+      "width": 720,
+      "height": 720,
+      "format": "jpg",
+      "bytes": 25575,
+      "uploaded_at": "2025-08-21T22:50:07.403Z"
+    },
+    "/uploads/products/1755409492777_sxmmv9.jpeg": {
+      "original_url": "/uploads/products/1755409492777_sxmmv9.jpeg",
+      "cloudinary_public_id": "westcoast/products/migrated_1755409492777_sxmmv9",
+      "cloudinary_url": "https://res.cloudinary.com/dxnp1razh/image/upload/v1755816607/westcoast/products/migrated_1755409492777_sxmmv9.jpg",
+      "version": 1755816607,
+      "width": 720,
+      "height": 720,
+      "format": "jpg",
+      "bytes": 15934,
+      "uploaded_at": "2025-08-21T22:50:08.283Z"
+    },
+    "/uploads/products/1755409505252_lg4md7.jpeg": {
+      "original_url": "/uploads/products/1755409505252_lg4md7.jpeg",
+      "cloudinary_public_id": "westcoast/products/migrated_1755409505252_lg4md7",
+      "cloudinary_url": "https://res.cloudinary.com/dxnp1razh/image/upload/v1755816608/westcoast/products/migrated_1755409505252_lg4md7.jpg",
+      "version": 1755816608,
+      "width": 720,
+      "height": 720,
+      "format": "jpg",
+      "bytes": 25575,
+      "uploaded_at": "2025-08-21T22:50:09.144Z"
+    },
+    "/uploads/products/1755409515276_cepwlc.jpeg": {
+      "original_url": "/uploads/products/1755409515276_cepwlc.jpeg",
+      "cloudinary_public_id": "westcoast/products/migrated_1755409515276_cepwlc",
+      "cloudinary_url": "https://res.cloudinary.com/dxnp1razh/image/upload/v1755816609/westcoast/products/migrated_1755409515276_cepwlc.jpg",
+      "version": 1755816609,
+      "width": 720,
+      "height": 720,
+      "format": "jpg",
+      "bytes": 15934,
+      "uploaded_at": "2025-08-21T22:50:10.065Z"
+    },
+    "/uploads/products/1755409521518_jqb0xn.jpeg": {
+      "original_url": "/uploads/products/1755409521518_jqb0xn.jpeg",
+      "cloudinary_public_id": "westcoast/products/migrated_1755409521518_jqb0xn",
+      "cloudinary_url": "https://res.cloudinary.com/dxnp1razh/image/upload/v1755816610/westcoast/products/migrated_1755409521518_jqb0xn.jpg",
+      "version": 1755816610,
+      "width": 720,
+      "height": 720,
+      "format": "jpg",
+      "bytes": 19299,
+      "uploaded_at": "2025-08-21T22:50:10.884Z"
+    },
+    "/uploads/products/1755409544517_ve9zyu.jpeg": {
+      "original_url": "/uploads/products/1755409544517_ve9zyu.jpeg",
+      "cloudinary_public_id": "westcoast/products/migrated_1755409544517_ve9zyu",
+      "cloudinary_url": "https://res.cloudinary.com/dxnp1razh/image/upload/v1755816611/westcoast/products/migrated_1755409544517_ve9zyu.jpg",
+      "version": 1755816611,
+      "width": 720,
+      "height": 720,
+      "format": "jpg",
+      "bytes": 26375,
+      "uploaded_at": "2025-08-21T22:50:11.495Z"
+    },
+    "/uploads/products/1755409571211_t7f9ma.jpeg": {
+      "original_url": "/uploads/products/1755409571211_t7f9ma.jpeg",
+      "cloudinary_public_id": "westcoast/products/migrated_1755409571211_t7f9ma",
+      "cloudinary_url": "https://res.cloudinary.com/dxnp1razh/image/upload/v1755816611/westcoast/products/migrated_1755409571211_t7f9ma.jpg",
+      "version": 1755816611,
+      "width": 720,
+      "height": 720,
+      "format": "jpg",
+      "bytes": 12996,
+      "uploaded_at": "2025-08-21T22:50:12.462Z"
+    },
+    "/uploads/products/1755410064569_7c7aqr.jpg": {
+      "original_url": "/uploads/products/1755410064569_7c7aqr.jpg",
+      "cloudinary_public_id": "westcoast/products/migrated_1755410064569_7c7aqr",
+      "cloudinary_url": "https://res.cloudinary.com/dxnp1razh/image/upload/v1755816612/westcoast/products/migrated_1755410064569_7c7aqr.jpg",
+      "version": 1755816612,
+      "width": 400,
+      "height": 400,
+      "format": "jpg",
+      "bytes": 30703,
+      "uploaded_at": "2025-08-21T22:50:13.447Z"
+    },
+    "/uploads/products/1755410089573_nmjnbe.jpg": {
+      "original_url": "/uploads/products/1755410089573_nmjnbe.jpg",
+      "cloudinary_public_id": "westcoast/products/migrated_1755410089573_nmjnbe",
+      "cloudinary_url": "https://res.cloudinary.com/dxnp1razh/image/upload/v1755816613/westcoast/products/migrated_1755410089573_nmjnbe.jpg",
+      "version": 1755816613,
+      "width": 1946,
+      "height": 1946,
+      "format": "jpg",
+      "bytes": 315730,
+      "uploaded_at": "2025-08-21T22:50:16.114Z"
+    },
+    "/uploads/products/1755410094962_oiuoj2.jpg": {
+      "original_url": "/uploads/products/1755410094962_oiuoj2.jpg",
+      "cloudinary_public_id": "westcoast/products/migrated_1755410094962_oiuoj2",
+      "cloudinary_url": "https://res.cloudinary.com/dxnp1razh/image/upload/v1755816616/westcoast/products/migrated_1755410094962_oiuoj2.jpg",
+      "version": 1755816616,
+      "width": 1920,
+      "height": 1920,
+      "format": "jpg",
+      "bytes": 186326,
+      "uploaded_at": "2025-08-21T22:50:17.233Z"
+    },
+    "/uploads/products/1755410113315_zx8ccj.jpg": {
+      "original_url": "/uploads/products/1755410113315_zx8ccj.jpg",
+      "cloudinary_public_id": "westcoast/products/migrated_1755410113315_zx8ccj",
+      "cloudinary_url": "https://res.cloudinary.com/dxnp1razh/image/upload/v1755816617/westcoast/products/migrated_1755410113315_zx8ccj.jpg",
+      "version": 1755816617,
+      "width": 1946,
+      "height": 1946,
+      "format": "jpg",
+      "bytes": 315730,
+      "uploaded_at": "2025-08-21T22:50:19.982Z"
+    },
+    "/uploads/products/1755410127003_0ohc93.jpg": {
+      "original_url": "/uploads/products/1755410127003_0ohc93.jpg",
+      "cloudinary_public_id": "westcoast/products/migrated_1755410127003_0ohc93",
+      "cloudinary_url": "https://res.cloudinary.com/dxnp1razh/image/upload/v1755816620/westcoast/products/migrated_1755410127003_0ohc93.jpg",
+      "version": 1755816620,
+      "width": 400,
+      "height": 400,
+      "format": "jpg",
+      "bytes": 40444,
+      "uploaded_at": "2025-08-21T22:50:21.431Z"
+    },
+    "/uploads/products/1755410513385_pindrg.jpg": {
+      "original_url": "/uploads/products/1755410513385_pindrg.jpg",
+      "cloudinary_public_id": "westcoast/products/migrated_1755410513385_pindrg",
+      "cloudinary_url": "https://res.cloudinary.com/dxnp1razh/image/upload/v1755816621/westcoast/products/migrated_1755410513385_pindrg.jpg",
+      "version": 1755816621,
+      "width": 1200,
+      "height": 1200,
+      "format": "jpg",
+      "bytes": 45878,
+      "uploaded_at": "2025-08-21T22:50:22.642Z"
+    },
+    "/uploads/products/1755410530703_rle4pa.jpg": {
+      "original_url": "/uploads/products/1755410530703_rle4pa.jpg",
+      "cloudinary_public_id": "westcoast/products/migrated_1755410530703_rle4pa",
+      "cloudinary_url": "https://res.cloudinary.com/dxnp1razh/image/upload/v1755816622/westcoast/products/migrated_1755410530703_rle4pa.jpg",
+      "version": 1755816622,
+      "width": 1200,
+      "height": 933,
+      "format": "jpg",
+      "bytes": 91156,
+      "uploaded_at": "2025-08-21T22:50:23.684Z"
+    },
+    "/uploads/products/1755410540856_lus2fv.jpg": {
+      "original_url": "/uploads/products/1755410540856_lus2fv.jpg",
+      "cloudinary_public_id": "westcoast/products/migrated_1755410540856_lus2fv",
+      "cloudinary_url": "https://res.cloudinary.com/dxnp1razh/image/upload/v1755816623/westcoast/products/migrated_1755410540856_lus2fv.jpg",
+      "version": 1755816623,
+      "width": 1200,
+      "height": 1200,
+      "format": "jpg",
+      "bytes": 110561,
+      "uploaded_at": "2025-08-21T22:50:24.848Z"
+    },
+    "/uploads/products/1755411404463_g0sf2e.webp": {
+      "original_url": "/uploads/products/1755411404463_g0sf2e.webp",
+      "cloudinary_public_id": "westcoast/products/migrated_1755411404463_g0sf2e",
+      "cloudinary_url": "https://res.cloudinary.com/dxnp1razh/image/upload/v1755816625/westcoast/products/migrated_1755411404463_g0sf2e.jpg",
+      "version": 1755816625,
+      "width": 1200,
+      "height": 1200,
+      "format": "jpg",
+      "bytes": 94326,
+      "uploaded_at": "2025-08-21T22:50:26.775Z"
+    },
+    "/uploads/products/1755411609620_dxml9x.png": {
+      "original_url": "/uploads/products/1755411609620_dxml9x.png",
+      "cloudinary_public_id": "westcoast/products/migrated_1755411609620_dxml9x",
+      "cloudinary_url": "https://res.cloudinary.com/dxnp1razh/image/upload/v1755816627/westcoast/products/migrated_1755411609620_dxml9x.jpg",
+      "version": 1755816627,
+      "width": 832,
+      "height": 1200,
+      "format": "jpg",
+      "bytes": 99884,
+      "uploaded_at": "2025-08-21T22:50:27.780Z"
+    },
+    "https://i.frg.im/CPrua0eq/406044552584-0.jpg": {
+      "original_url": "https://i.frg.im/CPrua0eq/406044552584-0.jpg",
+      "cloudinary_public_id": "westcoast/products/migrated_external_1755816628460_harqel",
+      "cloudinary_url": "https://res.cloudinary.com/dxnp1razh/image/upload/v1755816628/westcoast/products/migrated_external_1755816628460_harqel.jpg",
+      "version": 1755816628,
+      "width": 1200,
+      "height": 1600,
+      "format": "jpg",
+      "bytes": 145002,
+      "uploaded_at": "2025-08-21T22:50:29.622Z"
+    },
+    "https://i.frg.im/4ohSdXsh/406044552584-1.jpg": {
+      "original_url": "https://i.frg.im/4ohSdXsh/406044552584-1.jpg",
+      "cloudinary_public_id": "westcoast/products/migrated_external_1755816629963_ho4nj5",
+      "cloudinary_url": "https://res.cloudinary.com/dxnp1razh/image/upload/v1755816630/westcoast/products/migrated_external_1755816629963_ho4nj5.jpg",
+      "version": 1755816630,
+      "width": 1200,
+      "height": 1600,
+      "format": "jpg",
+      "bytes": 141128,
+      "uploaded_at": "2025-08-21T22:50:31.656Z"
+    },
+    "https://i.frg.im/XnLE00Uy/406076050752-0.jpg": {
+      "original_url": "https://i.frg.im/XnLE00Uy/406076050752-0.jpg",
+      "cloudinary_public_id": "westcoast/products/migrated_external_1755816631716_oicyav",
+      "cloudinary_url": "https://res.cloudinary.com/dxnp1razh/image/upload/v1755816632/westcoast/products/migrated_external_1755816631716_oicyav.jpg",
+      "version": 1755816632,
+      "width": 1200,
+      "height": 1600,
+      "format": "jpg",
+      "bytes": 124697,
+      "uploaded_at": "2025-08-21T22:50:33.487Z"
+    },
+    "https://i.frg.im/krku0uLJ/406076050752-1.jpg": {
+      "original_url": "https://i.frg.im/krku0uLJ/406076050752-1.jpg",
+      "cloudinary_public_id": "westcoast/products/migrated_external_1755816633735_9jlfr7",
+      "cloudinary_url": "https://res.cloudinary.com/dxnp1razh/image/upload/v1755816633/westcoast/products/migrated_external_1755816633735_9jlfr7.jpg",
+      "version": 1755816633,
+      "width": 1200,
+      "height": 1600,
+      "format": "jpg",
+      "bytes": 163759,
+      "uploaded_at": "2025-08-21T22:50:35.049Z"
+    }
+  }
+}

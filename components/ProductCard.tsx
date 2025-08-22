@@ -13,6 +13,7 @@ import WishlistButton from './WishlistButton'
 import AuthLightModal from './AuthLightModal'
 import { authService, AuthUser } from '../lib/auth-new'
 import { useCart } from '../lib/cart'
+import { getImageUrl, TRANSFORMATIONS } from '../lib/cloudinary'
 
 type Product = {
   id: string
@@ -112,7 +113,7 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
       id: product.id,
       name: product.name,
       price: product.price || 0,
-      image: product.image || undefined,
+      image: product.image ? getImageUrl(product.image, TRANSFORMATIONS.PRODUCT_THUMBNAIL) : undefined,
       weight: product.weight || 0.3
     })
     // Show cart confirmation popup
@@ -342,7 +343,7 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
         isOpen={showCartConfirmation}
         onClose={() => setShowCartConfirmation(false)}
         productName={product.name}
-        productImage={product.image || undefined}
+        productImage={product.image ? getImageUrl(product.image, TRANSFORMATIONS.PRODUCT_THUMBNAIL) : undefined}
         onContinueShopping={handleContinueShopping}
         onViewCart={handleViewCart}
       />

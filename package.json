@@ -22,7 +22,11 @@
     "db:studio": "prisma studio",
     "db:seed": "node scripts/seed.mjs",
     "db:backfill": "node scripts/backfill.mjs",
-    "smoke": "node scripts/smoke.mjs"
+    "smoke": "node scripts/smoke.mjs",
+    "migrate:images": "node scripts/migrate-images-to-cloudinary.mjs",
+    "verify:images": "node scripts/verify-cloudinary-images.mjs",
+    "test:images": "playwright test tests/cloudinary-images.spec.js",
+    "test:cloudinary-setup": "node scripts/test-cloudinary-setup.mjs"
   },
   "dependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -33,6 +37,7 @@
     "lucide-react": "^0.441.0",
     "next": "^14.2.5",
     "papaparse": "^5.5.3",
+    "glob": "^10.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-square-web-payments-sdk": "^3.2.4-beta.1",
