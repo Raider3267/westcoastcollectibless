@@ -87,8 +87,8 @@ export async function middleware(request: NextRequest) {
   // Get current user
   const user = await getCurrentUser(request)
   
-  // Handle admin route protection
-  if (ADMIN_ROUTES.some(route => pathname.startsWith(route))) {
+  // Handle admin route protection (except bypass)
+  if (ADMIN_ROUTES.some(route => pathname.startsWith(route)) && !pathname.startsWith('/admin-bypass')) {
     if (!user) {
       // Redirect to signin with return URL
       const signinUrl = new URL('/api/auth/signin', request.url)
