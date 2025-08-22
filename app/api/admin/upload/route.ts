@@ -44,11 +44,9 @@ export async function POST(request: NextRequest) {
         const result = await uploadImageToCloudinary(dataUri, {
           folder: FOLDERS.PRODUCTS,
           public_id: publicId,
-          resource_type: 'image',
-          transformation: [
-            { quality: 'auto:good' },
-            { fetch_format: 'auto' }
-          ]
+          resource_type: 'image' as const,
+          quality: 'auto:good',
+          fetch_format: 'auto'
         })
 
         uploadedFiles.push({
