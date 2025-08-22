@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
-import { AuthService } from '../lib/auth'
+import { authService as AuthService } from '../lib/auth-new'
 
 interface AuthModalProps {
   isOpen: boolean
@@ -27,9 +27,9 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
 
     try {
       if (mode === 'signup') {
-        await AuthService.signUp(email, password, name)
+        await AuthService.signUp({ email, password, name })
       } else {
-        await AuthService.signIn(email, password)
+        await AuthService.signIn({ email, password })
       }
       
       onAuthSuccess()
