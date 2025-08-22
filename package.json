@@ -37,7 +37,6 @@
     "lucide-react": "^0.441.0",
     "next": "^14.2.5",
     "papaparse": "^5.5.3",
-    "glob": "^10.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-square-web-payments-sdk": "^3.2.4-beta.1",
