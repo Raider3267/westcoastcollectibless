@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 export default function AdminLogin() {
-  const [credentials, setCredentials] = useState({ username: '', password: '' })
+  const [credentials, setCredentials] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
@@ -14,13 +14,36 @@ export default function AdminLogin() {
     setLoading(true)
     setError('')
 
-    // Simple authentication (you can enhance this later)
-    if (credentials.username === 'admin' && credentials.password === 'westcoast2025') {
-      // Store admin session
-      sessionStorage.setItem('adminAuth', 'authenticated')
-      router.push('/admin/dashboard')
-    } else {
-      setError('Invalid credentials')
+    try {
+      // Use proper email-based authentication
+      const response = await fetch('/api/auth/signin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: credentials.email,
+          password: credentials.password,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        // Check if user is admin by calling a check endpoint
+        const adminCheck = await fetch('/api/auth/me')
+        const adminData = await adminCheck.json()
+        
+        if (adminData.user && adminData.isAdmin) {
+          router.push('/admin/dashboard')
+        } else {
+          setError('Access denied. Admin privileges required.')
+        }
+      } else {
+        setError(data.error || 'Invalid credentials')
+      }
+    } catch (error) {
+      setError('Login failed. Please try again.')
     }
     
     setLoading(false)
@@ -42,14 +65,14 @@ export default function AdminLogin() {
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Username
+              Email
             </label>
             <input
-              type="text"
-              value={credentials.username}
-              onChange={(e) => setCredentials(prev => ({ ...prev, username: e.target.value }))}
+              type="email"
+              value={credentials.email}
+              onChange={(e) => setCredentials(prev => ({ ...prev, email: e.target.value }))}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pop-purple focus:border-transparent"
-              placeholder="Enter username"
+              placeholder="Enter your email"
               required
             />
           </div>
