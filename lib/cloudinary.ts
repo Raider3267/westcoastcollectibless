@@ -1,12 +1,17 @@
-import { v2 as cloudinary } from 'cloudinary'
-
-// Cloudinary configuration
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-  secure: true
-})
+// Only import cloudinary on server side
+let cloudinary: any
+if (typeof window === 'undefined') {
+  const { v2 } = require('cloudinary')
+  cloudinary = v2
+  
+  // Cloudinary configuration
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    secure: true
+  })
+}
 
 // Upload preset configurations for different image types
 export const UPLOAD_PRESETS = {
@@ -242,4 +247,5 @@ export function validateCloudinaryConfig(): boolean {
   return true
 }
 
+// Only export cloudinary on server side
 export { cloudinary }
