@@ -50,7 +50,10 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
     
     try {
       // Use predefined guest credentials
-      await AuthService.signIn('guest@westcoastcollectibles.com', 'guest123')
+      await AuthService.signIn({ 
+        email: 'guest@westcoastcollectibles.com', 
+        password: 'guest123' 
+      })
       onAuthSuccess()
       onClose()
     } catch (err) {
