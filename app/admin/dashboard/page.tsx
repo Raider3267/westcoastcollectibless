@@ -134,8 +134,10 @@ export default function AdminDashboard() {
   })
 
   useEffect(() => {
-    // Check authentication
-    if (typeof window !== 'undefined' && !sessionStorage.getItem('adminAuth')) {
+    // Check authentication (regular admin or temporary admin)
+    if (typeof window !== 'undefined' && 
+        !sessionStorage.getItem('adminAuth') && 
+        !sessionStorage.getItem('tempAdminAccess')) {
       router.push('/admin/login')
       return
     }
@@ -159,6 +161,8 @@ export default function AdminDashboard() {
 
   const logout = () => {
     sessionStorage.removeItem('adminAuth')
+    sessionStorage.removeItem('tempAdminAccess')
+    sessionStorage.removeItem('adminUser')
     router.push('/admin/login')
   }
 
