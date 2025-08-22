@@ -43,10 +43,7 @@ export async function POST(request: NextRequest) {
         // Upload to Cloudinary
         const result = await uploadImageToCloudinary(dataUri, {
           folder: FOLDERS.PRODUCTS,
-          public_id: publicId,
-          resource_type: 'image' as const,
-          quality: 'auto:good',
-          fetch_format: 'auto'
+          public_id: publicId
         })
 
         uploadedFiles.push({
