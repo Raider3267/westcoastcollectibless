@@ -42,8 +42,7 @@ export const PRODUCTS: Product[] = [
       }
     ],
     notes: [],
-    category: "Pop Mart",
-    cost: 0
+    category: "Pop Mart"
   },
   {
     id: "if-face0cea",
@@ -64,8 +63,7 @@ export const PRODUCTS: Product[] = [
       }
     ],
     notes: [],
-    category: "Pop Mart",
-    cost: 0
+    category: "Pop Mart"
   },
   {
     id: "if-5cf0b42e",
@@ -87,8 +85,7 @@ export const PRODUCTS: Product[] = [
       }
     ],
     notes: [],
-    category: "Collectibles",
-    cost: 0
+    category: "Collectibles"
   },
   {
     id: "if-eb0c6000",
@@ -111,8 +108,7 @@ export const PRODUCTS: Product[] = [
       }
     ],
     notes: [],
-    category: "Collectibles",
-    cost: 0
+    category: "Collectibles"
   },
   {
     id: "if-74699809",
@@ -130,8 +126,7 @@ export const PRODUCTS: Product[] = [
       }
     ],
     notes: [],
-    category: "Collectibles",
-    cost: 0
+    category: "Collectibles"
   },
   {
     id: "if-f277dc23",
@@ -149,8 +144,7 @@ export const PRODUCTS: Product[] = [
       }
     ],
     notes: [],
-    category: "Collectibles",
-    cost: 0
+    category: "Collectibles"
   },
   {
     id: "if-04bd2aa8",
@@ -173,8 +167,7 @@ export const PRODUCTS: Product[] = [
       }
     ],
     notes: [],
-    category: "Collectibles",
-    cost: 0
+    category: "Collectibles"
   },
   {
     id: "if-28cb01da",
@@ -196,8 +189,7 @@ export const PRODUCTS: Product[] = [
       }
     ],
     notes: [],
-    category: "Disney",
-    cost: 0
+    category: "Disney"
   },
   {
     id: "if-af2fde13",
@@ -219,8 +211,7 @@ export const PRODUCTS: Product[] = [
       }
     ],
     notes: [],
-    category: "Collectibles",
-    cost: 0
+    category: "Collectibles"
   },
   {
     id: "if-3247c15e",
@@ -243,8 +234,7 @@ export const PRODUCTS: Product[] = [
       }
     ],
     notes: [],
-    category: "Collectibles",
-    cost: 0
+    category: "Collectibles"
   },
   {
     id: "if-c052929c",
@@ -268,8 +258,7 @@ export const PRODUCTS: Product[] = [
       }
     ],
     notes: [],
-    category: "popmart",
-    cost: 0
+    category: "popmart"
   },
   {
     id: "if-cc08635b",
@@ -292,8 +281,7 @@ export const PRODUCTS: Product[] = [
       }
     ],
     notes: [],
-    category: "POPMART",
-    cost: 0
+    category: "POPMART"
   },
   {
     id: "if-e67a3264",
@@ -317,8 +305,7 @@ export const PRODUCTS: Product[] = [
       }
     ],
     notes: [],
-    category: "Collectibles",
-    cost: 0
+    category: "Collectibles"
   },
   {
     id: "if-23cb7d69",
@@ -341,8 +328,7 @@ export const PRODUCTS: Product[] = [
       }
     ],
     notes: [],
-    category: "Collectibles",
-    cost: 0
+    category: "Collectibles"
   },
   {
     id: "if-2b221f94",
@@ -368,8 +354,7 @@ export const PRODUCTS: Product[] = [
       }
     ],
     notes: [],
-    category: "Collectibles",
-    cost: 0
+    category: "Collectibles"
   },
   {
     id: "if-d5f941e7",
@@ -392,8 +377,7 @@ export const PRODUCTS: Product[] = [
       }
     ],
     notes: [],
-    category: "Collectibles",
-    cost: 0
+    category: "Collectibles"
   },
   {
     id: "if-e7a6475f",
@@ -411,8 +395,7 @@ export const PRODUCTS: Product[] = [
       }
     ],
     notes: [],
-    category: "Collectibles",
-    cost: 0
+    category: "Collectibles"
   },
   {
     id: "if-020f9042",
@@ -430,8 +413,7 @@ export const PRODUCTS: Product[] = [
       }
     ],
     notes: [],
-    category: "Collectibles",
-    cost: 0
+    category: "Collectibles"
   },
   {
     id: "if-b4c1478c",
@@ -449,8 +431,7 @@ export const PRODUCTS: Product[] = [
       }
     ],
     notes: [],
-    category: "Collectibles",
-    cost: 0
+    category: "Collectibles"
   },
   {
     id: "if-8eb14acd",
@@ -468,8 +449,7 @@ export const PRODUCTS: Product[] = [
       }
     ],
     notes: [],
-    category: "Collectibles",
-    cost: 0
+    category: "Collectibles"
   },
   {
     id: "if-65b3802a",
@@ -487,8 +467,7 @@ export const PRODUCTS: Product[] = [
       }
     ],
     notes: [],
-    category: "Collectibles",
-    cost: 0
+    category: "Collectibles"
   },
   {
     id: "if-0cefbeac",
@@ -506,8 +485,7 @@ export const PRODUCTS: Product[] = [
       }
     ],
     notes: [],
-    category: "Collectibles",
-    cost: 0
+    category: "Collectibles"
   },
   {
     id: "if-02295322",
@@ -525,8 +503,7 @@ export const PRODUCTS: Product[] = [
       }
     ],
     notes: [],
-    category: "Collectibles",
-    cost: 0
+    category: "Collectibles"
   },
   {
     id: "if-8a76ff44",
@@ -544,8 +521,7 @@ export const PRODUCTS: Product[] = [
       }
     ],
     notes: [],
-    category: "Collectibles",
-    cost: 0
+    category: "Collectibles"
   },
   {
     id: "if-82872b66",
@@ -563,8 +539,7 @@ export const PRODUCTS: Product[] = [
       }
     ],
     notes: [],
-    category: "Collectibles",
-    cost: 0
+    category: "Collectibles"
   },
   {
     id: "if-06e4288a",
@@ -582,8 +557,7 @@ export const PRODUCTS: Product[] = [
       }
     ],
     notes: [],
-    category: "Collectibles",
-    cost: 0
+    category: "Collectibles"
   },
   {
     id: "if-14a58083",
@@ -601,7 +575,6 @@ export const PRODUCTS: Product[] = [
       }
     ],
     notes: [],
-    category: "Collectibles",
-    cost: 0
+    category: "Collectibles"
   }
 ];
