@@ -263,6 +263,13 @@ export function validateCloudinaryConfig(): boolean {
     return false
   }
   
+  // Additional validation for cloud name format
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME
+  if (cloudName && !/^[a-zA-Z0-9_-]+$/.test(cloudName)) {
+    console.error('Invalid Cloudinary cloud name format')
+    return false
+  }
+  
   return true
 }
 

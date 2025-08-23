@@ -17,21 +17,34 @@ export default function ImageUpload({
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false)
   const [dragOver, setDragOver] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const [uploadSuccess, setUploadSuccess] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileSelect = async (files: FileList | null) => {
     if (!files) return
 
+    // Clear previous messages
+    setUploadError(null)
+    setUploadSuccess(null)
+
     const fileArray = Array.from(files)
     const imageFiles = fileArray.filter(file => file.type.startsWith('image/'))
     
     if (imageFiles.length === 0) {
-      alert('Please select only image files')
+      setUploadError('Please select only image files (JPG, PNG, GIF, WebP)')
       return
     }
 
     if (images.length + imageFiles.length > maxImages) {
-      alert(`Maximum ${maxImages} images allowed`)
+      setUploadError(`Maximum ${maxImages} images allowed. You can upload ${maxImages - images.length} more images.`)
+      return
+    }
+
+    // Check file sizes (limit to 10MB per file)
+    const oversizedFiles = imageFiles.filter(file => file.size > 10 * 1024 * 1024)
+    if (oversizedFiles.length > 0) {
+      setUploadError(`Some files are too large. Maximum file size is 10MB. Please compress your images and try again.`)
       return
     }
 
@@ -40,6 +53,9 @@ export default function ImageUpload({
 
   const uploadFiles = async (files: File[]) => {
     setUploading(true)
+    setUploadError(null)
+    setUploadSuccess(null)
+    
     try {
       const formData = new FormData()
       files.forEach(file => formData.append('files', file))
@@ -49,16 +65,38 @@ export default function ImageUpload({
         body: formData
       })
 
+      const result = await response.json()
+
       if (response.ok) {
-        const result = await response.json()
         const newImagePaths = result.files.map((file: any) => file.path)
         onChange([...images, ...newImagePaths])
+        setUploadSuccess(`Successfully uploaded ${files.length} image${files.length > 1 ? 's' : ''}!`)
+        
+        // Clear success message after 5 seconds
+        setTimeout(() => setUploadSuccess(null), 5000)
       } else {
-        alert('Failed to upload images')
+        // Handle different error types
+        if (response.status === 401) {
+          setUploadError('Authentication required. Please log in to the admin dashboard first.')
+        } else if (response.status === 403) {
+          setUploadError('Access denied. You need admin privileges to upload images.')
+        } else if (response.status === 413) {
+          setUploadError('Files too large. Please compress your images and try again.')
+        } else {
+          setUploadError(result.error || 'Failed to upload images. Please try again.')
+        }
       }
     } catch (error) {
       console.error('Upload error:', error)
-      alert('Failed to upload images')
+      if (error instanceof Error) {
+        if (error.name === 'NetworkError' || error.message.includes('fetch')) {
+          setUploadError('Network error. Please check your internet connection and try again.')
+        } else {
+          setUploadError(`Upload failed: ${error.message}`)
+        }
+      } else {
+        setUploadError('An unexpected error occurred. Please try again.')
+      }
     } finally {
       setUploading(false)
     }
@@ -91,11 +129,47 @@ export default function ImageUpload({
         Product Images ({images.length}/{maxImages})
       </label>
       
+      {/* Error Message */}
+      {uploadError && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="flex items-center">
+            <div className="text-red-500 text-xl mr-3">⚠️</div>
+            <div className="text-red-700 text-sm">{uploadError}</div>
+            <button
+              onClick={() => setUploadError(null)}
+              className="ml-auto text-red-500 hover:text-red-700"
+              aria-label="Dismiss error"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Success Message */}
+      {uploadSuccess && (
+        <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+          <div className="flex items-center">
+            <div className="text-green-500 text-xl mr-3">✅</div>
+            <div className="text-green-700 text-sm">{uploadSuccess}</div>
+            <button
+              onClick={() => setUploadSuccess(null)}
+              className="ml-auto text-green-500 hover:text-green-700"
+              aria-label="Dismiss success message"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Upload Area */}
       <div
         className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
           dragOver 
             ? 'border-pop-purple bg-pop-purple/5' 
+            : uploadError
+            ? 'border-red-300 bg-red-50/20'
             : 'border-gray-300 hover:border-gray-400'
         } ${uploading ? 'opacity-50 pointer-events-none' : ''}`}
         onDrop={handleDrop}
@@ -130,8 +204,13 @@ export default function ImageUpload({
               </button>
             </p>
             <p className="text-sm text-gray-500">
-              Supports JPG, PNG, GIF, WebP (Max {maxImages} images)
+              Supports JPG, PNG, GIF, WebP (Max {maxImages} images, 10MB per file)
             </p>
+            {uploadError && (
+              <p className="text-xs text-red-500 mt-2">
+                Please fix the error above and try again.
+              </p>
+            )}
           </div>
         )}
       </div>
