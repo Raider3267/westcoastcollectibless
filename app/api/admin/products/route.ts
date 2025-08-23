@@ -23,18 +23,25 @@ async function readCSV() {
 
 async function writeCSV(records: any[]) {
   try {
-    if (records.length === 0) return
+    console.log('Writing CSV with', records.length, 'records')
+    if (records.length === 0) {
+      console.log('No records to write, skipping')
+      return
+    }
     
     // Get column headers from first record
     const headers = Object.keys(records[0])
+    console.log('CSV headers:', headers.length, 'columns')
     
     // Convert records to CSV format
     const csvContent = stringify(records, { 
       header: true, 
       columns: headers 
     })
+    console.log('CSV content generated, length:', csvContent.length)
     
     await fs.writeFile(CSV_PATH, csvContent, 'utf-8')
+    console.log('CSV file written successfully')
   } catch (error) {
     console.error('Failed to write CSV:', error)
     throw error
@@ -95,12 +102,17 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
+    console.log('PUT /api/admin/products called')
     const body = await request.json()
+    console.log('Request body received:', JSON.stringify(body, null, 2))
     const { sku } = body
     
     if (!sku) {
+      console.error('No SKU provided in request body')
       return NextResponse.json({ error: 'SKU is required' }, { status: 400 })
     }
+    
+    console.log('Processing product update for SKU:', sku)
     
     const products = await readCSV()
     const productIndex = products.findIndex((product: any) => product.sku === sku)
@@ -130,13 +142,19 @@ export async function PUT(request: NextRequest) {
       limited_edition: (body.limited_edition === true || body.limited_edition === 'true' || body.limited_edition === 1 || body.limited_edition === '1') ? 'true' : 'false'
     }
     products[productIndex] = updatedProduct
+    console.log('Updated product in array, writing to CSV...')
     
     await writeCSV(products)
+    console.log('CSV write completed, returning success response')
     
     return NextResponse.json({ success: true, product: updatedProduct })
   } catch (error) {
     console.error('PUT /api/admin/products error:', error)
-    return NextResponse.json({ error: 'Failed to update product' }, { status: 500 })
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
+    return NextResponse.json({ 
+      error: 'Failed to update product', 
+      details: error instanceof Error ? error.message : String(error) 
+    }, { status: 500 })
   }
 }
 

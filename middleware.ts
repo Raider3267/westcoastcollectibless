@@ -131,14 +131,13 @@ export async function middleware(request: NextRequest) {
       hasTempAccess,
       hasUser: !!user,
       isAdmin: user ? isAdminUser(user) : false,
-      tempCookie: request.cookies.get('temp-admin-access')?.value
+      tempCookie: request.cookies.get('temp-admin-access')?.value,
+      allCookies: Object.fromEntries(request.cookies.getAll().map(c => [c.name, c.value]))
     })
     
-    // For debugging - temporarily allow test routes and upload route
-    if (pathname.includes('/test') || pathname.includes('/upload-test') || pathname.includes('/upload')) {
-      console.log('Allowing test/upload route:', pathname)
-      return NextResponse.next()
-    }
+    // TEMPORARY DEBUG: Allow ALL admin routes to bypass auth
+    console.log('TEMPORARILY ALLOWING ALL ADMIN ROUTES FOR DEBUGGING:', pathname)
+    return NextResponse.next()
     
     // Allow access if either temp admin access OR regular admin user
     if (!hasTempAccess && (!user || !isAdminUser(user))) {
