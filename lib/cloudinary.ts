@@ -78,23 +78,23 @@ export async function uploadImageToCloudinary(
     transformation?: string
   } = {}
 ): Promise<CloudinaryAsset> {
+  const uploadOptions: any = {
+    folder: options.folder || FOLDERS.PRODUCTS,
+    resource_type: 'image' as const,
+    use_filename: true,
+    unique_filename: true,
+    overwrite: false,
+    quality: 'auto',
+    fetch_format: 'auto',
+    ...options
+  }
+
+  // Only include upload_preset if specifically provided and not undefined
+  if (options.upload_preset !== undefined) {
+    uploadOptions.upload_preset = options.upload_preset
+  }
+
   try {
-    const uploadOptions: any = {
-      folder: options.folder || FOLDERS.PRODUCTS,
-      resource_type: 'image' as const,
-      use_filename: true,
-      unique_filename: true,
-      overwrite: false,
-      quality: 'auto',
-      fetch_format: 'auto',
-      ...options
-    }
-
-    // Only include upload_preset if specifically provided and not undefined
-    if (options.upload_preset !== undefined) {
-      uploadOptions.upload_preset = options.upload_preset
-    }
-
     console.log('Uploading to Cloudinary with options:', {
       folder: uploadOptions.folder,
       public_id: uploadOptions.public_id,
