@@ -21,7 +21,10 @@ function QuickAdminContent() {
       }))
       
       // Set cookie for middleware to recognize
-      document.cookie = 'temp-admin-access=true; path=/; max-age=86400' // 24 hours
+      document.cookie = 'temp-admin-access=true; path=/; max-age=86400; SameSite=Lax' // 24 hours
+      
+      // Debug: Check if cookie was set
+      console.log('Cookie set, current cookies:', document.cookie)
       
       // Redirect to admin dashboard
       router.replace('/admin/dashboard')

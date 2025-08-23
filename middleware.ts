@@ -134,9 +134,9 @@ export async function middleware(request: NextRequest) {
       tempCookie: request.cookies.get('temp-admin-access')?.value
     })
     
-    // For debugging - temporarily allow test routes
-    if (pathname.includes('/test') || pathname.includes('/upload-test')) {
-      console.log('Allowing test route:', pathname)
+    // For debugging - temporarily allow test routes and upload route
+    if (pathname.includes('/test') || pathname.includes('/upload-test') || pathname.includes('/upload')) {
+      console.log('Allowing test/upload route:', pathname)
       return NextResponse.next()
     }
     
