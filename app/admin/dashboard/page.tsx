@@ -827,19 +827,30 @@ export default function AdminDashboard() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Price</label>
                     <input
-                      type="number"
-                      step="0.01"
+                      type="text"
+                      inputMode="decimal"
                       value={editingProduct.price || ''}
-                      onChange={(e) => setEditingProduct(prev => prev ? {...prev, price: e.target.value ? parseFloat(e.target.value) : undefined} : null)}
+                      onChange={(e) => {
+                        const value = e.target.value
+                        if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                          setEditingProduct(prev => prev ? {...prev, price: value ? parseFloat(value) : undefined} : null)
+                        }
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
                     <input
-                      type="number"
+                      type="text"
+                      inputMode="numeric"
                       value={editingProduct.quantity || ''}
-                      onChange={(e) => setEditingProduct(prev => prev ? {...prev, quantity: e.target.value ? parseInt(e.target.value) : 0} : null)}
+                      onChange={(e) => {
+                        const value = e.target.value
+                        if (value === '' || /^\d+$/.test(value)) {
+                          setEditingProduct(prev => prev ? {...prev, quantity: value ? parseInt(value) : 0} : null)
+                        }
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
                     />
                   </div>
@@ -852,10 +863,15 @@ export default function AdminDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Weight (lbs)</label>
                       <input
-                        type="number"
-                        step="0.1"
+                        type="text"
+                        inputMode="decimal"
                         value={editingProduct.weight || ''}
-                        onChange={(e) => setEditingProduct(prev => prev ? {...prev, weight: e.target.value ? parseFloat(e.target.value) : 0.3} : null)}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                            setEditingProduct(prev => prev ? {...prev, weight: value ? parseFloat(value) : undefined} : null)
+                          }
+                        }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
                         placeholder="0.3"
                       />
@@ -863,10 +879,15 @@ export default function AdminDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Length (in)</label>
                       <input
-                        type="number"
-                        step="0.1"
+                        type="text"
+                        inputMode="decimal"
                         value={editingProduct.length || ''}
-                        onChange={(e) => setEditingProduct(prev => prev ? {...prev, length: e.target.value ? parseFloat(e.target.value) : 4} : null)}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                            setEditingProduct(prev => prev ? {...prev, length: value ? parseFloat(value) : undefined} : null)
+                          }
+                        }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
                         placeholder="4"
                       />
@@ -874,10 +895,15 @@ export default function AdminDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Width (in)</label>
                       <input
-                        type="number"
-                        step="0.1"
+                        type="text"
+                        inputMode="decimal"
                         value={editingProduct.width || ''}
-                        onChange={(e) => setEditingProduct(prev => prev ? {...prev, width: e.target.value ? parseFloat(e.target.value) : 3} : null)}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                            setEditingProduct(prev => prev ? {...prev, width: value ? parseFloat(value) : undefined} : null)
+                          }
+                        }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
                         placeholder="3"
                       />
@@ -885,10 +911,15 @@ export default function AdminDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Height (in)</label>
                       <input
-                        type="number"
-                        step="0.1"
+                        type="text"
+                        inputMode="decimal"
                         value={editingProduct.height || ''}
-                        onChange={(e) => setEditingProduct(prev => prev ? {...prev, height: e.target.value ? parseFloat(e.target.value) : 5} : null)}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                            setEditingProduct(prev => prev ? {...prev, height: value ? parseFloat(value) : undefined} : null)
+                          }
+                        }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
                         placeholder="5"
                       />
@@ -909,10 +940,15 @@ export default function AdminDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Purchase Cost</label>
                       <input
-                        type="number"
-                        step="0.01"
+                        type="text"
+                        inputMode="decimal"
                         value={editingProduct.purchase_cost || ''}
-                        onChange={(e) => setEditingProduct(prev => prev ? {...prev, purchase_cost: e.target.value ? parseFloat(e.target.value) : undefined} : null)}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                            setEditingProduct(prev => prev ? {...prev, purchase_cost: value ? parseFloat(value) : undefined} : null)
+                          }
+                        }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
                         placeholder="0.00"
                       />
@@ -920,10 +956,15 @@ export default function AdminDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Shipping Cost</label>
                       <input
-                        type="number"
-                        step="0.01"
+                        type="text"
+                        inputMode="decimal"
                         value={editingProduct.shipping_cost || ''}
-                        onChange={(e) => setEditingProduct(prev => prev ? {...prev, shipping_cost: e.target.value ? parseFloat(e.target.value) : undefined} : null)}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                            setEditingProduct(prev => prev ? {...prev, shipping_cost: value ? parseFloat(value) : undefined} : null)
+                          }
+                        }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
                         placeholder="0.00"
                       />
@@ -1243,10 +1284,15 @@ export default function AdminDashboard() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Price *</label>
                     <input
-                      type="number"
-                      step="0.01"
+                      type="text"
+                      inputMode="decimal"
                       value={newProduct.price || ''}
-                      onChange={(e) => setNewProduct(prev => ({...prev, price: e.target.value ? parseFloat(e.target.value) : undefined}))}
+                      onChange={(e) => {
+                        const value = e.target.value
+                        if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                          setNewProduct(prev => ({...prev, price: value ? parseFloat(value) : undefined}))
+                        }
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
                       required
                     />
@@ -1277,11 +1323,16 @@ export default function AdminDashboard() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Quantity *</label>
                     <input
-                      type="number"
+                      type="text"
+                      inputMode="numeric"
                       value={newProduct.quantity || ''}
-                      onChange={(e) => setNewProduct(prev => ({...prev, quantity: e.target.value ? parseInt(e.target.value) : 1}))}
+                      onChange={(e) => {
+                        const value = e.target.value
+                        if (value === '' || /^\d+$/.test(value)) {
+                          setNewProduct(prev => ({...prev, quantity: value ? parseInt(value) : 0}))
+                        }
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
-                      min="0"
                       required
                     />
                   </div>
@@ -1294,10 +1345,15 @@ export default function AdminDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Weight (lbs)</label>
                       <input
-                        type="number"
-                        step="0.1"
+                        type="text"
+                        inputMode="decimal"
                         value={newProduct.weight || ''}
-                        onChange={(e) => setNewProduct(prev => ({...prev, weight: e.target.value ? parseFloat(e.target.value) : 0.3}))}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                            setNewProduct(prev => ({...prev, weight: value ? parseFloat(value) : undefined}))
+                          }
+                        }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
                         placeholder="0.3"
                       />
@@ -1305,10 +1361,15 @@ export default function AdminDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Length (in)</label>
                       <input
-                        type="number"
-                        step="0.1"
+                        type="text"
+                        inputMode="decimal"
                         value={newProduct.length || ''}
-                        onChange={(e) => setNewProduct(prev => ({...prev, length: e.target.value ? parseFloat(e.target.value) : 4}))}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                            setNewProduct(prev => ({...prev, length: value ? parseFloat(value) : undefined}))
+                          }
+                        }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
                         placeholder="4"
                       />
@@ -1316,10 +1377,15 @@ export default function AdminDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Width (in)</label>
                       <input
-                        type="number"
-                        step="0.1"
+                        type="text"
+                        inputMode="decimal"
                         value={newProduct.width || ''}
-                        onChange={(e) => setNewProduct(prev => ({...prev, width: e.target.value ? parseFloat(e.target.value) : 3}))}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                            setNewProduct(prev => ({...prev, width: value ? parseFloat(value) : undefined}))
+                          }
+                        }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
                         placeholder="3"
                       />
@@ -1327,10 +1393,15 @@ export default function AdminDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Height (in)</label>
                       <input
-                        type="number"
-                        step="0.1"
+                        type="text"
+                        inputMode="decimal"
                         value={newProduct.height || ''}
-                        onChange={(e) => setNewProduct(prev => ({...prev, height: e.target.value ? parseFloat(e.target.value) : 5}))}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                            setNewProduct(prev => ({...prev, height: value ? parseFloat(value) : undefined}))
+                          }
+                        }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
                         placeholder="5"
                       />
@@ -1351,10 +1422,15 @@ export default function AdminDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Purchase Cost</label>
                       <input
-                        type="number"
-                        step="0.01"
+                        type="text"
+                        inputMode="decimal"
                         value={newProduct.purchase_cost || ''}
-                        onChange={(e) => setNewProduct(prev => ({...prev, purchase_cost: e.target.value ? parseFloat(e.target.value) : undefined}))}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                            setNewProduct(prev => ({...prev, purchase_cost: value ? parseFloat(value) : undefined}))
+                          }
+                        }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
                         placeholder="0.00"
                       />
@@ -1362,10 +1438,15 @@ export default function AdminDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Shipping Cost</label>
                       <input
-                        type="number"
-                        step="0.01"
+                        type="text"
+                        inputMode="decimal"
                         value={newProduct.shipping_cost || ''}
-                        onChange={(e) => setNewProduct(prev => ({...prev, shipping_cost: e.target.value ? parseFloat(e.target.value) : undefined}))}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                            setNewProduct(prev => ({...prev, shipping_cost: value ? parseFloat(value) : undefined}))
+                          }
+                        }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pop-purple focus:border-transparent"
                         placeholder="0.00"
                       />
