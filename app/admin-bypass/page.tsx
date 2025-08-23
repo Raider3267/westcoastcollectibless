@@ -16,19 +16,27 @@ export default function AdminBypass() {
 
     // Simple password check for temporary admin access
     if (password === 'westcoast2025admin') {
-      // Set temporary admin session
-      sessionStorage.setItem('tempAdminAccess', 'true')
-      sessionStorage.setItem('adminUser', JSON.stringify({
-        email: 'jaydenreyes32@icloud.com',
-        name: 'Jayden Reyes',
-        isAdmin: true
-      }))
-      router.push('/admin/dashboard')
+      try {
+        // Set temporary admin session
+        sessionStorage.setItem('tempAdminAccess', 'true')
+        sessionStorage.setItem('adminUser', JSON.stringify({
+          email: 'jaydenreyes32@icloud.com',
+          name: 'Jayden Reyes',
+          isAdmin: true
+        }))
+        
+        // Small delay to ensure sessionStorage is set
+        setTimeout(() => {
+          router.push('/admin/dashboard')
+        }, 100)
+      } catch (error) {
+        setError('Failed to set admin session')
+        setLoading(false)
+      }
     } else {
       setError('Invalid admin password')
+      setLoading(false)
     }
-    
-    setLoading(false)
   }
 
   return (
