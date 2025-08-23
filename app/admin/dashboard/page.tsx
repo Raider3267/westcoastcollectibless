@@ -135,15 +135,22 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     // Check authentication (regular admin or temporary admin)
-    if (typeof window !== 'undefined' && 
-        !sessionStorage.getItem('adminAuth') && 
-        !sessionStorage.getItem('tempAdminAccess')) {
-      router.push('/admin/login')
-      return
+    if (typeof window !== 'undefined') {
+      const hasAuth = sessionStorage.getItem('adminAuth') || sessionStorage.getItem('tempAdminAccess')
+      if (!hasAuth) {
+        // Use window.location to avoid React router issues
+        window.location.href = '/admin-bypass'
+        return
+      }
     }
     
-    loadProducts()
-  }, [router])
+    // Small delay to ensure the page is fully loaded
+    const timer = setTimeout(() => {
+      loadProducts()
+    }, 100)
+    
+    return () => clearTimeout(timer)
+  }, [])
 
   const loadProducts = async () => {
     try {
@@ -406,11 +413,17 @@ export default function AdminDashboard() {
           </div>
           <div className="flex items-center gap-4">
             <button
-              onClick={() => router.push('/admin/purchases')}
+              onClick={() => window.location.href = '/admin/purchases'}
               className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
             >
               📦 Purchase Management
             </button>
+            <a
+              href="/admin/purchases"
+              className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors no-underline"
+            >
+              📋 Orders (Direct Link)
+            </a>
             <button
               onClick={toggleNewReleasesSection}
               className={`px-4 py-2 rounded-lg transition-colors font-medium text-sm ${

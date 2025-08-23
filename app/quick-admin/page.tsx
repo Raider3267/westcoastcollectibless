@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-export default function QuickAdmin() {
+function QuickAdminContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -19,6 +19,9 @@ export default function QuickAdmin() {
         name: 'Jayden Reyes',
         isAdmin: true
       }))
+      
+      // Set cookie for middleware to recognize
+      document.cookie = 'temp-admin-access=true; path=/; max-age=86400' // 24 hours
       
       // Redirect to admin dashboard
       router.replace('/admin/dashboard')
@@ -42,5 +45,13 @@ export default function QuickAdmin() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function QuickAdmin() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <QuickAdminContent />
+    </Suspense>
   )
 }

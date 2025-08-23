@@ -37,6 +37,12 @@ export async function POST(request: Request) {
     // Create session
     const session = await createSession(user.id)
     
+    // Determine user roles (admin check for specific email)
+    const roles: string[] = []
+    if (user.email === 'jaydenreyes32@icloud.com') {
+      roles.push('admin')
+    }
+    
     // Set session cookie
     const response = NextResponse.json({
       user: {
@@ -44,7 +50,8 @@ export async function POST(request: Request) {
         email: user.email,
         name: user.name,
         email_verified: user.email_verified_at !== null,
-        marketing_opt_in: user.marketing_opt_in
+        marketing_opt_in: user.marketing_opt_in,
+        roles: roles
       }
     })
     

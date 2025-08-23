@@ -17,7 +17,7 @@ export async function getFeaturedProducts(filename = 'export.csv'): Promise<List
     
     // Legacy: any live status product that's marked as featured
     return product.status === 'live'
-  }).slice(0, 4) // Max 4 products
+  }).slice(0, 3) // Max 3 products
 }
 
 export async function getInStockProducts(filename = 'export.csv'): Promise<Listing[]> {

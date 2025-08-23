@@ -26,6 +26,24 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
     setLoading(true)
 
     try {
+      // Check for admin credentials first
+      if (email === 'jaydenreyes32@icloud.com' && password === 'westcoast2025') {
+        // Set admin session
+        sessionStorage.setItem('tempAdminAccess', 'true')
+        sessionStorage.setItem('adminUser', JSON.stringify({
+          email: 'jaydenreyes32@icloud.com',
+          name: 'Jayden Reyes',
+          isAdmin: true
+        }))
+        
+        // Set cookie for middleware
+        document.cookie = 'temp-admin-access=true; path=/; max-age=86400' // 24 hours
+        
+        // Redirect to admin dashboard
+        window.location.href = '/admin/dashboard'
+        return
+      }
+      
       if (mode === 'signup') {
         await AuthService.signUp({ email, password, name })
       } else {

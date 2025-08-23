@@ -66,8 +66,10 @@ export default function PurchasesPage() {
   }))
 
   useEffect(() => {
-    // Check authentication
-    if (typeof window !== 'undefined' && !sessionStorage.getItem('adminAuth')) {
+    // Check authentication (regular admin or temporary admin)
+    if (typeof window !== 'undefined' && 
+        !sessionStorage.getItem('adminAuth') && 
+        !sessionStorage.getItem('tempAdminAccess')) {
       router.push('/admin/login')
       return
     }

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Access Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 400px; margin: 50px auto; padding: 20px; }
+        .form-group { margin: 15px 0; }
+        label { display: block; margin-bottom: 5px; }
+        input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        button { width: 100%; padding: 10px; background: #007cba; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #005a8b; }
+    </style>
+</head>
+<body>
+    <h2>Admin Access Test</h2>
+    <form id="adminForm">
+        <div class="form-group">
+            <label for="password">Admin Password:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <button type="submit">Access Dashboard</button>
+    </form>
+
+    <script>
+        document.getElementById('adminForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const password = document.getElementById('password').value;
+            
+            if (password === 'westcoast2025admin') {
+                // Set session storage
+                sessionStorage.setItem('tempAdminAccess', 'true');
+                sessionStorage.setItem('adminUser', JSON.stringify({
+                    email: 'jaydenreyes32@icloud.com',
+                    name: 'Jayden Reyes',
+                    isAdmin: true
+                }));
+                
+                // Set cookie
+                document.cookie = 'temp-admin-access=true; path=/; max-age=86400';
+                
+                // Redirect to dashboard
+                window.location.href = '/admin/dashboard';
+            } else {
+                alert('Invalid password');
+            }
+        });
+    </script>
+</body>
+</html>

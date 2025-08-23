@@ -1,13 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 
 export default function AdminBypass() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
 
   const handleAccess = (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,10 +23,11 @@ export default function AdminBypass() {
           isAdmin: true
         }))
         
-        // Small delay to ensure sessionStorage is set
-        setTimeout(() => {
-          router.push('/admin/dashboard')
-        }, 100)
+        // Set cookie for middleware to recognize
+        document.cookie = 'temp-admin-access=true; path=/; max-age=86400' // 24 hours
+        
+        // Use window.location instead of router to avoid React navigation issues
+        window.location.href = '/admin/dashboard'
       } catch (error) {
         setError('Failed to set admin session')
         setLoading(false)

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase Orders Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 20px auto; padding: 20px; }
+        .order { border: 1px solid #ddd; margin: 10px 0; padding: 15px; border-radius: 5px; }
+        .order-header { font-weight: bold; font-size: 18px; margin-bottom: 10px; }
+        .items { margin-top: 10px; }
+        .item { background: #f5f5f5; padding: 8px; margin: 5px 0; border-radius: 3px; }
+        button { background: #007cba; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #005a8b; }
+        .error { color: red; }
+        .loading { color: #666; }
+    </style>
+</head>
+<body>
+    <h1>Purchase Orders Test</h1>
+    <button onclick="loadOrders()">Load Purchase Orders</button>
+    <div id="status"></div>
+    <div id="orders"></div>
+
+    <script>
+        // Set admin cookie for testing
+        document.cookie = 'temp-admin-access=true; path=/; max-age=86400';
+        
+        async function loadOrders() {
+            const status = document.getElementById('status');
+            const orders = document.getElementById('orders');
+            
+            status.innerHTML = '<div class="loading">Loading...</div>';
+            orders.innerHTML = '';
+            
+            try {
+                const response = await fetch('/api/admin/purchase-orders', {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                status.innerHTML = `<div>✅ Loaded ${data.purchase_orders.length} purchase orders</div>`;
+                
+                data.purchase_orders.forEach(order => {
+                    const orderDiv = document.createElement('div');
+                    orderDiv.className = 'order';
+                    
+                    const items = order.items || [];
+                    const itemsHtml = items.map(item => 
+                        `<div class="item">
+                            ${item.product_name} - Qty: ${item.quantity} - Cost: $${item.unit_cost}
+                        </div>`
+                    ).join('');
+                    
+                    orderDiv.innerHTML = `
+                        <div class="order-header">
+                            Order ${order.id} - ${order.supplier} - ${order.purchase_date}
+                        </div>
+                        <div>Status: ${order.status}</div>
+                        <div>Total Cost: $${order.total_cost}</div>
+                        <div class="items">
+                            <strong>Items:</strong>
+                            ${itemsHtml}
+                        </div>
+                    `;
+                    
+                    orders.appendChild(orderDiv);
+                });
+                
+            } catch (error) {
+                status.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+                console.error('Error loading orders:', error);
+            }
+        }
+        
+        // Auto-load on page load
+        window.addEventListener('load', loadOrders);
+    </script>
+</body>
+</html>

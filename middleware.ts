@@ -46,6 +46,13 @@ async function getCurrentUser(request: NextRequest) {
   }
 }
 
+// Check for temporary admin access (client-side bypass)
+function hasTempAdminAccess(request: NextRequest): boolean {
+  // Since we can't access sessionStorage from middleware, we'll use a cookie approach
+  const tempAdminCookie = request.cookies.get('temp-admin-access')?.value
+  return tempAdminCookie === 'true'
+}
+
 // Check if user is admin based on email
 function isAdminUser(user: any): boolean {
   if (!user || !user.email) {
@@ -91,14 +98,17 @@ export async function middleware(request: NextRequest) {
   if (ADMIN_ROUTES.some(route => pathname.startsWith(route)) && 
       !pathname.startsWith('/admin-bypass') && 
       !pathname.startsWith('/quick-admin')) {
-    if (!user) {
-      // Redirect to signin with return URL
-      const signinUrl = new URL('/api/auth/signin', request.url)
-      signinUrl.searchParams.set('callbackUrl', pathname)
-      return NextResponse.redirect(signinUrl)
+    
+    // Check for temporary admin access first
+    const hasTempAccess = hasTempAdminAccess(request)
+    
+    if (!user && !hasTempAccess) {
+      // Redirect to admin login page instead of API endpoint
+      const loginUrl = new URL('/admin-bypass', request.url)
+      return NextResponse.redirect(loginUrl)
     }
     
-    if (!isAdminUser(user)) {
+    if (!hasTempAccess && !isAdminUser(user)) {
       // Non-admin users get redirected to home with error
       const homeUrl = new URL('/', request.url)
       homeUrl.searchParams.set('error', 'unauthorized')
@@ -106,21 +116,24 @@ export async function middleware(request: NextRequest) {
     }
     
     // Admin user accessing /admin/login while authenticated -> redirect to dashboard
-    if (pathname === '/admin/login' && user) {
+    if (pathname === '/admin/login' && (user || hasTempAccess)) {
       return NextResponse.redirect(new URL('/admin/dashboard', request.url))
     }
   }
   
   // Handle admin API route protection
   if (ADMIN_API_ROUTES.some(route => pathname.startsWith(route))) {
-    if (!user) {
+    // Check for temporary admin access first
+    const hasTempAccess = hasTempAdminAccess(request)
+    
+    if (!user && !hasTempAccess) {
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
       )
     }
     
-    if (!isAdminUser(user)) {
+    if (!hasTempAccess && !isAdminUser(user)) {
       return NextResponse.json(
         { error: 'Admin access required' },
         { status: 403 }
