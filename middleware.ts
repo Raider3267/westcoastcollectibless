@@ -126,14 +126,17 @@ export async function middleware(request: NextRequest) {
     // Check for temporary admin access first
     const hasTempAccess = hasTempAdminAccess(request)
     
-    if (!user && !hasTempAccess) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      )
-    }
+    // Debug logging
+    console.log('Admin API Route:', pathname, {
+      hasTempAccess,
+      hasUser: !!user,
+      isAdmin: user ? isAdminUser(user) : false,
+      cookies: Object.fromEntries(request.cookies.getAll().map(c => [c.name, c.value]))
+    })
     
-    if (!hasTempAccess && !isAdminUser(user)) {
+    // Allow access if either temp admin access OR regular admin user
+    if (!hasTempAccess && (!user || !isAdminUser(user))) {
+      console.log('Admin access denied:', { hasTempAccess, user, isAdmin: user ? isAdminUser(user) : false })
       return NextResponse.json(
         { error: 'Admin access required' },
         { status: 403 }
