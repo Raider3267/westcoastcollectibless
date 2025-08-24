@@ -231,26 +231,6 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
           </div>
         )}
         
-        {/* Featured badge */}
-        {product.featured && (
-          <div className="luxury-badge featured" style={{
-            position: 'absolute',
-            top: '12px',
-            left: '12px',
-            zIndex: 15,
-            background: 'rgba(255, 215, 0, 0.9)',
-            color: '#000',
-            padding: '4px 8px',
-            borderRadius: '999px',
-            fontSize: '0.7rem',
-            fontWeight: 700,
-            backdropFilter: 'blur(4px)',
-            border: '2px solid white',
-            boxShadow: '0 4px 12px rgba(255, 215, 0, 0.3)'
-          }}>
-            ⭐ FEATURED
-          </div>
-        )}
         
         <div className="product-thumb wcc-thumb" style={{ position: 'relative' }}>
 
