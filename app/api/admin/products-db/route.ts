@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import { getPrismaClient } from '../../../../lib/database'
 
 export async function GET() {
   try {
+    const prisma = getPrismaClient()
+    if (!prisma) {
+      console.log('Database not available, returning empty array')
+      return NextResponse.json([])
+    }
+    
     const products = await prisma.product.findMany({
       orderBy: { createdAt: 'desc' }
     })
@@ -53,6 +57,11 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
+    const prisma = getPrismaClient()
+    if (!prisma) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 503 })
+    }
+    
     const body = await request.json()
     const { sku } = body
     
@@ -123,6 +132,11 @@ export async function PUT(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const prisma = getPrismaClient()
+    if (!prisma) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 503 })
+    }
+    
     const body = await request.json()
     const { sku, title } = body
     
@@ -189,6 +203,11 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    const prisma = getPrismaClient()
+    if (!prisma) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 503 })
+    }
+    
     const body = await request.json()
     const { sku } = body
     

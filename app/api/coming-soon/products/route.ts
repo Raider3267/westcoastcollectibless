@@ -1,10 +1,14 @@
 import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import { getPrismaClient } from '../../../../lib/database'
 
 export async function GET() {
   try {
+    const prisma = getPrismaClient()
+    if (!prisma) {
+      console.log('Database not available, returning empty array')
+      return NextResponse.json([])
+    }
+    
     // Get coming-soon products for the preview section
     const products = await prisma.product.findMany({
       where: { 

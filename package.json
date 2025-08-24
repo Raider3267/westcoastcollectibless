@@ -7,9 +7,9 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
-    "postinstall": "next telemetry disable",
+    "postinstall": "prisma generate && next telemetry disable",
     "lint": "next lint",
     "analyze": "ANALYZE=true npm run build",
     "lighthouse": "npx lighthouse http://localhost:3000 --output json --output html --output-path ./lighthouse-report",
