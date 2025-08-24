@@ -54,7 +54,14 @@ export async function GET() {
       }
     })
     
-    return NextResponse.json(formattedProducts)
+    const response = NextResponse.json(formattedProducts)
+    
+    // Add cache-busting headers
+    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
+    response.headers.set('Pragma', 'no-cache')
+    response.headers.set('Expires', '0')
+    
+    return response
   } catch (error) {
     console.error('Error fetching in-stock products:', error)
     return NextResponse.json([])
