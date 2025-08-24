@@ -102,6 +102,15 @@ export async function PUT(request: NextRequest) {
     if (body.showInLimitedEditions !== undefined) updateData.showInLimitedEditions = Boolean(body.showInLimitedEditions)
     if (body.outOfStock !== undefined) updateData.outOfStock = Boolean(body.outOfStock)
     if (body.showInFeaturedWhileComingSoon !== undefined) updateData.showInFeaturedWhileComingSoon = Boolean(body.showInFeaturedWhileComingSoon)
+    
+    // Also support snake_case field names from admin form
+    if (body.show_in_new_releases !== undefined) updateData.showInNewReleases = Boolean(body.show_in_new_releases)
+    if (body.show_in_featured !== undefined) updateData.showInFeatured = Boolean(body.show_in_featured)
+    if (body.show_in_coming_soon !== undefined) updateData.showInComingSoon = Boolean(body.show_in_coming_soon)
+    if (body.show_in_staff_picks !== undefined) updateData.showInStaffPicks = Boolean(body.show_in_staff_picks)
+    if (body.show_in_limited_editions !== undefined) updateData.showInLimitedEditions = Boolean(body.show_in_limited_editions)
+    if (body.out_of_stock !== undefined) updateData.outOfStock = Boolean(body.out_of_stock)
+    if (body.show_in_featured_while_coming_soon !== undefined) updateData.showInFeaturedWhileComingSoon = Boolean(body.show_in_featured_while_coming_soon)
     if (body.purchaseCost !== undefined) updateData.purchaseCost = parseFloat(body.purchaseCost) || null
     if (body.shippingCost !== undefined) updateData.shippingCost = parseFloat(body.shippingCost) || null
     if (body.totalCost !== undefined) updateData.totalCost = parseFloat(body.totalCost) || null
