@@ -718,7 +718,7 @@ export default function AdminDashboard() {
                         {/* Show active sections as colored tags */}
                         {(product.status === 'coming-soon' ? 
                           product.show_in_featured_while_coming_soon : 
-                          product.show_in_featured !== false) && 
+                          product.show_in_featured) && 
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                             Featured
                           </span>
@@ -741,7 +741,7 @@ export default function AdminDashboard() {
                         {/* Show empty state if no sections selected */}
                         {!(product.status === 'coming-soon' ? 
                           product.show_in_featured_while_coming_soon : 
-                          product.show_in_featured !== false) && 
+                          product.show_in_featured) && 
                          !product.show_in_staff_picks && 
                          !product.show_in_limited_editions && 
                          !product.show_in_new_releases && 
