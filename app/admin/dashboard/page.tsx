@@ -1247,9 +1247,20 @@ export default function AdminDashboard() {
                         loadProducts()
                       } else {
                         console.error('Save failed with status:', response.status)
+                        // Try to get detailed error information
+                        try {
+                          const errorData = await response.json()
+                          console.error('Detailed error information:', errorData)
+                          alert(`Save failed: ${errorData.message || errorData.error || 'Unknown error'}`)
+                        } catch (parseError) {
+                          const errorText = await response.text()
+                          console.error('Raw error response:', errorText)
+                          alert(`Save failed with status ${response.status}. Check console for details.`)
+                        }
                       }
                     } catch (error) {
                       console.error('Failed to update product:', error)
+                      alert(`Network error: ${error instanceof Error ? error.message : String(error)}`)
                     }
                   }}
                   className="bg-pop-purple text-white px-4 py-2 rounded-lg hover:bg-pop-purple/90 transition-colors"

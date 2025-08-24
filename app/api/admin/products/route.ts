@@ -101,9 +101,10 @@ export async function GET() {
 }
 
 export async function PUT(request: NextRequest) {
+  let body: any = null
   try {
     console.log('PUT /api/admin/products called')
-    const body = await request.json()
+    body = await request.json()
     console.log('Request body received:', JSON.stringify(body, null, 2))
     const { sku } = body
     
@@ -151,10 +152,18 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     console.error('PUT /api/admin/products error:', error)
     console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
-    return NextResponse.json({ 
-      error: 'Failed to update product', 
-      details: error instanceof Error ? error.message : String(error) 
-    }, { status: 500 })
+    
+    // Return detailed error information for debugging
+    const errorDetails = {
+      error: 'Failed to update product',
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString(),
+      requestBody: body ? JSON.stringify(body).substring(0, 500) : 'No body',
+      csvPath: CSV_PATH
+    }
+    
+    return NextResponse.json(errorDetails, { status: 500 })
   }
 }
 
