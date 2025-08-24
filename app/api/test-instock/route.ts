@@ -8,25 +8,12 @@ export async function GET() {
       return NextResponse.json({ error: 'No database connection' }, { status: 503 })
     }
     
-    // Same query as in-stock API
+    // Same query as in-stock API - show ALL in-stock products
     const products = await prisma.product.findMany({
       where: {
         AND: [
           { quantity: { gt: 0 } }, // Has inventory
-          { outOfStock: false },    // Not marked out of stock
-          // Must have at least one display flag set
-          {
-            OR: [
-              { showInFeatured: true },
-              { showInComingSoon: true },
-              { showInNewReleases: true },
-              { showInStaffPicks: true },
-              { showInLimitedEditions: true },
-              { featured: true },
-              { staffPick: true },
-              { limitedEdition: true }
-            ]
-          }
+          { outOfStock: false }     // Not marked out of stock
         ]
       },
       orderBy: { createdAt: 'desc' }

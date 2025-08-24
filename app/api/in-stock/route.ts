@@ -8,25 +8,13 @@ export async function GET() {
       return NextResponse.json([])
     }
     
-    // Only show products from admin dashboard that are in stock
+    // Show all products from admin dashboard that are in stock
+    // Products with no section flags will only appear in in-stock
     const products = await prisma.product.findMany({
       where: {
         AND: [
           { quantity: { gt: 0 } }, // Has inventory
-          { outOfStock: false },    // Not marked out of stock
-          // Must have at least one display flag set
-          {
-            OR: [
-              { showInFeatured: true },
-              { showInComingSoon: true },
-              { showInNewReleases: true },
-              { showInStaffPicks: true },
-              { showInLimitedEditions: true },
-              { featured: true },
-              { staffPick: true },
-              { limitedEdition: true }
-            ]
-          }
+          { outOfStock: false }     // Not marked out of stock
         ]
       },
       orderBy: { createdAt: 'desc' }
