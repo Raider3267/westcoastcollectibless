@@ -6,8 +6,8 @@ export async function GET(request: Request) {
   try {
     const prisma = getPrismaClient()
     if (!prisma) {
-      console.log('Database not available, using safe fallback')
-      return NextResponse.json(safeFallbackProducts)
+      console.log('Database not available, returning empty array')
+      return NextResponse.json([])
     }
     
     const products = await prisma.product.findMany({
@@ -28,8 +28,8 @@ export async function GET(request: Request) {
     })
     
     if (products.length === 0) {
-      console.log('No products in database, using safe fallback')
-      return NextResponse.json(safeFallbackProducts)
+      console.log('No products match display criteria, returning empty array')
+      return NextResponse.json([])
     }
     
     // Format with complete field mapping and safety (same as main products API)
@@ -112,6 +112,6 @@ export async function GET(request: Request) {
     
   } catch (error) {
     console.error('GET /api/public/products error:', error)
-    return NextResponse.json(safeFallbackProducts)
+    return NextResponse.json([])
   }
 }
