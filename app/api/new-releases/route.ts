@@ -1,14 +1,45 @@
 import { NextResponse } from 'next/server'
-import { getNewReleases } from '../../../lib/new-releases'
+import { getPrismaClient } from '../../../lib/database'
 
 export async function GET() {
   try {
-    // Get products released in the last 7 days
-    const newReleases = await getNewReleases('export.csv', 7)
+    const prisma = getPrismaClient()
+    if (!prisma) {
+      return NextResponse.json([])
+    }
     
-    return NextResponse.json(newReleases)
+    // Only show products from admin dashboard marked for new releases
+    const products = await prisma.product.findMany({
+      where: {
+        showInNewReleases: true
+      },
+      orderBy: { createdAt: 'desc' }
+    })
+    
+    // Format the same way as other APIs
+    const formattedProducts = products.map((product) => {
+      const imageUrls = product.images ? 
+        product.images.split(',')
+          .map(img => img.trim())
+          .filter(img => img && img.length > 0) 
+        : []
+      
+      return {
+        id: product.sku || '',
+        name: product.title || '',
+        price: product.price ? parseFloat(product.price.toString()) : null,
+        description: product.description || '',
+        quantity: product.quantity || 0,
+        image: imageUrls.length > 0 ? imageUrls[0] : null,
+        images: imageUrls,
+        status: product.status || 'live',
+        show_in_new_releases: true
+      }
+    })
+    
+    return NextResponse.json(formattedProducts)
   } catch (error) {
     console.error('GET /api/new-releases error:', error)
-    return NextResponse.json({ error: 'Failed to fetch new releases' }, { status: 500 })
+    return NextResponse.json([])
   }
 }

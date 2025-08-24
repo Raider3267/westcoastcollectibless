@@ -5,13 +5,12 @@ export async function GET() {
   try {
     const prisma = getPrismaClient()
     if (!prisma) {
-      console.log('Database not available, returning empty array')
       return NextResponse.json([])
     }
     
-    // Get coming-soon products for the preview section
+    // Only show products from admin dashboard marked for coming soon
     const products = await prisma.product.findMany({
-      where: { 
+      where: {
         OR: [
           { status: 'coming-soon' },
           { showInComingSoon: true }
@@ -20,38 +19,32 @@ export async function GET() {
       orderBy: { createdAt: 'desc' }
     })
     
-    // Format products to match the expected structure
-    const formattedProducts = products.map((product) => ({
-      sku: product.sku,
-      title: product.title,
-      description: product.description,
-      quantity: product.quantity,
-      price: product.price ? parseFloat(product.price.toString()) : 0,
-      images: product.images ? product.images.split(',').map(img => img.trim()).filter(img => img) : [],
-      status: product.status,
-      saleState: product.saleState,
-      releaseAt: product.releaseAt,
-      featured: product.featured,
-      staffPick: product.staffPick,
-      limitedEdition: product.limitedEdition,
-      dropDate: product.dropDate,
-      releasedDate: product.releasedDate,
-      showInNewReleases: product.showInNewReleases,
-      showInFeatured: product.showInFeatured,
-      showInComingSoon: product.showInComingSoon,
-      showInStaffPicks: product.showInStaffPicks,
-      showInLimitedEditions: product.showInLimitedEditions,
-      outOfStock: product.outOfStock,
-      showInFeaturedWhileComingSoon: product.showInFeaturedWhileComingSoon,
-      weight: product.weight ? parseFloat(product.weight.toString()) : 0.3,
-      length: product.length ? parseFloat(product.length.toString()) : 4,
-      width: product.width ? parseFloat(product.width.toString()) : 3,
-      height: product.height ? parseFloat(product.height.toString()) : 5,
-    }))
+    // Format the same way as other APIs
+    const formattedProducts = products.map((product) => {
+      const imageUrls = product.images ? 
+        product.images.split(',')
+          .map(img => img.trim())
+          .filter(img => img && img.length > 0) 
+        : []
+      
+      return {
+        id: product.sku || '',
+        name: product.title || '',
+        price: product.price ? parseFloat(product.price.toString()) : null,
+        description: product.description || '',
+        quantity: product.quantity || 0,
+        image: imageUrls.length > 0 ? imageUrls[0] : null,
+        images: imageUrls,
+        status: product.status || 'coming-soon',
+        show_in_coming_soon: true,
+        release_at: product.releaseAt,
+        drop_date: product.dropDate
+      }
+    })
     
     return NextResponse.json(formattedProducts)
   } catch (error) {
     console.error('GET /api/coming-soon/products error:', error)
-    return NextResponse.json({ error: 'Failed to fetch coming soon products' }, { status: 500 })
+    return NextResponse.json([])
   }
 }
