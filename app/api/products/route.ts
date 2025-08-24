@@ -11,7 +11,19 @@ export async function GET() {
     }
     
     const products = await prisma.product.findMany({
-      // Don't filter by status - show all products including "coming-soon" and "on the way"
+      where: {
+        // Only show products that are specifically marked to show somewhere
+        OR: [
+          { showInFeatured: true },
+          { showInComingSoon: true },
+          { showInNewReleases: true },
+          { showInStaffPicks: true },
+          { showInLimitedEditions: true },
+          { featured: true },
+          { staffPick: true },
+          { limitedEdition: true }
+        ]
+      },
       orderBy: { createdAt: 'desc' }
     })
     

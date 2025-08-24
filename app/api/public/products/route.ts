@@ -11,7 +11,19 @@ export async function GET(request: Request) {
     }
     
     const products = await prisma.product.findMany({
-      // Show all products for public API too
+      where: {
+        // Only show products that are specifically marked to show somewhere
+        OR: [
+          { showInFeatured: true },
+          { showInComingSoon: true },
+          { showInNewReleases: true },
+          { showInStaffPicks: true },
+          { showInLimitedEditions: true },
+          { featured: true },
+          { staffPick: true },
+          { limitedEdition: true }
+        ]
+      },
       orderBy: { createdAt: 'desc' }
     })
     
