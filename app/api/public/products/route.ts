@@ -1,12 +1,19 @@
 import { NextResponse } from 'next/server'
 import { getPrismaClient } from '../../../../lib/database'
+import { getListingsFromCsv } from '../../../../lib/listings'
 
 export async function GET(request: Request) {
   try {
     const prisma = getPrismaClient()
     if (!prisma) {
-      console.log('Database not available, returning empty array')
-      return NextResponse.json([])
+      console.log('Database not available, falling back to CSV')
+      try {
+        const products = await getListingsFromCsv('export.csv', true)
+        return NextResponse.json(products)
+      } catch (csvError) {
+        console.error('CSV fallback failed:', csvError)
+        return NextResponse.json([])
+      }
     }
     
     // Get all live products for the public website (including out of stock)
