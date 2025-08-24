@@ -107,12 +107,12 @@ export default function AdminDashboard() {
   const productToForm = (product: Product): ProductForm => ({
     ...product,
     images: product.images ? product.images.split(',').map(img => img.trim()).filter(img => img) : [],
-    show_in_new_releases: product.show_in_new_releases || false,
-    show_in_featured: product.show_in_featured || false,
-    show_in_staff_picks: product.show_in_staff_picks || false,
-    show_in_limited_editions: product.show_in_limited_editions || false,
-    out_of_stock: product.out_of_stock || false,
-    show_in_featured_while_coming_soon: product.show_in_featured_while_coming_soon || false,
+    show_in_new_releases: product.show_in_new_releases ?? false,
+    show_in_featured: product.show_in_featured ?? false,
+    show_in_staff_picks: product.show_in_staff_picks ?? false,
+    show_in_limited_editions: product.show_in_limited_editions ?? false,
+    out_of_stock: product.out_of_stock ?? false,
+    show_in_featured_while_coming_soon: product.show_in_featured_while_coming_soon ?? false,
     purchase_cost: parseFloat(String(product.purchase_cost || 0)) || 0,
     shipping_cost: parseFloat(String(product.shipping_cost || 0)) || 0,
     total_cost: parseFloat(String(product.total_cost || 0)) || 0,
@@ -124,12 +124,12 @@ export default function AdminDashboard() {
   const formToProduct = (form: ProductForm): Product => ({
     ...form,
     images: form.images.join(', '),
-    show_in_new_releases: form.show_in_new_releases || false,
-    show_in_featured: form.show_in_featured || false,
-    show_in_staff_picks: form.show_in_staff_picks || false,
-    show_in_limited_editions: form.show_in_limited_editions || false,
-    out_of_stock: form.out_of_stock || false,
-    show_in_featured_while_coming_soon: form.show_in_featured_while_coming_soon || false,
+    show_in_new_releases: form.show_in_new_releases ?? false,
+    show_in_featured: form.show_in_featured ?? false,
+    show_in_staff_picks: form.show_in_staff_picks ?? false,
+    show_in_limited_editions: form.show_in_limited_editions ?? false,
+    out_of_stock: form.out_of_stock ?? false,
+    show_in_featured_while_coming_soon: form.show_in_featured_while_coming_soon ?? false,
     total_cost: (form.purchase_cost || 0) + (form.shipping_cost || 0)
   })
 
@@ -1077,8 +1077,8 @@ export default function AdminDashboard() {
                           >
                             <div className={`p-3 rounded-lg border-2 transition-all ${
                               (editingProduct.status === 'coming-soon' ? 
-                                editingProduct.show_in_featured_while_coming_soon : 
-                                editingProduct.show_in_featured !== false)
+                                !!editingProduct.show_in_featured_while_coming_soon : 
+                                !!editingProduct.show_in_featured)
                                 ? 'border-blue-500 bg-blue-50' 
                                 : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-25'
                             }`}>
@@ -1086,14 +1086,14 @@ export default function AdminDashboard() {
                                 <span className="font-medium text-sm text-gray-800">Featured</span>
                                 <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                                   (editingProduct.status === 'coming-soon' ? 
-                                    editingProduct.show_in_featured_while_coming_soon : 
-                                    editingProduct.show_in_featured !== false)
+                                    !!editingProduct.show_in_featured_while_coming_soon : 
+                                    !!editingProduct.show_in_featured)
                                     ? 'border-blue-500 bg-blue-500' 
                                     : 'border-gray-300'
                                 }`}>
                                   {(editingProduct.status === 'coming-soon' ? 
-                                    editingProduct.show_in_featured_while_coming_soon : 
-                                    editingProduct.show_in_featured !== false) && 
+                                    !!editingProduct.show_in_featured_while_coming_soon : 
+                                    !!editingProduct.show_in_featured) && 
                                     <span className="text-white text-xs">✓</span>
                                   }
                                 </div>
@@ -1222,6 +1222,8 @@ export default function AdminDashboard() {
                       // Debug logging
                       console.log('Saving product data:', {
                         sku: productData.sku,
+                        status: productData.status,
+                        show_in_featured: productData.show_in_featured,
                         show_in_staff_picks: productData.show_in_staff_picks,
                         show_in_limited_editions: productData.show_in_limited_editions,
                         show_in_featured_while_coming_soon: productData.show_in_featured_while_coming_soon,
