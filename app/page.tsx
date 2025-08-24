@@ -558,10 +558,15 @@ function FeaturedHighlightsSection() {
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       try {
+        console.log('FeaturedHighlights: Starting fetch...')
         const response = await fetch('/api/featured')
+        console.log('FeaturedHighlights: Response received:', response.status)
         if (response.ok) {
           const data = await response.json()
+          console.log('FeaturedHighlights: Data parsed:', data.length, 'products', data)
           setFeaturedProducts(data)
+        } else {
+          console.log('FeaturedHighlights: Response not ok:', response.status)
         }
       } catch (error) {
         console.error('Failed to load featured products:', error)
@@ -583,7 +588,9 @@ function FeaturedHighlightsSection() {
 
 
   // Don't show section if no featured products
+  console.log('FeaturedHighlights: Render check - loading:', loading, 'featuredProducts.length:', featuredProducts.length)
   if (!loading && featuredProducts.length === 0) {
+    console.log('FeaturedHighlights: Hiding section - no products')
     return null
   }
 
