@@ -65,41 +65,54 @@ model Product {
   id              String   @id @default(cuid())
   
   // Basic product information
+  sku             String   @unique
   title           String
   description     String?
   brand           String?
-  category        String?
-  subcategory     String?
   
   // Pricing
-  price           Decimal  @db.Decimal(10, 2)
-  salePrice       Decimal? @db.Decimal(10, 2)
-  cost            Decimal? @db.Decimal(10, 2) // For admin only
+  price           Decimal? @db.Decimal(10, 2)
   
   // Inventory
-  stock           Int      @default(0)
-  sku             String?  @unique
-  barcode         String?
+  quantity        Int      @default(0)
   
-  // Physical attributes
+  // Physical attributes (for shipping)
   weight          Decimal? @db.Decimal(8, 3) // in pounds
-  dimensions      String?  // "L x W x H"
+  length          Decimal? @db.Decimal(8, 2) // in inches
+  width           Decimal? @db.Decimal(8, 2) // in inches  
+  height          Decimal? @db.Decimal(8, 2) // in inches
   
   // Media
-  images          String[] // Cloudinary URLs
-  heroImage       String?  // Primary image URL
+  images          String?  // Comma-separated Cloudinary URLs
   
-  // Status flags
-  isActive        Boolean  @default(true)
-  isFeatured      Boolean  @default(false)
-  isStaffPick     Boolean  @default(false)
-  isLimitedEdition Boolean @default(false)
-  isNewRelease    Boolean  @default(false)
-  isComingSoon    Boolean  @default(false)
+  // Status and visibility
+  status          String   @default("live") // live, coming-soon, draft
+  saleState       String?  // DRAFT, PREVIEW, LIVE, ARCHIVED
+  releaseAt       String?
+  
+  // Feature flags
+  featured                            Boolean @default(false)
+  staffPick                           Boolean @default(false) 
+  limitedEdition                      Boolean @default(false)
+  showInNewReleases                   Boolean @default(false)
+  showInFeatured                      Boolean @default(true)
+  showInComingSoon                    Boolean @default(true)
+  showInStaffPicks                    Boolean @default(false)
+  showInLimitedEditions               Boolean @default(false)
+  outOfStock                          Boolean @default(false)
+  showInFeaturedWhileComingSoon       Boolean @default(false)
+  
+  // Cost tracking
+  purchaseCost    Decimal? @db.Decimal(10, 2)
+  shippingCost    Decimal? @db.Decimal(10, 2)
+  totalCost       Decimal? @db.Decimal(10, 2)
+  purchaseDate    String?
+  supplier        String?
+  trackingNumber  String?
   
   // Dates
-  releaseDate     DateTime?
-  dropDate        DateTime? // For scheduled releases
+  dropDate        String?
+  releasedDate    String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   
@@ -112,12 +125,12 @@ model Product {
   searchVector    String?  // For full-text search
   
   @@map("products")
-  @@index([isActive, isFeatured])
-  @@index([isActive, isStaffPick])
-  @@index([isActive, isNewRelease])
-  @@index([isActive, isComingSoon])
-  @@index([category, subcategory])
-  @@index([releaseDate, dropDate])
+  @@index([status, featured])
+  @@index([status, staffPick])
+  @@index([status, showInNewReleases])
+  @@index([status, showInComingSoon])
+  @@index([createdAt])
+  @@index([updatedAt])
 }
 
 // =============================================================================

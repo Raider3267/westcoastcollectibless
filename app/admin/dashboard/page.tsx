@@ -154,7 +154,7 @@ export default function AdminDashboard() {
 
   const loadProducts = async () => {
     try {
-      const response = await fetch('/api/admin/products-kv')
+      const response = await fetch('/api/admin/products-db')
       if (response.ok) {
         const data = await response.json()
         setProducts(data)
@@ -188,7 +188,7 @@ export default function AdminDashboard() {
 
   const updateStock = async (sku: string, newQuantity: number) => {
     try {
-      const response = await fetch('/api/admin/products-kv', {
+      const response = await fetch('/api/admin/products-db', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sku, quantity: Math.max(0, newQuantity) })
@@ -206,7 +206,7 @@ export default function AdminDashboard() {
 
   const updateProductStatus = async (sku: string, newStatus: 'live' | 'coming-soon' | 'draft') => {
     try {
-      const response = await fetch('/api/admin/products-kv', {
+      const response = await fetch('/api/admin/products-db', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sku, status: newStatus })
@@ -224,7 +224,7 @@ export default function AdminDashboard() {
 
   const updateSaleState = async (sku: string, newSaleState: 'DRAFT' | 'PREVIEW' | 'LIVE' | 'ARCHIVED') => {
     try {
-      const response = await fetch('/api/admin/products-kv', {
+      const response = await fetch('/api/admin/products-db', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sku, sale_state: newSaleState })
@@ -242,7 +242,7 @@ export default function AdminDashboard() {
 
   const updateDropDate = async (sku: string, dropDate: string) => {
     try {
-      const response = await fetch('/api/admin/products-kv', {
+      const response = await fetch('/api/admin/products-db', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sku, drop_date: dropDate })
@@ -260,7 +260,7 @@ export default function AdminDashboard() {
 
   const updateNewReleasesVisibility = async (sku: string, showInNewReleases: boolean) => {
     try {
-      const response = await fetch('/api/admin/products-kv', {
+      const response = await fetch('/api/admin/products-db', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sku, show_in_new_releases: showInNewReleases.toString() })
@@ -279,7 +279,7 @@ export default function AdminDashboard() {
 
   const updateOutOfStockStatus = async (sku: string, outOfStock: boolean) => {
     try {
-      const response = await fetch('/api/admin/products-kv', {
+      const response = await fetch('/api/admin/products-db', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sku, out_of_stock: outOfStock.toString() })
@@ -297,7 +297,7 @@ export default function AdminDashboard() {
 
   const updateStaffPicksStatus = async (sku: string, showInStaffPicks: boolean) => {
     try {
-      const response = await fetch('/api/admin/products-kv', {
+      const response = await fetch('/api/admin/products-db', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sku, show_in_staff_picks: showInStaffPicks.toString() })
@@ -315,7 +315,7 @@ export default function AdminDashboard() {
 
   const updateLimitedEditionsStatus = async (sku: string, showInLimitedEditions: boolean) => {
     try {
-      const response = await fetch('/api/admin/products-kv', {
+      const response = await fetch('/api/admin/products-db', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sku, show_in_limited_editions: showInLimitedEditions.toString() })
@@ -335,7 +335,7 @@ export default function AdminDashboard() {
     if (!confirm('Are you sure you want to delete this product?')) return
     
     try {
-      const response = await fetch('/api/admin/products-kv', {
+      const response = await fetch('/api/admin/products-db', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sku })
@@ -354,7 +354,7 @@ export default function AdminDashboard() {
       // Convert form data to product format before sending
       const productData = formToProduct(newProduct as ProductForm)
       
-      const response = await fetch('/api/admin/products-kv', {
+      const response = await fetch('/api/admin/products-db', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(productData)
@@ -1228,7 +1228,7 @@ export default function AdminDashboard() {
                         out_of_stock: productData.out_of_stock
                       })
                       
-                      const response = await fetch('/api/admin/products-kv', {
+                      const response = await fetch('/api/admin/products-db', {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(productData)

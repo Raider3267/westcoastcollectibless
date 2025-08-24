@@ -21,6 +21,7 @@
     "db:studio": "prisma studio",
     "db:seed": "node scripts/seed.mjs",
     "db:backfill": "node scripts/backfill.mjs",
+    "db:import": "node scripts/import-csv-to-database.js",
     "smoke": "node scripts/smoke.mjs",
     "migrate:images": "node scripts/migrate-images-to-cloudinary.mjs",
     "verify:images": "node scripts/verify-cloudinary-images.mjs",
