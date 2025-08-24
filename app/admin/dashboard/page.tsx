@@ -108,7 +108,7 @@ export default function AdminDashboard() {
     ...product,
     images: product.images ? product.images.split(',').map(img => img.trim()).filter(img => img) : [],
     show_in_new_releases: product.show_in_new_releases || false,
-    show_in_featured: product.show_in_featured !== false, // Default to true
+    show_in_featured: product.show_in_featured || false,
     show_in_staff_picks: product.show_in_staff_picks || false,
     show_in_limited_editions: product.show_in_limited_editions || false,
     out_of_stock: product.out_of_stock || false,
@@ -125,7 +125,7 @@ export default function AdminDashboard() {
     ...form,
     images: form.images.join(', '),
     show_in_new_releases: form.show_in_new_releases || false,
-    show_in_featured: form.show_in_featured !== false,
+    show_in_featured: form.show_in_featured || false,
     show_in_staff_picks: form.show_in_staff_picks || false,
     show_in_limited_editions: form.show_in_limited_editions || false,
     out_of_stock: form.out_of_stock || false,
