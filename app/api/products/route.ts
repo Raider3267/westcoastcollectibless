@@ -11,9 +11,7 @@ export async function GET() {
     }
     
     const products = await prisma.product.findMany({
-      where: { 
-        status: 'live'
-      },
+      // Don't filter by status - show all products including "coming-soon" and "on the way"
       orderBy: { createdAt: 'desc' }
     })
     
@@ -22,38 +20,80 @@ export async function GET() {
       return NextResponse.json(safeFallbackProducts)
     }
     
-    // Format with extreme safety - ensure no undefined values
-    const safeProducts = products.map((product) => ({
-      id: product.sku || `product_${Date.now()}`,
-      name: product.title || 'Untitled Product',
-      price: product.price ? parseFloat(product.price.toString()) : 0,
-      description: (product.description || '').replace(/[\r\n]+/g, ' ').trim(),
-      quantity: product.quantity || 0,
-      image: null,
-      images: product.images ? 
+    // Format with complete field mapping and safety
+    const safeProducts = products.map((product) => {
+      // Process images safely
+      const imageUrls = product.images ? 
         product.images.split(',')
           .map(img => img.trim())
-          .filter(img => img && img.length > 0) 
-        : [],
-      status: product.status || 'live',
-      sale_state: product.saleState || 'LIVE',
-      show_in_featured: !!product.showInFeatured,
-      show_in_coming_soon: !!product.showInComingSoon,
-      show_in_new_releases: !!product.showInNewReleases,
-      show_in_staff_picks: !!product.showInStaffPicks,
-      show_in_limited_editions: !!product.showInLimitedEditions,
-      out_of_stock: !!product.outOfStock,
-      weight: product.weight ? parseFloat(product.weight.toString()) : 0.3,
-      length: product.length ? parseFloat(product.length.toString()) : 4,
-      width: product.width ? parseFloat(product.width.toString()) : 3,
-      height: product.height ? parseFloat(product.height.toString()) : 5,
-      featured: !!product.featured,
-      staff_pick: !!product.staffPick,
-      limited_edition: !!product.limitedEdition,
-      drop_date: product.dropDate || null,
-      released_date: product.releasedDate || null,
-      release_at: product.releaseAt || null
-    }))
+          .filter(img => img && img.length > 0 && img !== 'null' && img !== 'undefined') 
+        : []
+      
+      // Get primary image (first valid image)
+      const primaryImage = imageUrls.length > 0 ? imageUrls[0] : null
+      
+      return {
+        // Basic identifiers
+        id: product.sku || `product_${Date.now()}`,
+        sku: product.sku || '',
+        name: product.title || 'Untitled Product',
+        title: product.title || 'Untitled Product',
+        
+        // Pricing - make sure to show actual prices
+        price: product.price ? parseFloat(product.price.toString()) : null,
+        
+        // Full description with line breaks preserved but cleaned
+        description: product.description ? 
+          product.description.replace(/[\r\n]+/g, '\n').trim() : '',
+        
+        // Inventory
+        quantity: product.quantity || 0,
+        
+        // Images
+        image: primaryImage,
+        images: imageUrls,
+        
+        // Status and visibility
+        status: product.status || 'live',
+        sale_state: product.saleState || 'LIVE',
+        
+        // Display flags
+        show_in_featured: !!product.showInFeatured,
+        show_in_coming_soon: !!product.showInComingSoon,
+        show_in_new_releases: !!product.showInNewReleases,
+        show_in_staff_picks: !!product.showInStaffPicks,
+        show_in_limited_editions: !!product.showInLimitedEditions,
+        out_of_stock: !!product.outOfStock,
+        show_in_featured_while_coming_soon: !!product.showInFeaturedWhileComingSoon,
+        
+        // Physical attributes
+        weight: product.weight ? parseFloat(product.weight.toString()) : 0.3,
+        length: product.length ? parseFloat(product.length.toString()) : 4,
+        width: product.width ? parseFloat(product.width.toString()) : 3,
+        height: product.height ? parseFloat(product.height.toString()) : 5,
+        
+        // Feature flags
+        featured: !!product.featured,
+        staff_pick: !!product.staffPick,
+        limited_edition: !!product.limitedEdition,
+        
+        // Dates
+        drop_date: product.dropDate || null,
+        released_date: product.releasedDate || null,
+        release_at: product.releaseAt || null,
+        
+        // Cost tracking (for internal use)
+        purchase_cost: product.purchaseCost ? parseFloat(product.purchaseCost.toString()) : null,
+        shipping_cost: product.shippingCost ? parseFloat(product.shippingCost.toString()) : null,
+        total_cost: product.totalCost ? parseFloat(product.totalCost.toString()) : null,
+        purchase_date: product.purchaseDate || null,
+        supplier: product.supplier || null,
+        tracking_number: product.trackingNumber || null,
+        
+        // Brand info
+        brand: product.brand || null
+      }
+    })
     
     console.log(`Returning ${safeProducts.length} products from database`)
     return NextResponse.json(safeProducts)

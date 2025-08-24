@@ -1,11 +1,103 @@
 import { NextResponse } from 'next/server'
+import { getPrismaClient } from '../../../../lib/database'
 import { safeFallbackProducts } from '../../safe-fallback'
 
 export async function GET(request: Request) {
   try {
-    // Temporarily return safe data while fixing CSV/database issues
-    console.log('Returning safe fallback products for public API')
-    return NextResponse.json(safeFallbackProducts)
+    const prisma = getPrismaClient()
+    if (!prisma) {
+      console.log('Database not available, using safe fallback')
+      return NextResponse.json(safeFallbackProducts)
+    }
+    
+    const products = await prisma.product.findMany({
+      // Show all products for public API too
+      orderBy: { createdAt: 'desc' }
+    })
+    
+    if (products.length === 0) {
+      console.log('No products in database, using safe fallback')
+      return NextResponse.json(safeFallbackProducts)
+    }
+    
+    // Format with complete field mapping and safety (same as main products API)
+    const safeProducts = products.map((product) => {
+      // Process images safely
+      const imageUrls = product.images ? 
+        product.images.split(',')
+          .map(img => img.trim())
+          .filter(img => img && img.length > 0 && img !== 'null' && img !== 'undefined') 
+        : []
+      
+      // Get primary image (first valid image)
+      const primaryImage = imageUrls.length > 0 ? imageUrls[0] : null
+      
+      return {
+        // Basic identifiers
+        id: product.sku || `product_${Date.now()}`,
+        sku: product.sku || '',
+        name: product.title || 'Untitled Product',
+        title: product.title || 'Untitled Product',
+        
+        // Pricing - make sure to show actual prices
+        price: product.price ? parseFloat(product.price.toString()) : null,
+        
+        // Full description with line breaks preserved but cleaned
+        description: product.description ? 
+          product.description.replace(/[\r\n]+/g, '\n').trim() : '',
+        
+        // Inventory
+        quantity: product.quantity || 0,
+        
+        // Images
+        image: primaryImage,
+        images: imageUrls,
+        
+        // Status and visibility
+        status: product.status || 'live',
+        sale_state: product.saleState || 'LIVE',
+        
+        // Display flags
+        show_in_featured: !!product.showInFeatured,
+        show_in_coming_soon: !!product.showInComingSoon,
+        show_in_new_releases: !!product.showInNewReleases,
+        show_in_staff_picks: !!product.showInStaffPicks,
+        show_in_limited_editions: !!product.showInLimitedEditions,
+        out_of_stock: !!product.outOfStock,
+        show_in_featured_while_coming_soon: !!product.showInFeaturedWhileComingSoon,
+        
+        // Physical attributes
+        weight: product.weight ? parseFloat(product.weight.toString()) : 0.3,
+        length: product.length ? parseFloat(product.length.toString()) : 4,
+        width: product.width ? parseFloat(product.width.toString()) : 3,
+        height: product.height ? parseFloat(product.height.toString()) : 5,
+        
+        // Feature flags
+        featured: !!product.featured,
+        staff_pick: !!product.staffPick,
+        limited_edition: !!product.limitedEdition,
+        
+        // Dates
+        drop_date: product.dropDate || null,
+        released_date: product.releasedDate || null,
+        release_at: product.releaseAt || null,
+        
+        // Cost tracking (for internal use)
+        purchase_cost: product.purchaseCost ? parseFloat(product.purchaseCost.toString()) : null,
+        shipping_cost: product.shippingCost ? parseFloat(product.shippingCost.toString()) : null,
+        total_cost: product.totalCost ? parseFloat(product.totalCost.toString()) : null,
+        purchase_date: product.purchaseDate || null,
+        supplier: product.supplier || null,
+        tracking_number: product.trackingNumber || null,
+        
+        // Brand info
+        brand: product.brand || null
+      }
+    })
+    
+    console.log(`Returning ${safeProducts.length} products from database (public API)`)
+    return NextResponse.json(safeProducts)
+    
   } catch (error) {
     console.error('GET /api/public/products error:', error)
     return NextResponse.json(safeFallbackProducts)
