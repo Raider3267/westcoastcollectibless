@@ -178,13 +178,16 @@ export async function POST(request: NextRequest) {
         limitedEdition: Boolean(body.limitedEdition),
         dropDate: body.dropDate || null,
         releasedDate: body.releasedDate || null,
-        showInNewReleases: Boolean(body.showInNewReleases),
-        showInFeatured: body.showInFeatured !== undefined ? Boolean(body.showInFeatured) : true,
-        showInComingSoon: body.showInComingSoon !== undefined ? Boolean(body.showInComingSoon) : true,
-        showInStaffPicks: Boolean(body.showInStaffPicks),
-        showInLimitedEditions: Boolean(body.showInLimitedEditions),
-        outOfStock: Boolean(body.outOfStock),
-        showInFeaturedWhileComingSoon: Boolean(body.showInFeaturedWhileComingSoon),
+        // Support both camelCase and snake_case field names from frontend
+        showInNewReleases: Boolean(body.showInNewReleases || body.show_in_new_releases),
+        showInFeatured: (body.showInFeatured !== undefined) ? Boolean(body.showInFeatured) : 
+                       (body.show_in_featured !== undefined) ? Boolean(body.show_in_featured) : 
+                       false, // Changed default to false
+        showInComingSoon: Boolean(body.showInComingSoon || body.show_in_coming_soon),
+        showInStaffPicks: Boolean(body.showInStaffPicks || body.show_in_staff_picks),
+        showInLimitedEditions: Boolean(body.showInLimitedEditions || body.show_in_limited_editions),
+        outOfStock: Boolean(body.outOfStock || body.out_of_stock),
+        showInFeaturedWhileComingSoon: Boolean(body.showInFeaturedWhileComingSoon || body.show_in_featured_while_coming_soon),
         purchaseCost: parseFloat(body.purchaseCost) || null,
         shippingCost: parseFloat(body.shippingCost) || null,
         totalCost: parseFloat(body.totalCost) || null,
