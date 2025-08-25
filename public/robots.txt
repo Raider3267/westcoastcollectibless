@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://westcoastcollectibless.vercel.app/sitemap.xml
+
+# Disallow admin areas
+Disallow: /admin/
+Disallow: /api/admin/
+
+# Disallow sensitive files
+Disallow: /_next/
+Disallow: /data/
+Disallow: /uploads/temp/
+
+# Allow important pages
+Allow: /
+Allow: /contact
+Allow: /privacy
+Allow: /returns
+
+# Crawl delay (optional - be respectful to server)
+Crawl-delay: 1

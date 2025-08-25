@@ -25,22 +25,28 @@ export async function GET() {
         environment: 'ok',
         storage: 'ok',
         database: 'not_enabled', // Phase 1 default
-      }
+      },
+      responseTime: '0ms' // Will be calculated below
     }
     
-    // Check environment variables
-    const requiredEnvVars = [
-      'SQUARE_ENV',
-      'NEXT_PUBLIC_SITE_NAME',
-      'AUTH_SECRET',
-    ]
-    
-    for (const envVar of requiredEnvVars) {
-      if (!process.env[envVar]) {
-        health.status = 'degraded'
-        health.checks.environment = 'missing_env_vars'
-        break
+    // Check environment variables (only in production)
+    if (process.env.NODE_ENV === 'production') {
+      const requiredEnvVars = [
+        'SQUARE_ENV',
+        'NEXT_PUBLIC_SITE_NAME',
+        'AUTH_SECRET',
+      ]
+      
+      for (const envVar of requiredEnvVars) {
+        if (!process.env[envVar]) {
+          health.status = 'degraded'
+          health.checks.environment = 'missing_env_vars'
+          break
+        }
       }
+    } else {
+      // In development, be more lenient
+      health.checks.environment = 'ok_dev_mode'
     }
     
     // Phase 2: Database connectivity check

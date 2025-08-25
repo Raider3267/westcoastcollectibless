@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 
 interface ImageCarouselProps {
   images: string[]
@@ -8,6 +9,7 @@ interface ImageCarouselProps {
   className?: string
   showThumbnails?: boolean
   autoHeight?: boolean
+  priority?: boolean // For above-the-fold images
 }
 
 export default function ImageCarousel({ 
@@ -15,7 +17,8 @@ export default function ImageCarousel({
   productName, 
   className = '',
   showThumbnails = true,
-  autoHeight = false
+  autoHeight = false,
+  priority = false
 }: ImageCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [imageError, setImageError] = useState<Set<number>>(new Set())
@@ -60,24 +63,34 @@ export default function ImageCarousel({
   if (validImages.length === 1) {
     return (
       <div className={`relative group w-full h-full ${className}`}>
-        <img
-          src={currentImage}
-          alt={productName}
-          className="wcc-zoom"
-          onError={() => handleImageError(0)}
-        />
+        <div style={{ position: 'relative', width: '100%', height: '100%', aspectRatio: '1' }}>
+          <Image
+            src={currentImage}
+            alt={productName}
+            fill
+            className="wcc-zoom object-cover"
+            sizes="(max-width: 768px) 290px, (max-width: 1024px) 330px, 350px"
+            priority={priority}
+            onError={() => handleImageError(0)}
+          />
+        </div>
       </div>
     )
   }
 
   return (
     <div className={`relative group w-full h-full ${className}`}>
-      <img
-        src={currentImage}
-        alt={`${productName} - Image ${currentIndex + 1}`}
-        className="wcc-zoom"
-        onError={() => handleImageError(currentIndex)}
-      />
+      <div style={{ position: 'relative', width: '100%', height: '100%', aspectRatio: '1' }}>
+        <Image
+          src={currentImage}
+          alt={`${productName} - Image ${currentIndex + 1}`}
+          fill
+          className="wcc-zoom object-cover"
+          sizes="(max-width: 768px) 290px, (max-width: 1024px) 330px, 350px"
+          priority={priority}
+          onError={() => handleImageError(currentIndex)}
+        />
+      </div>
       
       {/* Small Navigation Arrows for individual cards - positioned inside at edges */}
       {validImages.length > 1 && (
@@ -119,13 +132,19 @@ export default function ImageCarousel({
                   ? 'border-pop-purple shadow-md' 
                   : 'border-gray-200 hover:border-gray-300'
               }`}
+              aria-label={`View image ${index + 1} of ${validImages.length}`}
+              aria-current={index === currentIndex ? 'true' : undefined}
             >
-              <img
-                src={image}
-                alt={`${productName} thumbnail ${index + 1}`}
-                className="w-full h-full object-cover"
-                onError={() => handleImageError(index)}
-              />
+              <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                <Image
+                  src={image}
+                  alt={`${productName} thumbnail ${index + 1}`}
+                  fill
+                  className="object-cover"
+                  sizes="48px"
+                  onError={() => handleImageError(index)}
+                />
+              </div>
             </button>
           ))}
         </div>
@@ -143,7 +162,8 @@ export default function ImageCarousel({
                   ? 'bg-pop-purple' 
                   : 'bg-gray-300 hover:bg-gray-400'
               }`}
-              aria-label={`Go to image ${index + 1}`}
+              aria-label={`View image ${index + 1} of ${validImages.length}`}
+              aria-current={index === currentIndex ? 'true' : undefined}
             />
           ))}
         </div>

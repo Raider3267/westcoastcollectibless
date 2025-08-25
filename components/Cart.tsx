@@ -6,6 +6,12 @@ import { createSquareOrder } from '../app/actions/fast-checkout'
 import SquarePayment from './SquarePayment'
 import { calculateSalesTax, formatTaxRate, shouldCollectTax } from '../lib/tax'
 
+// Product stock data interface
+interface ProductStock {
+  id: string
+  quantity: number
+}
+
 export default function Cart() {
   const { state, removeItem, updateQuantity, clearCart, closeCart } = useCart()
   const [isCheckingOut, setIsCheckingOut] = useState(false)
@@ -15,6 +21,9 @@ export default function Cart() {
   const [paymentError, setPaymentError] = useState('')
   const [squareOrderId, setSquareOrderId] = useState('')
   const [isCreatingOrder, setIsCreatingOrder] = useState(false)
+  
+  // Stock tracking
+  const [productStock, setProductStock] = useState<Record<string, number>>({})
   
   // Billing Information
   const [billingInfo, setBillingInfo] = useState({
@@ -60,10 +69,28 @@ export default function Cart() {
     shouldCollect: false
   })
 
-  // Prevent body scroll when cart is open
+  // Fetch stock data for cart items
+  const fetchStockData = async () => {
+    try {
+      const response = await fetch('/api/products')
+      if (response.ok) {
+        const products = await response.json()
+        const stockMap: Record<string, number> = {}
+        products.forEach((product: any) => {
+          stockMap[product.id] = product.quantity || 0
+        })
+        setProductStock(stockMap)
+      }
+    } catch (error) {
+      console.error('Failed to fetch stock data:', error)
+    }
+  }
+
+  // Prevent body scroll when cart is open and fetch stock data
   useEffect(() => {
     if (state.isOpen) {
       document.body.style.overflow = 'hidden'
+      fetchStockData() // Fetch fresh stock data when cart opens
     } else {
       document.body.style.overflow = ''
     }
@@ -77,6 +104,15 @@ export default function Cart() {
   useEffect(() => {
     calculateTax()
   }, [billingInfo.state, billingInfo.zipCode, shippingInfo.state, shippingInfo.zipCode, sameAsBilling, selectedShipping, state.totalPrice])
+
+  // Handle quantity increase with stock validation
+  const handleQuantityIncrease = (itemId: string, currentQuantity: number) => {
+    const cartItem = state.items.find(item => item.id === itemId)
+    const availableStock = cartItem?.maxStock || productStock[itemId] || 0
+    if (currentQuantity < availableStock) {
+      updateQuantity(itemId, currentQuantity + 1)
+    }
+  }
 
   const handleCheckout = async () => {
     setIsCheckingOut(true)
@@ -766,10 +802,20 @@ export default function Cart() {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
                             </svg>
                           </button>
-                          <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
+                          <div className="flex flex-col items-center">
+                            <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
+                            {item.quantity >= (item.maxStock || productStock[item.id] || 0) && (item.maxStock || productStock[item.id] || 0) > 0 && (
+                              <span className="text-xs text-orange-600 mt-1 whitespace-nowrap">Max available</span>
+                            )}
+                          </div>
                           <button
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors"
+                            onClick={() => handleQuantityIncrease(item.id, item.quantity)}
+                            className={`w-8 h-8 rounded-full border flex items-center justify-center transition-colors ${
+                              item.quantity >= (item.maxStock || productStock[item.id] || 0)
+                                ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
+                                : 'border-gray-300 hover:bg-gray-50'
+                            }`}
+                            disabled={item.quantity >= (item.maxStock || productStock[item.id] || 0)}
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -790,14 +836,14 @@ export default function Cart() {
                   </div>
 
                   {/* Free Shipping Progress */}
-                  {state.totalPrice < 75 && (
+                  {state.totalPrice < 100 && (
                     <div className="px-4 py-3 bg-gradient-to-r from-blue-50 to-green-50 border-t border-gray-200">
                       <div className="space-y-2">
                         <div className="flex justify-between items-center text-sm">
                           <span className="font-medium text-gray-700">
                             {state.totalPrice === 0 
-                              ? '🚚 Free USPS Ground Advantage® on orders over $75'
-                              : `🚚 Add $${(75 - state.totalPrice).toFixed(2)} for FREE USPS shipping!`
+                              ? '🚚 Free USPS Ground Advantage® on orders over $100'
+                              : `🚚 Add $${(100 - state.totalPrice).toFixed(2)} for FREE USPS shipping!`
                             }
                           </span>
                           <span className="text-xs text-gray-500">Under 5 lbs</span>
@@ -808,7 +854,7 @@ export default function Cart() {
                           <div 
                             className="absolute left-0 top-0 h-full bg-gradient-to-r from-blue-500 to-green-500 rounded-full transition-all duration-500 ease-out"
                             style={{ 
-                              width: `${Math.min((state.totalPrice / 75) * 100, 100)}%`,
+                              width: `${Math.min((state.totalPrice / 100) * 100, 100)}%`,
                             }}
                           />
                           {/* Animated shimmer effect */}
@@ -824,12 +870,12 @@ export default function Cart() {
                         {/* Progress Text */}
                         <div className="flex justify-between text-xs text-gray-500">
                           <span>${state.totalPrice.toFixed(2)}</span>
-                          <span className="font-medium">$75.00</span>
+                          <span className="font-medium">$100.00</span>
                         </div>
                       </div>
                       
                       {/* Suggestion when close to free shipping */}
-                      {state.totalPrice >= 55 && state.totalPrice < 75 && (
+                      {state.totalPrice >= 80 && state.totalPrice < 100 && (
                         <div className="mt-2 p-2 bg-yellow-50 rounded-md border border-yellow-200">
                           <p className="text-xs text-yellow-800 font-medium">
                             💡 You're so close! Add one more item to unlock free shipping.
@@ -840,7 +886,7 @@ export default function Cart() {
                   )}
 
                   {/* Success Message - Already Qualified */}
-                  {state.totalPrice >= 75 && (
+                  {state.totalPrice >= 100 && (
                     <div className="px-4 py-3 bg-gradient-to-r from-green-50 to-emerald-50 border-t border-green-200">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">

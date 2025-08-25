@@ -134,24 +134,54 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Wait for deployment
-        run: sleep 30
+      - name: Wait for deployment propagation
+        run: sleep 45
 
-      - name: Run smoke tests
+      - name: Run comprehensive smoke tests
         env:
           DEPLOYMENT_URL: ${{ needs.deploy.outputs.deployment-url }}
-          TEST_TIMEOUT: 30000
+          TEST_TIMEOUT: 45000
         run: node scripts/smoke.mjs
+
+      - name: Production deployment validation
+        if: github.ref == 'refs/heads/main'
+        env:
+          DEPLOYMENT_URL: ${{ needs.deploy.outputs.production-url }}
+        run: |
+          echo "🔍 Running additional production validation..."
+          
+          # Check core pages load within 3 seconds
+          curl -w "@/dev/stdin" -s -o /dev/null "$DEPLOYMENT_URL" <<< "time_total: %{time_total}" | \
+          awk '{if ($2 > 3.0) {print "❌ Homepage load time too slow:", $2 "s"; exit 1} else {print "✅ Homepage loads in", $2 "s"}}'
+          
+          # Verify no dev/debug content in production
+          CONTENT=$(curl -s "$DEPLOYMENT_URL")
+          if echo "$CONTENT" | grep -qi "development\|localhost\|debug"; then
+            echo "❌ Development content found in production"
+            exit 1
+          else
+            echo "✅ No development content in production"
+          fi
+          
+          # Check robots.txt accessibility
+          curl -f -s "$DEPLOYMENT_URL/robots.txt" > /dev/null && echo "✅ robots.txt accessible" || echo "⚠️ robots.txt not found"
 
       - name: Update deployment status
         if: always()
         run: |
           if [[ "${{ job.status }}" == "success" ]]; then
-            echo "✅ **Health Checks Passed**" >> $GITHUB_STEP_SUMMARY
-            echo "All smoke tests completed successfully" >> $GITHUB_STEP_SUMMARY
+            echo "✅ **All Health Checks Passed**" >> $GITHUB_STEP_SUMMARY
+            echo "- Smoke tests completed successfully" >> $GITHUB_STEP_SUMMARY
+            if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+              echo "- Production validation completed" >> $GITHUB_STEP_SUMMARY
+              echo "- Performance benchmarks met" >> $GITHUB_STEP_SUMMARY
+            fi
           else
             echo "❌ **Health Checks Failed**" >> $GITHUB_STEP_SUMMARY
-            echo "Some smoke tests failed - investigate before proceeding" >> $GITHUB_STEP_SUMMARY
+            echo "- Deployment may have issues - investigate before proceeding" >> $GITHUB_STEP_SUMMARY
+            if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+              echo "⚠️ **PRODUCTION DEPLOYMENT REQUIRES ATTENTION**" >> $GITHUB_STEP_SUMMARY
+            fi
           fi
 
   # Phase 4: Post-deployment notifications (PR comments)

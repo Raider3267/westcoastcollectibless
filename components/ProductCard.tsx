@@ -45,9 +45,10 @@ interface ProductCardProps {
   product: Product
   cardColor: string
   randomEmoji: string
+  hideStatusBadges?: boolean // Hide featured/staff pick badges when true
 }
 
-export default function ProductCard({ product, cardColor, randomEmoji }: ProductCardProps) {
+export default function ProductCard({ product, cardColor, randomEmoji, hideStatusBadges = false }: ProductCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isNotifyModalOpen, setIsNotifyModalOpen] = useState(false)
   const [showCartConfirmation, setShowCartConfirmation] = useState(false)
@@ -113,7 +114,8 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
       name: product.name,
       price: product.price || 0,
       image: product.image || undefined,
-      weight: product.weight || 0.3
+      weight: product.weight || 0.3,
+      maxStock: product.quantity || 0
     })
     // Show cart confirmation popup
     setShowCartConfirmation(true)
@@ -194,7 +196,6 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
         className={`product-card wcc-card ${accentClass} group`} 
         style={{ overflow: 'hidden' }}
         aria-labelledby={`product-title-${product.id}`}
-        role="group"
       >
         {/* Product status chip */}
         <div style={{
@@ -231,7 +232,7 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
         )}
         
         {/* Featured badge */}
-        {product.featured && (
+        {product.featured && !hideStatusBadges && (
           <div className="luxury-badge featured" style={{
             position: 'absolute',
             top: '12px',
@@ -279,11 +280,11 @@ export default function ProductCard({ product, cardColor, randomEmoji }: Product
 
         <div className="product-foot wcc-foot">
           {typeof product.price === 'number' ? (
-            <span className="product-price wcc-price">
+            <span className="product-price wcc-price" aria-label={`Price: ${new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(product.price)}`}>
               {new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(product.price)}
             </span>
           ) : (
-            <span className="product-price wcc-price">Price Available</span>
+            <span className="product-price wcc-price" aria-label="Price available upon request">Price Available</span>
           )}
           
           <div className="wcc-actions" style={{ position: 'relative', zIndex: 10, width: '100%', display: 'flex', gap: '8px' }}>

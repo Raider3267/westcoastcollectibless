@@ -116,13 +116,13 @@ const SHIPPING_ZONES = {
 // Weight thresholds for free shipping (weight in lbs, order value in cents)
 const FREE_SHIPPING_RULES = {
   US: {
-    minOrderValue: 7500, // $75.00
+    minOrderValue: 10000, // $100.00
     maxWeight: 5 // Free shipping only for orders under 5 lbs
   }
 }
 
 // Free shipping thresholds (in cents)
-const FREE_SHIPPING_THRESHOLD = 7500 // $75.00
+const FREE_SHIPPING_THRESHOLD = 10000 // $100.00
 
 export function calculateShippingRates(
   address: ShippingAddress, 

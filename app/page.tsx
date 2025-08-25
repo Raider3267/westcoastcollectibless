@@ -4,11 +4,18 @@ import { SITE } from '../lib/products'
 import { Listing } from '../lib/listings'
 import ProductCard from '../components/ProductCard'
 import FilterBar, { FilterOptions } from '../components/FilterBar'
-import VIPSection from '../components/VIPSection'
+// Dynamically import heavy components
+const VIPSection = dynamic(() => import('../components/VIPSection'), {
+  ssr: false,
+  loading: () => <div style={{ height: '400px', background: '#f8f9fa' }} />
+})
 import UserNav from '../components/UserNav'
 import HeaderActionButton from '../components/ui/HeaderActionButton'
+import LazySection from '../components/LazySection'
 import { useCart } from '../lib/cart'
 import { useEffect, useState, useRef } from 'react'
+import dynamic from 'next/dynamic'
+import ContactModal from '../components/ContactModal'
 
 // Scrollable section with navigation arrows component
 function ScrollableSection({ children, className = "wcc-scroll" }: { children: React.ReactNode, className?: string }) {
@@ -164,63 +171,13 @@ function ScrollableSection({ children, className = "wcc-scroll" }: { children: R
 
 // New Premium Hero Section Component
 function HeroSection({ toggleCart, cartState }: { toggleCart: () => void, cartState: any }) {
-  const [nextDrop, setNextDrop] = useState<Listing | null>(null)
-  const [timeLeft, setTimeLeft] = useState<{days: number, hours: number, minutes: number} | null>(null)
   const [scrollY, setScrollY] = useState(0)
 
   // Check for reduced motion preference
   const prefersReducedMotion = typeof window !== 'undefined' && 
     window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-  useEffect(() => {
-    // Fetch preview products for Next Drop countdown
-    const fetchNextDrop = async () => {
-      try {
-        const previewResponse = await fetch('/api/preview')
-        const previewItems = await previewResponse.json()
-        
-        // Find the soonest PREVIEW item with release_at
-        const upcomingItems = previewItems
-          .filter((item: Listing) => item.release_at)
-          .sort((a: Listing, b: Listing) => new Date(a.release_at!).getTime() - new Date(b.release_at!).getTime())
-        
-        if (upcomingItems.length > 0) {
-          setNextDrop(upcomingItems[0])
-        }
-      } catch (error) {
-        console.error('Error fetching next drop:', error)
-      }
-    }
 
-    fetchNextDrop()
-  }, [])
-
-  // Countdown timer
-  useEffect(() => {
-    if (!nextDrop?.release_at) return
-
-    const updateCountdown = () => {
-      const now = new Date().getTime()
-      const dropTime = new Date(nextDrop.release_at!).getTime()
-      const difference = dropTime - now
-
-      if (difference > 0) {
-        const days = Math.floor(difference / (1000 * 60 * 60 * 24))
-        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60))
-        
-        setTimeLeft({ days, hours, minutes })
-      } else {
-        setTimeLeft(null)
-        // Item should be live now
-      }
-    }
-
-    updateCountdown()
-    const interval = setInterval(updateCountdown, 60000) // Update every minute
-
-    return () => clearInterval(interval)
-  }, [nextDrop])
 
   // Parallax scroll effect and floating nav positioning
   useEffect(() => {
@@ -284,12 +241,13 @@ function HeroSection({ toggleCart, cartState }: { toggleCart: () => void, cartSt
         <UserNav />
       </div>
 
-      {/* Video Background with Parallax */}
+      {/* Video Background with Parallax - Non-blocking for LCP */}
       <video 
         autoPlay 
         muted 
         loop 
         playsInline
+        preload="none"
         style={{
           position: 'absolute',
           top: '50%',
@@ -301,7 +259,15 @@ function HeroSection({ toggleCart, cartState }: { toggleCart: () => void, cartSt
           zIndex: -1,
           transform: `translate(-50%, -50%) translateY(${prefersReducedMotion ? 0 : scrollY * 0.05}px)`,
           objectFit: 'cover',
-          transition: prefersReducedMotion ? 'none' : 'transform 0.1s ease-out'
+          transition: prefersReducedMotion ? 'none' : 'transform 0.1s ease-out',
+          opacity: 0.9
+        }}
+        onLoadStart={() => {
+          // Start loading after initial render
+          const video = document.querySelector('video')
+          if (video) {
+            video.preload = 'metadata'
+          }
         }}
       >
         <source src="/hero-video.mp4" type="video/mp4" />
@@ -400,79 +366,9 @@ function HeroSection({ toggleCart, cartState }: { toggleCart: () => void, cartSt
           Designer Toys • Limited Drops • Authentic Collectibles
         </p>
         
-        <p style={{ 
-          fontSize: '1.1rem',
-          color: 'rgba(255,255,255,0.85)',
-          textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-          lineHeight: 1.5,
-          fontWeight: 500,
-          maxWidth: '600px',
-          margin: '0 auto 16px auto'
-        }}>
-          Premium collectibles with magical details for serious collectors worldwide
-        </p>
 
 
 
-        {/* Purpose Block: Next Drop Countdown Only */}
-        {nextDrop && timeLeft ? (
-          <div style={{
-            background: 'rgba(255,255,255,0.1)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            borderRadius: '16px',
-            padding: '20px',
-            maxWidth: '400px',
-            margin: '0 auto',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
-          }}>
-            <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)', marginBottom: '8px', fontWeight: 600 }}>
-              Next Drop
-            </div>
-            <div style={{ fontSize: '1.2rem', color: 'white', marginBottom: '12px', fontWeight: 700 }}>
-              {nextDrop.name}
-            </div>
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              gap: '12px', 
-              marginBottom: '16px',
-              fontSize: '1rem',
-              color: 'white',
-              fontWeight: 600
-            }}>
-              <time dateTime={nextDrop.release_at || undefined}>
-                {timeLeft.days > 0 && `${timeLeft.days}d `}
-                {timeLeft.hours}h {timeLeft.minutes}m
-              </time>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <button
-                onClick={() => {
-                  // Open notify/signup flow
-                  const notifyEvent = new CustomEvent('show-auth-modal')
-                  window.dispatchEvent(notifyEvent)
-                }}
-                style={{
-                  background: 'linear-gradient(135deg, var(--wcc-teal), var(--wcc-lilac))',
-                  color: '#0b0b0f',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '8px 16px',
-                  fontSize: '0.9rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-1px)'}
-                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-              >
-                Set a reminder
-              </button>
-            </div>
-          </div>
-        ) : null}
       </div>
 
       <style jsx>{`
@@ -662,6 +558,7 @@ function FeaturedHighlightsSection() {
                       product={product}
                       cardColor={cardColor}
                       randomEmoji={randomEmoji}
+                      hideStatusBadges={true}
                     />
                   </div>
                 )
@@ -1446,7 +1343,7 @@ function ComingSoonProductsSection() {
           Get early access to these upcoming releases. Add them to your wishlist and be notified when they launch!
         </p>
         {loading ? (
-          <ScrollableSection>
+          <div className="coming-soon-grid">
             {[1, 2, 3].map((i) => (
               <div key={i} className="luxury-card accent-teal" style={{ opacity: 0.6 }}>
                 <div className="luxury-thumb">
@@ -1462,9 +1359,9 @@ function ComingSoonProductsSection() {
                 </div>
               </div>
             ))}
-          </ScrollableSection>
+          </div>
         ) : (
-          <ScrollableSection>
+          <div className="coming-soon-grid">
             {comingSoonProducts.map((product, index) => {
               const cardColor = cardColors[index % cardColors.length]
               const comingSoonEmojis = ['⏰', '🚀', '🔜', '✨', '🌟', '⭐', '💫', '🎯', '🎪', '🎨']
@@ -1476,11 +1373,12 @@ function ComingSoonProductsSection() {
                     product={product}
                     cardColor={cardColor}
                     randomEmoji={randomEmoji}
+                    hideStatusBadges={true}
                   />
                 </div>
               )
             })}
-          </ScrollableSection>
+          </div>
         )}
       </div>
 
@@ -1583,13 +1481,38 @@ function ComingSoonProductsSection() {
             opacity: 0.5;
           }
         }
+
+        .coming-soon-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 24px;
+          max-width: 100%;
+          /* Explicit min-height to prevent CLS */
+          min-height: 400px;
+        }
+
+        @media (min-width: 768px) {
+          .coming-soon-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            min-height: 450px;
+          }
+        }
+
+        @media (max-width: 767px) {
+          .coming-soon-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+            min-height: 350px;
+          }
+        }
       `}</style>
     </section>
   )
 }
 
 
-function CollectorAssuranceSection() {
+function CollectorAssuranceSection({ onContactClick }: { onContactClick: () => void }) {
   return (
     <section className="collector-assurance-section">
       {/* Faint gradient backdrop */}
@@ -1657,7 +1580,23 @@ function CollectorAssuranceSection() {
           </div>
 
           {/* Collector Support */}
-          <a href="/contact" className="assurance-card support-card">
+          <div 
+            onClick={() => {
+              console.log('Contact card clicked');
+              onContactClick();
+            }}
+            className="assurance-card support-card"
+            style={{ cursor: 'pointer' }}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                console.log('Contact card keyboard activated');
+                onContactClick();
+              }
+            }}
+          >
             <div className="card-icon-container">
               <svg className="card-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
@@ -1671,7 +1610,7 @@ function CollectorAssuranceSection() {
               <span className="contact-text">Contact us</span>
               <span className="contact-helper">We typically respond within 1–2 business days.</span>
             </div>
-          </a>
+          </div>
         </div>
       </div>
 
@@ -2037,6 +1976,7 @@ export default function HomePage() {
     }
     return false
   })
+  const [showContactModal, setShowContactModal] = useState(false)
 
   const loadProducts = async () => {
     try {
@@ -2140,20 +2080,36 @@ export default function HomePage() {
         <HeroSection toggleCart={toggleCart} cartState={state} />
 
         {/* Featured Collection - Premium Spotlight */}
-        <FeaturedHighlightsSection />
+        <LazySection rootMargin="50px">
+          <FeaturedHighlightsSection />
+        </LazySection>
 
         {/* Coming Soon - Anticipation */}
-        <ComingSoonProductsSection />
+        <LazySection rootMargin="100px">
+          <ComingSoonProductsSection />
+        </LazySection>
 
         {/* In Stock - Catalog Utility */}
-        <FeaturedSection items={items} filteredItems={filteredItems} loading={loading} onFiltersChange={handleFiltersChange} />
+        <LazySection rootMargin="100px">
+          <FeaturedSection items={items} filteredItems={filteredItems} loading={loading} onFiltersChange={handleFiltersChange} />
+        </LazySection>
 
         {/* VIP Invite - Optional Upgrade */}
-        <VIPSection />
+        <LazySection rootMargin="200px">
+          <VIPSection />
+        </LazySection>
 
         {/* Collector Assurance - Consolidated Trust */}
-        <CollectorAssuranceSection />
+        <LazySection rootMargin="200px">
+          <CollectorAssuranceSection onContactClick={() => setShowContactModal(true)} />
+        </LazySection>
       </main>
+      
+      {/* Contact Modal */}
+      <ContactModal 
+        isOpen={showContactModal} 
+        onClose={() => setShowContactModal(false)} 
+      />
     </div>
   )
 }
@@ -2304,6 +2260,7 @@ function FeaturedSection({ items, filteredItems, loading, onFiltersChange }: {
                 product={product}
                 cardColor={cardColor}
                 randomEmoji={randomEmoji}
+                hideStatusBadges={true}
               />
             )
           })}
@@ -2443,6 +2400,7 @@ function NewReleasesSection() {
                     product={product}
                     cardColor={cardColor}
                     randomEmoji={randomEmoji}
+                    hideStatusBadges={true}
                   />
                 </div>
               )
@@ -2572,6 +2530,7 @@ function StaffPicksSection() {
                     product={product}
                     cardColor={cardColor}
                     randomEmoji={randomEmoji}
+                    hideStatusBadges={true}
                   />
                 </div>
               )
@@ -2713,6 +2672,7 @@ function LimitedEditionsSection() {
                     product={product}
                     cardColor={cardColor}
                     randomEmoji={randomEmoji}
+                    hideStatusBadges={true}
                   />
                 </div>
               )

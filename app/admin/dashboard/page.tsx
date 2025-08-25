@@ -90,7 +90,7 @@ export default function AdminDashboard() {
     images: [],
     status: 'live',
     show_in_new_releases: false,
-    show_in_featured: true,
+    show_in_featured: false,
     show_in_staff_picks: false,
     show_in_limited_editions: false,
     out_of_stock: false,
@@ -108,7 +108,7 @@ export default function AdminDashboard() {
     ...product,
     images: product.images ? product.images.split(',').map(img => img.trim()).filter(img => img) : [],
     show_in_new_releases: product.show_in_new_releases || false,
-    show_in_featured: product.show_in_featured !== false, // Default to true
+    show_in_featured: product.show_in_featured || false,
     show_in_staff_picks: product.show_in_staff_picks || false,
     show_in_limited_editions: product.show_in_limited_editions || false,
     out_of_stock: product.out_of_stock || false,
@@ -134,10 +134,15 @@ export default function AdminDashboard() {
   })
 
   useEffect(() => {
-    // Check authentication
-    if (typeof window !== 'undefined' && !sessionStorage.getItem('adminAuth')) {
-      router.push('/admin/login')
-      return
+    // Check authentication - in development mode, auto-set session storage
+    if (typeof window !== 'undefined') {
+      if (process.env.NODE_ENV === 'development') {
+        // Auto-authenticate in development
+        sessionStorage.setItem('adminAuth', 'authenticated')
+      } else if (!sessionStorage.getItem('adminAuth')) {
+        router.push('/admin/login')
+        return
+      }
     }
     
     loadProducts()
@@ -360,9 +365,13 @@ export default function AdminDashboard() {
           quantity: 1,
           price: 0,
           images: [],
+          status: 'live',
+          show_in_new_releases: false,
+          show_in_featured: false,
           show_in_staff_picks: false,
           show_in_limited_editions: false,
           out_of_stock: false,
+          show_in_featured_while_coming_soon: false,
           purchase_cost: 0,
           shipping_cost: 0,
           total_cost: 0,
@@ -390,7 +399,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white shadow-sm border-b" role="banner">
         <div className="px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <img 
@@ -531,37 +540,37 @@ export default function AdminDashboard() {
         {/* Products Table */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full" role="table" aria-label="Products inventory table">
               <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <tr role="row">
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">
                     Product
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">
                     Price / Cost
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">
                     Stock
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">
                     Profit/Unit
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">
                     Status
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">
                     Drop Date
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">
                     New Releases
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">
                     Homepage Sections
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">
                     Stock Status
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" scope="col">
                     Actions
                   </th>
                 </tr>
@@ -1525,7 +1534,7 @@ export default function AdminDashboard() {
                       images: [],
                       status: 'live',
                       show_in_new_releases: false,
-                      show_in_featured: true,
+                      show_in_featured: false,
                       show_in_staff_picks: false,
                       show_in_limited_editions: false,
                       out_of_stock: false,

@@ -119,7 +119,7 @@ export async function getNewReleases(filename = 'export.csv', daysBack = 7): Pro
       
       // Get show_in_coming_soon field for priority filtering
       const show_in_coming_soon_val = FIRST<string>(row['show_in_coming_soon'], row['Show In Coming Soon'])
-      const show_in_coming_soon = show_in_coming_soon_val === 'true' || show_in_coming_soon_val === '1' || show_in_coming_soon_val
+      const show_in_coming_soon = show_in_coming_soon_val === 'true' || show_in_coming_soon_val === '1'
 
       return { 
         id: String(id), 

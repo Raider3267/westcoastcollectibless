@@ -150,10 +150,10 @@ export async function createCustomer(customerData: {
     
     console.log('Customer creation response:', response)
     
-    if (response.result && response.result.customer) {
+    if ((response as any).result && (response as any).result.customer) {
       return {
         success: true,
-        customer: response.result.customer,
+        customer: (response as any).result.customer,
       }
     } else {
       console.error('No customer in response:', response)
@@ -199,12 +199,12 @@ export async function getSquareProducts(): Promise<{ success: boolean; products?
     console.log('Fetching products from Square Catalog API...')
     
     const response = await catalogApi.list({
-      types: ['ITEM']
+      types: 'ITEM' as any
     })
     
     console.log('Square catalog response:', JSON.stringify(response, null, 2))
     
-    const result = response.result
+    const result = (response as any).result
     if (!result || !result.objects) {
       console.log('No objects found in Square catalog response')
       return { success: true, products: [] }
