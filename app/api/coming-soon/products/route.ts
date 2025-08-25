@@ -8,11 +8,14 @@ export async function GET() {
       return NextResponse.json([])
     }
     
-    // Only show products from admin dashboard marked for coming soon
+    // Show products marked for coming soon section:
+    // - status: 'coming-soon' OR 'preview' 
+    // - OR showInComingSoon flag is true
     const products = await prisma.product.findMany({
       where: {
         OR: [
           { status: 'coming-soon' },
+          { status: 'preview' },
           { showInComingSoon: true }
         ]
       },

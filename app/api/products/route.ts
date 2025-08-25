@@ -12,8 +12,9 @@ export async function GET() {
     
     const products = await prisma.product.findMany({
       where: {
-        // Only show products that are specifically marked to show somewhere
+        // Show all products that should be visible to customers
         OR: [
+          // Products specifically marked to show in sections
           { showInFeatured: true },
           { showInComingSoon: true },
           { showInNewReleases: true },
@@ -21,7 +22,19 @@ export async function GET() {
           { showInLimitedEditions: true },
           { featured: true },
           { staffPick: true },
-          { limitedEdition: true }
+          { limitedEdition: true },
+          // Also show all live products (default behavior for new products)
+          {
+            AND: [
+              { status: 'live' },                // Live products
+              {
+                OR: [
+                  { quantity: { gt: 0 } },       // Has inventory
+                  { outOfStock: false }           // Or not marked out of stock
+                ]
+              }
+            ]
+          }
         ]
       },
       orderBy: { createdAt: 'desc' }

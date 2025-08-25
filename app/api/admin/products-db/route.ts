@@ -170,7 +170,8 @@ export async function POST(request: NextRequest) {
         quantity: parseInt(body.quantity) || 0,
         price: parseFloat(body.price) || null,
         images: body.images || null,
-        status: 'live',
+        // Status should respect user input, default to 'live'
+        status: body.status || 'live',
         saleState: body.saleState || null,
         releaseAt: body.releaseAt || null,
         featured: Boolean(body.featured),
@@ -179,13 +180,13 @@ export async function POST(request: NextRequest) {
         dropDate: body.dropDate || null,
         releasedDate: body.releasedDate || null,
         // Support both camelCase and snake_case field names from frontend
+        // Default all section flags to false unless explicitly set
         showInNewReleases: Boolean(body.showInNewReleases || body.show_in_new_releases),
-        showInFeatured: (body.showInFeatured !== undefined) ? Boolean(body.showInFeatured) : 
-                       (body.show_in_featured !== undefined) ? Boolean(body.show_in_featured) : 
-                       false, // Changed default to false
+        showInFeatured: Boolean(body.showInFeatured || body.show_in_featured),
         showInComingSoon: Boolean(body.showInComingSoon || body.show_in_coming_soon),
         showInStaffPicks: Boolean(body.showInStaffPicks || body.show_in_staff_picks),
         showInLimitedEditions: Boolean(body.showInLimitedEditions || body.show_in_limited_editions),
+        // outOfStock should default to false for new products unless explicitly set
         outOfStock: Boolean(body.outOfStock || body.out_of_stock),
         showInFeaturedWhileComingSoon: Boolean(body.showInFeaturedWhileComingSoon || body.show_in_featured_while_coming_soon),
         purchaseCost: parseFloat(body.purchaseCost) || null,
@@ -194,10 +195,10 @@ export async function POST(request: NextRequest) {
         purchaseDate: body.purchaseDate || null,
         supplier: body.supplier || null,
         trackingNumber: body.trackingNumber || null,
-        weight: parseFloat(body.weight) || null,
-        length: parseFloat(body.length) || null,
-        width: parseFloat(body.width) || null,
-        height: parseFloat(body.height) || null,
+        weight: parseFloat(body.weight) || 0.3,
+        length: parseFloat(body.length) || 4,
+        width: parseFloat(body.width) || 3,
+        height: parseFloat(body.height) || 5,
       }
     })
     
