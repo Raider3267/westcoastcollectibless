@@ -264,7 +264,7 @@ export default function WishlistPage() {
             color: '#666',
             marginBottom: '24px'
           }}>
-            Browse Featured or Coming Soon to get started.
+  Start building your collection by browsing our featured items or upcoming drops.
           </p>
           <div style={{
             display: 'flex',

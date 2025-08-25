@@ -1,8 +1,10 @@
 export default function CancelPage() {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8 text-center">
-        <div className="mb-6 text-yellow-600">
+    <div className="min-h-screen flex items-center justify-center" style={{
+      background: 'linear-gradient(135deg, rgba(255,184,77,0.05) 0%, rgba(255,159,67,0.05) 100%)'
+    }}>
+      <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 text-center border border-gray-100">
+        <div className="mb-6" style={{ color: '#ff8b2a' }}>
           <svg className="w-20 h-20 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path 
               strokeLinecap="round" 
@@ -13,24 +15,34 @@ export default function CancelPage() {
           </svg>
         </div>
         
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Payment Canceled</h1>
-        <p className="text-gray-600 mb-6">
-          Your payment was canceled. No charges were made to your account.
+        <h1 className="text-3xl font-bold mb-3" style={{ color: '#0b0b0f' }}>Payment Canceled</h1>
+        <p className="text-gray-600 mb-8 text-lg leading-relaxed">
+          No worries! Your payment was canceled and no charges were made to your account. Your cart is still saved.
         </p>
         
-        <div className="space-y-3">
+        <div className="space-y-4">
           <a 
             href="/" 
-            className="block bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
+            className="block font-semibold py-3 px-8 rounded-xl transition-all duration-200 hover:transform hover:translateY(-1px) hover:shadow-lg"
+            style={{
+              background: 'linear-gradient(135deg, #5ED0C0, #F7E7C3)',
+              color: '#0b0b0f',
+              textDecoration: 'none'
+            }}
           >
-            Back to Shop
+            Continue Shopping
           </a>
-          <a 
-            href="/sandbox-buy" 
-            className="block bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 px-6 rounded-lg transition-colors"
+          <button 
+            onClick={() => window.history.back()}
+            className="block w-full font-medium py-3 px-6 rounded-xl transition-all duration-200 hover:shadow-md"
+            style={{
+              border: '2px solid #5ED0C0',
+              background: 'white',
+              color: '#5ED0C0'
+            }}
           >
-            Try Again
-          </a>
+            Back to Cart
+          </button>
         </div>
       </div>
     </div>
