@@ -1,7 +1,6 @@
 {
-  "buildCommand": "pnpm build",
-  "devCommand": "pnpm dev",
-  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
   "outputDirectory": ".next",
   "framework": "nextjs",
   "regions": ["iad1"],
