@@ -6,7 +6,7 @@ import { randomUUID } from 'crypto'
 // Initialize Square Client
 const client = new SquareClient({
   token: process.env.SQUARE_ACCESS_TOKEN!,
-  environment: process.env.SQUARE_ENV === 'production' ? SquareEnvironment.Production : SquareEnvironment.Sandbox,
+  environment: process.env.SQUARE_ENVIRONMENT === 'production' ? SquareEnvironment.Production : SquareEnvironment.Sandbox,
 })
 
 export const paymentsApi = client.payments
@@ -88,7 +88,7 @@ export async function createPayment(paymentRequest: PaymentRequest) {
     console.log('Clean payment data:', JSON.stringify(paymentData, null, 2))
     
     // Use environment-aware endpoint
-    const baseUrl = process.env.SQUARE_ENV === 'production' 
+    const baseUrl = process.env.SQUARE_ENVIRONMENT === 'production' 
       ? 'https://connect.squareup.com' 
       : 'https://connect.squareupsandbox.com'
     
@@ -150,10 +150,10 @@ export async function createCustomer(customerData: {
     
     console.log('Customer creation response:', response)
     
-    if (response.customer) {
+    if ((response as any).result && (response as any).result.customer) {
       return {
         success: true,
-        customer: response.customer,
+        customer: (response as any).result.customer,
       }
     } else {
       console.error('No customer in response:', response)
@@ -198,40 +198,39 @@ export async function getSquareProducts(): Promise<{ success: boolean; products?
   try {
     console.log('Fetching products from Square Catalog API...')
     
-    const response = await catalogApi.list({ types: 'ITEM' })
+    const response = await catalogApi.list({
+      types: 'ITEM' as any
+    })
     
     console.log('Square catalog response:', JSON.stringify(response, null, 2))
     
-    // Response is a page with data property containing catalog objects
-    const objects = response.data || []
-    if (objects.length === 0) {
+    const result = (response as any).result
+    if (!result || !result.objects) {
       console.log('No objects found in Square catalog response')
       return { success: true, products: [] }
     }
     
     const products: SquareProduct[] = []
     
-    for (const catalogObject of objects) {
+    for (const catalogObject of result.objects) {
       if (catalogObject.type === 'ITEM' && catalogObject.itemData) {
         const item = catalogObject.itemData
         const variations = item.variations || []
         
         // Get the primary variation (usually the first one) for main price
         const primaryVariation = variations[0]
-        const basePrice = (primaryVariation as any)?.itemVariationData?.priceMoney?.amount || 0
-        const currency = (primaryVariation as any)?.itemVariationData?.priceMoney?.currency || 'USD'
+        const basePrice = primaryVariation?.itemVariationData?.priceMoney?.amount || 0
+        const currency = primaryVariation?.itemVariationData?.priceMoney?.currency || 'USD'
         
         // Get inventory for the primary variation if it exists
         let quantity = 0
         if (primaryVariation?.id) {
           try {
-            const inventoryResult = await inventoryApi.get({
+            const inventoryResult = await inventoryApi.retrieveInventoryCount({
               catalogObjectId: primaryVariation.id,
-              locationIds: process.env.SQUARE_LOCATION_ID!
+              locationIds: [process.env.SQUARE_LOCATION_ID!]
             })
-            // The response is a page with data property containing inventory counts
-            const counts = inventoryResult.data || []
-            quantity = Number(counts[0]?.quantity) || 0
+            quantity = Number(inventoryResult.result.counts?.[0]?.quantity) || 0
           } catch (inventoryError) {
             console.log('Could not fetch inventory for item:', primaryVariation.id)
           }
@@ -240,18 +239,18 @@ export async function getSquareProducts(): Promise<{ success: boolean; products?
         const product: SquareProduct = {
           id: catalogObject.id!,
           name: item.name || 'Unnamed Product',
-          description: item.description || undefined,
+          description: item.description,
           price: Number(basePrice) / 100, // Convert from cents to dollars
           currency,
           imageUrl: item.imageIds?.[0] ? undefined : undefined, // We'll handle images separately
-          sku: (primaryVariation as any)?.itemVariationData?.sku,
+          sku: primaryVariation?.itemVariationData?.sku,
           quantity,
           isAvailable: quantity > 0,
-          variations: variations.map((v: any) => ({
+          variations: variations.map(v => ({
             id: v.id!,
-            name: (v as any).itemVariationData?.name || item.name || 'Variation',
-            price: Number((v as any).itemVariationData?.priceMoney?.amount || 0) / 100,
-            sku: (v as any).itemVariationData?.sku,
+            name: v.itemVariationData?.name || item.name || 'Variation',
+            price: Number(v.itemVariationData?.priceMoney?.amount || 0) / 100,
+            sku: v.itemVariationData?.sku,
             quantity: 0 // We'd need separate inventory calls for each variation
           }))
         }
@@ -274,9 +273,12 @@ export async function getSquareProducts(): Promise<{ success: boolean; products?
 
 export async function getSquareProductById(productId: string): Promise<{ success: boolean; product?: SquareProduct; error?: any }> {
   try {
-    const response = await catalogApi.object.get({ objectId: productId, includeRelatedObjects: true })
+    const { result } = await catalogApi.retrieveObject({
+      objectId: productId,
+      includeRelatedObjects: true
+    })
     
-    const catalogObject = response.object
+    const catalogObject = result.object
     if (!catalogObject || catalogObject.type !== 'ITEM' || !catalogObject.itemData) {
       return { success: false, error: { detail: 'Product not found' } }
     }
@@ -284,20 +286,18 @@ export async function getSquareProductById(productId: string): Promise<{ success
     const item = catalogObject.itemData
     const variations = item.variations || []
     const primaryVariation = variations[0]
-    const basePrice = (primaryVariation as any)?.itemVariationData?.priceMoney?.amount || 0
-    const currency = (primaryVariation as any)?.itemVariationData?.priceMoney?.currency || 'USD'
+    const basePrice = primaryVariation?.itemVariationData?.priceMoney?.amount || 0
+    const currency = primaryVariation?.itemVariationData?.priceMoney?.currency || 'USD'
     
     // Get inventory
     let quantity = 0
     if (primaryVariation?.id) {
       try {
-        const inventoryResult = await inventoryApi.get({
+        const inventoryResult = await inventoryApi.retrieveInventoryCount({
           catalogObjectId: primaryVariation.id,
-          locationIds: process.env.SQUARE_LOCATION_ID!
+          locationIds: [process.env.SQUARE_LOCATION_ID!]
         })
-        // The response is a page with data property containing inventory counts
-        const counts = inventoryResult.data || []
-        quantity = Number(counts[0]?.quantity) || 0
+        quantity = Number(inventoryResult.result.counts?.[0]?.quantity) || 0
       } catch (inventoryError) {
         console.log('Could not fetch inventory for item:', primaryVariation.id)
       }
@@ -306,13 +306,13 @@ export async function getSquareProductById(productId: string): Promise<{ success
     const product: SquareProduct = {
       id: catalogObject.id!,
       name: item.name || 'Unnamed Product',
-      description: item.description || undefined,
+      description: item.description,
       price: Number(basePrice) / 100,
       currency,
-      sku: (primaryVariation as any)?.itemVariationData?.sku,
+      sku: primaryVariation?.itemVariationData?.sku,
       quantity,
       isAvailable: quantity > 0,
-      variations: variations.map((v: any) => ({
+      variations: variations.map(v => ({
         id: v.id!,
         name: v.itemVariationData?.name || item.name || 'Variation',
         price: Number(v.itemVariationData?.priceMoney?.amount || 0) / 100,

@@ -36,7 +36,13 @@ const nextConfig = {
       'react-square-web-payments-sdk'
     ],
     scrollRestoration: true,
+    optimizeCss: true,
+    esmExternals: true,
   },
+  
+  // Output optimization
+  output: 'standalone',
+  poweredByHeader: false,
   
   // Headers for performance
   async headers() {

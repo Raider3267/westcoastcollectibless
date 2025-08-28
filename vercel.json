@@ -1,10 +1,15 @@
 {
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
-  "installCommand": "npm ci",
+  "buildCommand": "pnpm build",
+  "devCommand": "pnpm dev",
+  "installCommand": "pnpm install --frozen-lockfile",
   "outputDirectory": ".next",
   "framework": "nextjs",
   "regions": ["iad1"],
+  "functions": {
+    "app/**/*.ts": {
+      "runtime": "nodejs20.x"
+    }
+  },
   "headers": [
     {
       "source": "/(.*)",
@@ -48,6 +53,24 @@
           "value": "public, max-age=31536000, immutable"
         }
       ]
+    },
+    {
+      "source": "/_next/static/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/robots.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400"
+        }
+      ]
     }
   ],
   "rewrites": [
@@ -63,6 +86,14 @@
       "permanent": false
     }
   ],
+  "crons": [
+    {
+      "path": "/api/scheduler",
+      "schedule": "0 */6 * * *"
+    }
+  ],
+  "trailingSlash": false,
+  "cleanUrls": true,
   "env": {
     "NODE_ENV": "production"
   },

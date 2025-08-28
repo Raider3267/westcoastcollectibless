@@ -10,9 +10,9 @@ Sentry.init({
   // Performance monitoring
   tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
   
-  // Session replay - captures user interactions for debugging
-  replaysSessionSampleRate: 0.1,
-  replaysOnErrorSampleRate: 1.0,
+  // Session replay - disabled for now (requires higher Sentry plan)
+  // replaysSessionSampleRate: 0.1,
+  // replaysOnErrorSampleRate: 1.0,
   
   // Error filtering
   beforeSend(event, hint) {
@@ -51,10 +51,10 @@ Sentry.init({
   },
   
   integrations: [
-    Sentry.replayIntegration({
-      // Mask sensitive data in replays
-      maskAllText: true,
-      blockAllMedia: true,
-    }),
+    // Session replay integration disabled for now
+    // new Sentry.Replay({
+    //   maskAllText: true,
+    //   blockAllMedia: true,
+    // }),
   ],
 });

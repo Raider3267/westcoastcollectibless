@@ -4,7 +4,10 @@ import path from 'path'
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, orderNumber, message } = await request.json()
+    const requestData = await request.json()
+    const { name, email, subject, orderNumber, message } = requestData
+    
+    console.log('Contact form submission:', { name, email, subject, orderNumber, message })
 
     if (!name || !name.trim() || !email || !email.trim() || !message || !message.trim()) {
       return NextResponse.json(
@@ -13,9 +16,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Subject is required for new contact form, orderNumber is optional for legacy support
+    if (!subject || !subject.trim()) {
+      return NextResponse.json(
+        { error: 'Subject is required' },
+        { status: 400 }
+      )
+    }
+
     const trimmedData = {
       name: name.trim(),
       email: email.trim().toLowerCase(),
+      subject: subject?.trim() || `Order Inquiry: ${orderNumber?.trim()}`,
       orderNumber: orderNumber?.trim() || '',
       message: message.trim()
     }

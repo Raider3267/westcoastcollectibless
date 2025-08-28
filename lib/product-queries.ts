@@ -66,7 +66,7 @@ export async function getStaffPicksProducts(filename = 'export.csv'): Promise<Li
   
   return allProducts.filter(product => {
     // Staff picks: staff_pick = true OR legacy show_in_staff_picks = true
-    const isStaffPick = product.staff_pick || product.show_in_staff_picks
+    const isStaffPick = product.staff_pick || (product as any).show_in_staff_picks
     if (!isStaffPick) return false
     
     // Must be available for purchase
@@ -84,7 +84,7 @@ export async function getLimitedEditionsProducts(filename = 'export.csv'): Promi
   
   return allProducts.filter(product => {
     // Limited editions: limited_edition = true OR legacy show_in_limited_editions = true
-    const isLimitedEdition = product.limited_edition || product.show_in_limited_editions
+    const isLimitedEdition = product.limited_edition || (product as any).show_in_limited_editions
     if (!isLimitedEdition) return false
     
     // Must be available for purchase

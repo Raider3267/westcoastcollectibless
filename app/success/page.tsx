@@ -1,8 +1,10 @@
 export default function SuccessPage() {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8 text-center">
-        <div className="mb-6 text-green-600">
+    <div className="min-h-screen flex items-center justify-center" style={{
+      background: 'linear-gradient(135deg, rgba(94,208,192,0.05) 0%, rgba(199,163,255,0.05) 100%)'
+    }}>
+      <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 text-center border border-gray-100">
+        <div className="mb-6" style={{ color: '#5ED0C0' }}>
           <svg className="w-20 h-20 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path 
               strokeLinecap="round" 
@@ -13,16 +15,21 @@ export default function SuccessPage() {
           </svg>
         </div>
         
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Payment Successful!</h1>
-        <p className="text-gray-600 mb-6">
-          Thank you for your purchase. Your order has been processed successfully.
+        <h1 className="text-3xl font-bold mb-3" style={{ color: '#0b0b0f' }}>Order Complete!</h1>
+        <p className="text-gray-600 mb-8 text-lg leading-relaxed">
+          Thank you for your purchase! Your collectible is on its way. You'll receive a confirmation email with tracking details shortly.
         </p>
         
         <a 
           href="/" 
-          className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
+          className="inline-block font-semibold py-3 px-8 rounded-xl transition-all duration-200 hover:transform hover:translateY(-1px) hover:shadow-lg"
+          style={{
+            background: 'linear-gradient(135deg, #5ED0C0, #F7E7C3)',
+            color: '#0b0b0f',
+            textDecoration: 'none'
+          }}
         >
-          Back to Shop
+          Continue Shopping
         </a>
       </div>
     </div>

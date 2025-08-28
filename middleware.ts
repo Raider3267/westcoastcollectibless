@@ -26,6 +26,16 @@ const ADMIN_API_ROUTES = [
 // Get current user session from cookies/headers
 async function getCurrentUser(request: NextRequest) {
   try {
+    // LOCAL DEVELOPMENT: Allow admin access without auth for localhost
+    if (process.env.NODE_ENV === 'development') {
+      return { 
+        id: 'dev-admin', 
+        email: 'admin@localhost', 
+        roles: ['admin'],
+        isAdmin: true 
+      }
+    }
+    
     // Check for session token in cookies
     const sessionToken = request.cookies.get('auth-token')?.value
     
@@ -57,6 +67,11 @@ function hasTempAdminAccess(request: NextRequest): boolean {
 function isAdminUser(user: any): boolean {
   if (!user || !user.email) {
     return false
+  }
+  
+  // LOCAL DEVELOPMENT: Allow admin access for dev user
+  if (process.env.NODE_ENV === 'development' && user.email === 'admin@localhost') {
+    return true
   }
   
   const adminEmails = process.env.ADMIN_EMAILS?.split(',') || []

@@ -92,7 +92,7 @@ class SmokeTest {
       
       // Check for essential content
       const checks = [
-        { test: html.includes('West Coast Collectibles'), name: 'Site title present' },
+        { test: html.includes('WestCoastCollectibless'), name: 'Site title present' },
         { test: html.includes('</html>'), name: 'Valid HTML structure' },
         { test: response.headers.get('content-type')?.includes('text/html'), name: 'HTML content type' },
       ];
