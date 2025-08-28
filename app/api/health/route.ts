@@ -20,14 +20,13 @@ export async function GET() {
       environment: process.env.NODE_ENV as 'development' | 'production' | 'test',
       version: process.env.VERCEL_GIT_COMMIT_SHA?.substring(0, 7) || 'local',
       phase: process.env.ENABLE_DATABASE === 'true' ? 2 : 1,
-      responseTime: '', // Will be calculated and updated before return
+      responseTime: '0ms', // Will be calculated and updated
       checks: {
         server: 'ok',
         environment: 'ok',
         storage: 'ok',
         database: 'not_enabled', // Phase 1 default
-      },
-      responseTime: '0ms' // Will be calculated below
+      }
     }
     
     // Check environment variables (only in production)
