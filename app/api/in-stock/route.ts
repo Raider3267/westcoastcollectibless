@@ -22,12 +22,30 @@ export async function GET() {
     })
 
     console.log(`Found ${products.length} in-stock products`)
-    console.log('In-stock products:', products.map(p => ({ 
-      sku: p.sku, 
-      title: p.title?.substring(0, 50), 
-      saleState: p.saleState, 
-      status: p.status 
-    })))
+    
+    // Debug: Check if the Wacky Mart Labubu is in the results
+    const labubusInResults = products.filter(p => p.sku === 'IF_9223B4D0')
+    console.log('Labubu products in results:', labubusInResults.length)
+    if (labubusInResults.length > 0) {
+      console.log('Found Labubu:', labubusInResults[0])
+    } else {
+      console.log('Labubu not found - checking if it exists in database at all...')
+      
+      // Check if it exists in database with different criteria
+      const allLabubus = await prisma.product.findMany({
+        where: { sku: 'IF_9223B4D0' }
+      })
+      console.log('All Labubus in database:', allLabubus.length)
+      if (allLabubus.length > 0) {
+        console.log('Labubu exists but filtered out:', {
+          sku: allLabubus[0].sku,
+          saleState: allLabubus[0].saleState,
+          status: allLabubus[0].status,
+          quantity: allLabubus[0].quantity,
+          outOfStock: allLabubus[0].outOfStock
+        })
+      }
+    }
     
     // Format the same way as other APIs
     const formattedProducts = products.map((product) => {
