@@ -199,6 +199,30 @@ export default function AdminDashboard() {
     setShowAddForm(true)
   }
 
+  const handleClearPastDates = async () => {
+    if (!confirm('Clear all past release dates? Products will remain in coming soon but without dates.')) {
+      return
+    }
+    
+    setIsLoading(true)
+    try {
+      const response = await fetch('/api/admin/cleanup-dates', { method: 'POST' })
+      const result = await response.json()
+      
+      if (result.success) {
+        alert(`Successfully cleared ${result.updated} past release dates`)
+        loadProducts() // Reload to show updated data
+      } else {
+        alert(`Error: ${result.error}`)
+      }
+    } catch (error) {
+      console.error('Error clearing past dates:', error)
+      alert('Failed to clear past dates')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
@@ -272,12 +296,21 @@ export default function AdminDashboard() {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Product Management</h1>
-          <button
-            onClick={handleAdd}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium"
-          >
-            Add New Product
-          </button>
+          <div className="flex space-x-3">
+            <button
+              onClick={handleClearPastDates}
+              disabled={isLoading}
+              className="bg-orange-600 hover:bg-orange-700 disabled:bg-orange-300 text-white px-4 py-2 rounded-lg font-medium"
+            >
+              Clear Past Dates
+            </button>
+            <button
+              onClick={handleAdd}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium"
+            >
+              Add New Product
+            </button>
+          </div>
         </div>
 
         {/* Products Table */}
@@ -455,6 +488,38 @@ export default function AdminDashboard() {
                       </p>
                     </div>
                   </div>
+
+                  {/* Release Date - only show when status is PREVIEW/Coming Soon */}
+                  {form.sale_state === 'PREVIEW' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Release Date (Optional)
+                      </label>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="datetime-local"
+                          value={form.release_at ? new Date(form.release_at).toISOString().slice(0, 16) : ''}
+                          onChange={(e) => {
+                            setForm({
+                              ...form, 
+                              release_at: e.target.value ? new Date(e.target.value).toISOString() : null
+                            })
+                          }}
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setForm({...form, release_at: null})}
+                          className="px-3 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                        >
+                          Clear
+                        </button>
+                      </div>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Optional release date for coming soon products. Leave empty to hide date.
+                      </p>
+                    </div>
+                  )}
 
                   {/* Images */}
                   <div>
