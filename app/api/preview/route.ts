@@ -1,10 +1,15 @@
 import { NextResponse } from 'next/server'
+import { getListingsFromCsv } from '../../../lib/listings'
 
 export async function GET() {
   try {
-    // Return empty array for preview (no coming soon items in safe mode)
-    console.log('Returning empty preview products in safe mode')
-    return NextResponse.json([])
+    const allProducts = await getListingsFromCsv('export.csv', true)
+    const previewProducts = allProducts.filter((item: any) => 
+      item.sale_state === 'PREVIEW' && item.status === 'live'
+    )
+    
+    console.log(`Found ${previewProducts.length} preview products`)
+    return NextResponse.json(previewProducts)
   } catch (error) {
     console.error('Error fetching preview products:', error)
     return NextResponse.json([])
