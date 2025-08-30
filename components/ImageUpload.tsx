@@ -222,9 +222,15 @@ export default function ImageUpload({
             {images.map((image, index) => (
               <div key={index} className="relative group">
                 <img
-                  src={image}
+                  src={image.startsWith('http') ? image : `${window.location.origin}${image}`}
                   alt={`Product image ${index + 1}`}
                   className="w-full h-32 object-cover rounded-lg border border-gray-200"
+                  onError={(e) => {
+                    // Fallback to placeholder if image fails to load
+                    const target = e.target as HTMLImageElement
+                    target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyOCIgdmlld0JveD0iMCAwIDIwMCAxMjgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTI4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMDAgNjRMMTI1IDM5SDc1TDEwMCA2NFoiIGZpbGw9IiNEMUQ1REIiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHN0eWxlPi5jbGFzcy0xIHsgZmlsbDogbm9uZTsgc3Ryb2tlOiAjOEI5NUEwOyBzdHJva2Utd2lkdGg6IDEuNTsgfTwvc3R5bGU+CjxjaXJjbGUgY3g9IjEwIiBjeT0iMTAiIHI9IjkuMjUiIGNsYXNzPSJjbGFzcy0xIi8+CjxwYXRoIGQ9Im0xNSAxNS0zLjg3NS0zLjg3NWE1LjI0IDUuMjQgMCAwIDAgLjg3NS0yLjg3NSA1LjI1IDUuMjUgMCAxIDAtNS4yNSA1LjI1IDUuMjQgNS4yNCAwIDAgMCAyLjg3NS0uODc1TDE1IDE1WiIgY2xhc3M9ImNsYXNzLTEiLz4KPC9zdmc+Cg=='
+                    target.alt = 'Image not available'
+                  }}
                 />
                 <button
                   type="button"
