@@ -11,7 +11,7 @@ export async function POST() {
       return NextResponse.json({ error: 'Database not available' }, { status: 500 })
     }
 
-    const now = new Date()
+    const now = new Date().toISOString()
     
     // Find products with past release dates
     const productsWithPastDates = await prisma.product.findMany({
