@@ -9,6 +9,7 @@ export async function GET() {
     }
     
     // Show all live products that are in stock (exclude PREVIEW/coming-soon)
+    // NOTE: Products can appear in both featured AND in-stock sections
     const products = await prisma.product.findMany({
       where: {
         AND: [
