@@ -1,294 +1,194 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { promises as fs } from 'fs'
-import path from 'path'
-import { parse } from 'csv-parse/sync'
-import { stringify } from 'csv-stringify/sync'
+import { getPrismaClient } from '../../../../lib/database'
 
-const CSV_PATH = path.join(process.cwd(), 'export.csv')
-
-async function readCSV() {
-  try {
-    const csvContent = await fs.readFile(CSV_PATH, 'utf-8')
-    const records = parse(csvContent, { 
-      columns: true, 
-      skip_empty_lines: true,
-      trim: true 
-    })
-    return records
-  } catch (error) {
-    console.error('Failed to read CSV:', error)
-    return []
-  }
-}
-
-async function writeCSV(records: any[]) {
-  try {
-    console.log('Writing CSV with', records.length, 'records')
-    if (records.length === 0) {
-      console.log('No records to write, skipping')
-      return
-    }
-    
-    // Get column headers from first record
-    const headers = Object.keys(records[0])
-    console.log('CSV headers:', headers.length, 'columns')
-    
-    // Convert records to CSV format
-    const csvContent = stringify(records, { 
-      header: true, 
-      columns: headers 
-    })
-    console.log('CSV content generated, length:', csvContent.length)
-    
-    await fs.writeFile(CSV_PATH, csvContent, 'utf-8')
-    console.log('CSV file written successfully')
-  } catch (error) {
-    console.error('Failed to write CSV:', error)
-    throw error
-  }
-}
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    const products = await readCSV()
-    
-    // Transform CSV data to match frontend expectations
-    const transformedProducts = products.map((product: any) => ({
-      sku: product.sku || '',
-      title: product.title || '',
-      description: product.description || '',
-      quantity: parseInt(product.quantity) || 0,
-      price: parseFloat(product.price) || 0,
-      images: product.images || '',
-      status: product.status || 'live',
-      sale_state: product.sale_state || null,
-      release_at: product.release_at || null,
-      featured: product.featured === 'true' || product.featured === 1 || product.featured === '1',
-      staff_pick: product.staff_pick === 'true' || product.staff_pick === 1 || product.staff_pick === '1',
-      limited_edition: product.limited_edition === 'true' || product.limited_edition === 1 || product.limited_edition === '1',
-      drop_date: product.drop_date || '',
-      released_date: product.released_date || '',
-      show_in_new_releases: product.show_in_new_releases === 'true' || product.show_in_new_releases === 1 || product.show_in_new_releases === '1',
-      show_in_featured: product.show_in_featured === 'true' || product.show_in_featured === 1 || product.show_in_featured === '1',
-      show_in_coming_soon: product.show_in_coming_soon === 'true' || product.show_in_coming_soon === 1 || product.show_in_coming_soon === '1',
-      show_in_staff_picks: product.show_in_staff_picks === 'true' || product.show_in_staff_picks === 1 || product.show_in_staff_picks === '1',
-      show_in_limited_editions: product.show_in_limited_editions === 'true' || product.show_in_limited_editions === 1 || product.show_in_limited_editions === '1',
-      out_of_stock: product.out_of_stock === 'true' || product.out_of_stock === 1 || product.out_of_stock === '1',
-      show_in_featured_while_coming_soon: product.show_in_featured_while_coming_soon === 'true' || product.show_in_featured_while_coming_soon === 1 || product.show_in_featured_while_coming_soon === '1',
-      // Cost tracking fields
-      purchase_cost: parseFloat(product.purchase_cost) || 0,
-      shipping_cost: parseFloat(product.shipping_cost) || 0,
-      total_cost: parseFloat(product.total_cost) || 0,
-      purchase_date: product.purchase_date || '',
-      supplier: product.supplier || '',
-      tracking_number: product.tracking_number || '',
-      // Shipping information fields
-      weight: parseFloat(product.weight) || 0.3,
-      length: parseFloat(product.length) || 4,
-      width: parseFloat(product.width) || 3,
-      height: parseFloat(product.height) || 5,
-      // Calculated fields
-      profit_per_unit: (parseFloat(product.price) || 0) - (parseFloat(product.total_cost) || 0),
-      total_inventory_value: (parseInt(product.quantity) || 0) * (parseFloat(product.total_cost) || 0),
-      potential_profit: (parseInt(product.quantity) || 0) * ((parseFloat(product.price) || 0) - (parseFloat(product.total_cost) || 0))
-    })).filter((product: any) => product.title) // Filter out empty products
-    
-    return NextResponse.json(transformedProducts)
+    const prisma = getPrismaClient()
+    if (!prisma) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 500 })
+    }
+
+    const products = await prisma.product.findMany({
+      orderBy: { createdAt: 'desc' }
+    })
+
+    // Format products for admin dashboard
+    const formattedProducts = products.map((product) => {
+      const imageUrls = product.images ? 
+        product.images.split(',').map(img => img.trim()).filter(img => img && img.length > 0)
+        : []
+
+      return {
+        id: product.id,
+        sku: product.sku || '',
+        title: product.title || '',
+        description: product.description || '',
+        quantity: product.quantity || 0,
+        price: product.price ? parseFloat(product.price.toString()) : null,
+        images: imageUrls,
+        brand: product.brand || '',
+        status: product.status || 'live',
+        sale_state: product.saleState || 'LIVE',
+        release_at: product.releaseAt || null,
+        featured: !!product.featured,
+        staff_pick: !!product.staffPick,
+        limited_edition: !!product.limitedEdition,
+        show_in_featured: !!product.showInFeatured,
+        show_in_coming_soon: !!product.showInComingSoon,
+        show_in_staff_picks: !!product.showInStaffPicks,
+        show_in_limited_editions: !!product.showInLimitedEditions,
+        out_of_stock: !!product.outOfStock,
+        drop_date: product.dropDate || null,
+        released_date: product.releasedDate || null,
+        show_in_new_releases: !!product.showInNewReleases,
+        weight: product.weight ? parseFloat(product.weight.toString()) : 0.3,
+        createdAt: product.createdAt,
+        updatedAt: product.updatedAt
+      }
+    })
+
+    return NextResponse.json(formattedProducts)
   } catch (error) {
-    console.error('GET /api/admin/products error:', error)
+    console.error('Error fetching products:', error)
     return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 })
-  }
-}
-
-export async function PUT(request: NextRequest) {
-  let body: any = null
-  try {
-    console.log('PUT /api/admin/products called')
-    body = await request.json()
-    console.log('Request body received:', JSON.stringify(body, null, 2))
-    const { sku } = body
-    
-    if (!sku) {
-      console.error('No SKU provided in request body')
-      return NextResponse.json({ error: 'SKU is required' }, { status: 400 })
-    }
-    
-    console.log('Processing product update for SKU:', sku)
-    
-    const products = await readCSV()
-    const productIndex = products.findIndex((product: any) => product.sku === sku)
-    
-    if (productIndex === -1) {
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 })
-    }
-    
-    // Update the product with new data, ensuring booleans are converted to strings for CSV
-    const updatedProduct = { 
-      ...products[productIndex], 
-      ...body,
-      // Convert boolean feature flags to strings for CSV storage
-      // Handle both boolean and existing string/number values
-      show_in_new_releases: (body.show_in_new_releases === true || body.show_in_new_releases === 'true' || body.show_in_new_releases === 1 || body.show_in_new_releases === '1') ? 'true' : 'false',
-      show_in_featured: (body.show_in_featured === true || body.show_in_featured === 'true' || body.show_in_featured === 1 || body.show_in_featured === '1') ? 'true' : 'false',
-      show_in_coming_soon: (body.show_in_coming_soon === true || body.show_in_coming_soon === 'true' || body.show_in_coming_soon === 1 || body.show_in_coming_soon === '1') ? 'true' : 'false',
-      show_in_staff_picks: (body.show_in_staff_picks === true || body.show_in_staff_picks === 'true' || body.show_in_staff_picks === 1 || body.show_in_staff_picks === '1') ? 'true' : 'false',
-      show_in_limited_editions: (body.show_in_limited_editions === true || body.show_in_limited_editions === 'true' || body.show_in_limited_editions === 1 || body.show_in_limited_editions === '1') ? 'true' : 'false',
-      out_of_stock: (body.out_of_stock === true || body.out_of_stock === 'true' || body.out_of_stock === 1 || body.out_of_stock === '1') ? 'true' : 'false',
-      show_in_featured_while_coming_soon: (body.show_in_featured_while_coming_soon === true || body.show_in_featured_while_coming_soon === 'true' || body.show_in_featured_while_coming_soon === 1 || body.show_in_featured_while_coming_soon === '1') ? 'true' : 'false',
-      // New sale_state system fields
-      sale_state: body.sale_state || '',
-      release_at: body.release_at || '',
-      featured: (body.featured === true || body.featured === 'true' || body.featured === 1 || body.featured === '1') ? 'true' : 'false',
-      staff_pick: (body.staff_pick === true || body.staff_pick === 'true' || body.staff_pick === 1 || body.staff_pick === '1') ? 'true' : 'false',
-      limited_edition: (body.limited_edition === true || body.limited_edition === 'true' || body.limited_edition === 1 || body.limited_edition === '1') ? 'true' : 'false'
-    }
-    products[productIndex] = updatedProduct
-    console.log('Updated product in array, writing to CSV...')
-    
-    await writeCSV(products)
-    console.log('CSV write completed, returning success response')
-    
-    return NextResponse.json({ success: true, product: updatedProduct })
-  } catch (error) {
-    console.error('PUT /api/admin/products error:', error)
-    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
-    
-    // Return detailed error information for debugging
-    const errorDetails = {
-      error: 'Failed to update product',
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      timestamp: new Date().toISOString(),
-      requestBody: body ? JSON.stringify(body).substring(0, 500) : 'No body',
-      csvPath: CSV_PATH
-    }
-    
-    return NextResponse.json(errorDetails, { status: 500 })
-  }
-}
-
-export async function DELETE(request: NextRequest) {
-  try {
-    const body = await request.json()
-    const { sku } = body
-    
-    if (!sku) {
-      return NextResponse.json({ error: 'SKU is required' }, { status: 400 })
-    }
-    
-    const products = await readCSV()
-    const filteredProducts = products.filter((product: any) => product.sku !== sku)
-    
-    if (filteredProducts.length === products.length) {
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 })
-    }
-    
-    await writeCSV(filteredProducts)
-    
-    return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error('DELETE /api/admin/products error:', error)
-    return NextResponse.json({ error: 'Failed to delete product' }, { status: 500 })
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { 
-      sku, 
-      title, 
-      description, 
-      quantity = 0, 
-      price = 0, 
-      images = '',
-      show_in_staff_picks = false,
-      show_in_limited_editions = false,
-      out_of_stock = false,
-      show_in_featured_while_coming_soon = false,
-      purchase_cost = 0,
-      shipping_cost = 0,
-      purchase_date = '',
-      supplier = '',
-      tracking_number = '',
-      weight = 0.3,
-      length = 4,
-      width = 3,
-      height = 5
-    } = body
-    
-    if (!sku || !title) {
-      return NextResponse.json({ error: 'SKU and title are required' }, { status: 400 })
+    const prisma = getPrismaClient()
+    if (!prisma) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 500 })
     }
-    
-    const products = await readCSV()
-    
-    // Check if product already exists
-    const existingProduct = products.find((product: any) => product.sku === sku)
-    if (existingProduct) {
-      return NextResponse.json({ error: 'Product with this SKU already exists' }, { status: 400 })
-    }
-    
-    // Calculate total cost
-    const totalCost = (parseFloat(purchase_cost) || 0) + (parseFloat(shipping_cost) || 0)
-    
-    // Create new product with all required CSV columns
-    const newProduct = {
-      sku,
-      title,
-      description,
-      quantity: quantity.toString(),
-      price: price.toString(),
-      images,
-      optionname1: '',
-      optionname2: '',
-      optionname3: '',
-      optionname4: '',
-      optionname5: '',
-      option1: '',
-      option2: '',
-      option3: '',
-      option4: '',
-      option5: '',
-      product_identifier: '',
-      product_identifier_type: '',
-      brand: '',
-      cost: '', // Keep existing cost field for eBay compatibility
-      status: 'live',
-      sale_state: 'LIVE',
-      release_at: '',
-      featured: 'false',
-      staff_pick: 'false',
-      limited_edition: 'false',
-      drop_date: '',
-      released_date: '',
-      show_in_new_releases: 'false',
-      show_in_featured: 'false',
-      show_in_coming_soon: 'false',
-      show_in_staff_picks: show_in_staff_picks.toString(),
-      show_in_limited_editions: show_in_limited_editions.toString(),
-      out_of_stock: out_of_stock.toString(),
-      show_in_featured_while_coming_soon: show_in_featured_while_coming_soon.toString(),
-      // Cost tracking fields
-      purchase_cost: purchase_cost.toString(),
-      shipping_cost: shipping_cost.toString(),
-      total_cost: totalCost.toString(),
-      purchase_date,
-      supplier,
-      tracking_number,
-      // Shipping information fields
-      weight: weight.toString(),
-      length: length.toString(),
-      width: width.toString(),
-      height: height.toString()
-    }
-    
-    products.push(newProduct)
-    await writeCSV(products)
-    
-    return NextResponse.json({ success: true, product: newProduct })
+
+    const data = await request.json()
+    console.log('Creating product with data:', data)
+
+    const product = await prisma.product.create({
+      data: {
+        sku: data.sku || `PRODUCT_${Date.now()}`,
+        title: data.title || 'Untitled Product',
+        description: data.description || '',
+        price: data.price ? parseFloat(data.price.toString()) : 0,
+        quantity: data.quantity || 0,
+        images: Array.isArray(data.images) ? data.images.join(',') : (data.images || ''),
+        brand: data.brand || '',
+        status: data.status || 'live',
+        saleState: data.sale_state || 'LIVE',
+        featured: !!data.featured,
+        staffPick: !!data.staff_pick,
+        limitedEdition: !!data.limited_edition,
+        showInFeatured: !!data.show_in_featured,
+        showInComingSoon: !!data.show_in_coming_soon,
+        showInStaffPicks: !!data.show_in_staff_picks,
+        showInLimitedEditions: !!data.show_in_limited_editions,
+        outOfStock: !!data.out_of_stock,
+        releaseAt: data.release_at || null,
+        dropDate: data.drop_date || null,
+        releasedDate: data.released_date || null,
+        showInNewReleases: !!data.show_in_new_releases,
+        weight: data.weight ? parseFloat(data.weight.toString()) : 0.3,
+        length: data.length ? parseFloat(data.length.toString()) : null,
+        width: data.width ? parseFloat(data.width.toString()) : null,
+        height: data.height ? parseFloat(data.height.toString()) : null
+      }
+    })
+
+    console.log('Product created successfully:', product.sku)
+    return NextResponse.json({ success: true, product })
   } catch (error) {
-    console.error('POST /api/admin/products error:', error)
-    return NextResponse.json({ error: 'Failed to create product' }, { status: 500 })
+    console.error('Error creating product:', error)
+    return NextResponse.json({ 
+      error: 'Failed to create product',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const prisma = getPrismaClient()
+    if (!prisma) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 500 })
+    }
+
+    const data = await request.json()
+    console.log('Updating product with data:', data)
+
+    if (!data.sku) {
+      return NextResponse.json({ error: 'SKU is required for updates' }, { status: 400 })
+    }
+
+    const product = await prisma.product.update({
+      where: { sku: data.sku },
+      data: {
+        title: data.title || 'Untitled Product',
+        description: data.description || '',
+        price: data.price ? parseFloat(data.price.toString()) : 0,
+        quantity: data.quantity || 0,
+        images: Array.isArray(data.images) ? data.images.join(',') : (data.images || ''),
+        brand: data.brand || '',
+        status: data.status || 'live',
+        saleState: data.sale_state || 'LIVE',
+        featured: !!data.featured,
+        staffPick: !!data.staff_pick,
+        limitedEdition: !!data.limited_edition,
+        showInFeatured: !!data.show_in_featured,
+        showInComingSoon: !!data.show_in_coming_soon,
+        showInStaffPicks: !!data.show_in_staff_picks,
+        showInLimitedEditions: !!data.show_in_limited_editions,
+        outOfStock: !!data.out_of_stock,
+        releaseAt: data.release_at || null,
+        dropDate: data.drop_date || null,
+        releasedDate: data.released_date || null,
+        showInNewReleases: !!data.show_in_new_releases,
+        weight: data.weight ? parseFloat(data.weight.toString()) : 0.3,
+        length: data.length ? parseFloat(data.length.toString()) : null,
+        width: data.width ? parseFloat(data.width.toString()) : null,
+        height: data.height ? parseFloat(data.height.toString()) : null,
+        updatedAt: new Date()
+      }
+    })
+
+    console.log('Product updated successfully:', product.sku)
+    return NextResponse.json({ success: true, product })
+  } catch (error) {
+    console.error('Error updating product:', error)
+    return NextResponse.json({ 
+      error: 'Failed to update product',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const prisma = getPrismaClient()
+    if (!prisma) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 500 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const sku = searchParams.get('sku')
+
+    if (!sku) {
+      return NextResponse.json({ error: 'SKU is required for deletion' }, { status: 400 })
+    }
+
+    await prisma.product.delete({
+      where: { sku }
+    })
+
+    console.log('Product deleted successfully:', sku)
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Error deleting product:', error)
+    return NextResponse.json({ 
+      error: 'Failed to delete product',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }
