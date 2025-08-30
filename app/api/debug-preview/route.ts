@@ -29,6 +29,6 @@ export async function GET() {
     })
   } catch (error) {
     console.error('Debug: Error:', error)
-    return NextResponse.json({ error: error.message })
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) })
   }
 }
