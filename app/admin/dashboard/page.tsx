@@ -433,33 +433,26 @@ export default function AdminDashboard() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Status
-                      </label>
-                      <select
-                        value={form.status}
-                        onChange={(e) => setForm({...form, status: e.target.value as 'live' | 'coming-soon' | 'draft'})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="draft">Draft</option>
-                        <option value="coming-soon">Coming Soon</option>
-                        <option value="live">Live</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Sale State
+                        Product Status
                       </label>
                       <select
                         value={form.sale_state || 'DRAFT'}
-                        onChange={(e) => setForm({...form, sale_state: e.target.value as 'DRAFT' | 'PREVIEW' | 'LIVE' | 'ARCHIVED'})}
+                        onChange={(e) => {
+                          const saleState = e.target.value as 'DRAFT' | 'PREVIEW' | 'LIVE' | 'ARCHIVED'
+                          // Auto-set the status field based on sale_state for consistency
+                          const status = saleState === 'PREVIEW' ? 'coming-soon' : 'live'
+                          setForm({...form, sale_state: saleState, status})
+                        }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
-                        <option value="DRAFT">Draft</option>
-                        <option value="PREVIEW">Preview (Coming Soon)</option>
-                        <option value="LIVE">Live</option>
-                        <option value="ARCHIVED">Archived</option>
+                        <option value="DRAFT">Draft (Hidden)</option>
+                        <option value="PREVIEW">Coming Soon (Preview)</option>
+                        <option value="LIVE">Live (In Stock)</option>
+                        <option value="ARCHIVED">Archived (Hidden)</option>
                       </select>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Choose "Coming Soon" to display products in the coming soon section
+                      </p>
                     </div>
                   </div>
 
