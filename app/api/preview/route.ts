@@ -9,11 +9,16 @@ export async function GET() {
       return NextResponse.json([])
     }
     
-    // Get products with PREVIEW sale state
+    // Get products with PREVIEW sale state or other preview indicators
     const products = await prisma.product.findMany({
       where: {
-        saleState: 'PREVIEW',
-        status: 'live'
+        OR: [
+          { saleState: 'PREVIEW' },
+          { saleState: 'preview' },
+          { status: 'coming-soon' },
+          { status: 'preview' },
+          { showInComingSoon: true }
+        ]
       },
       orderBy: { createdAt: 'desc' }
     })
