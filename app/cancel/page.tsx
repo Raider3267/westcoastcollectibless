@@ -1,3 +1,5 @@
+'use client'
+
 export default function CancelPage() {
   return (
     <div className="min-h-screen flex items-center justify-center" style={{
