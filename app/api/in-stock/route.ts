@@ -11,13 +11,17 @@ export async function GET() {
     // Show all live products that are in stock (exclude PREVIEW/coming-soon)
     const products = await prisma.product.findMany({
       where: {
-        quantity: { gt: 0 },        // Has inventory
-        outOfStock: false,          // Not marked out of stock
-        status: 'live',             // Only live products (not coming-soon)
-        saleState: { not: 'PREVIEW' } // Exclude preview/coming soon items
+        AND: [
+          { quantity: { gt: 0 } },        // Has inventory
+          { outOfStock: false },          // Not marked out of stock
+          { status: 'live' },             // Only live products (not coming-soon)
+          { saleState: 'LIVE' }           // Only LIVE products (not PREVIEW)
+        ]
       },
       orderBy: { createdAt: 'desc' }
     })
+
+    console.log(`Found ${products.length} in-stock products`)
     
     // Format the same way as other APIs
     const formattedProducts = products.map((product) => {
