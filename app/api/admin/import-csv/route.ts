@@ -21,25 +21,25 @@ export async function POST() {
 
     for (const product of products) {
       try {
-        // Skip if product already exists
+        // Skip if product already exists  
         const existing = await prisma.product.findUnique({
-          where: { sku: product.sku }
+          where: { sku: product.id }
         })
 
         if (existing) {
-          console.log(`Skipping existing product: ${product.sku}`)
+          console.log(`Skipping existing product: ${product.id}`)
           continue
         }
 
         await prisma.product.create({
           data: {
-            sku: product.sku,
-            title: product.title,
-            description: product.description,
+            sku: product.id,
+            title: product.name,
+            description: product.description || '',
             price: product.price ? parseFloat(product.price.toString()) : 0,
             quantity: product.quantity || 0,
-            images: product.images || '',
-            brand: product.brand || '',
+            images: Array.isArray(product.images) ? product.images.join(',') : (product.image || ''),
+            brand: '',
             status: product.status || 'live',
             saleState: product.sale_state || 'LIVE',
             featured: !!product.featured,
@@ -47,35 +47,35 @@ export async function POST() {
             limitedEdition: !!product.limited_edition,
             showInFeatured: !!product.show_in_featured,
             showInComingSoon: !!product.show_in_coming_soon,
-            showInStaffPicks: !!product.show_in_staff_picks,
-            showInLimitedEditions: !!product.show_in_limited_editions,
+            showInStaffPicks: !!product.staff_pick,
+            showInLimitedEditions: !!product.limited_edition,
             outOfStock: !!product.out_of_stock,
             releaseAt: product.release_at ? new Date(product.release_at) : null,
             dropDate: product.drop_date ? new Date(product.drop_date) : null,
             releasedDate: product.released_date ? new Date(product.released_date) : null,
             showInNewReleases: !!product.show_in_new_releases,
-            showInFeaturedWhileComingSoon: !!product.show_in_featured_while_coming_soon,
-            purchaseCost: product.purchase_cost ? parseFloat(product.purchase_cost.toString()) : 0,
-            shippingCost: product.shipping_cost ? parseFloat(product.shipping_cost.toString()) : 0,
-            totalCost: product.total_cost ? parseFloat(product.total_cost.toString()) : 0,
-            purchaseDate: product.purchase_date ? new Date(product.purchase_date) : null,
-            supplier: product.supplier || '',
-            trackingNumber: product.tracking_number || '',
+            showInFeaturedWhileComingSoon: !!product.show_in_coming_soon,
+            purchaseCost: 0,
+            shippingCost: 0,
+            totalCost: 0,
+            purchaseDate: null,
+            supplier: '',
+            trackingNumber: '',
             weight: product.weight ? parseFloat(product.weight.toString()) : 0.3,
             length: product.length ? parseFloat(product.length.toString()) : null,
             width: product.width ? parseFloat(product.width.toString()) : null,
             height: product.height ? parseFloat(product.height.toString()) : null,
-            profitPerUnit: product.profit_per_unit ? parseFloat(product.profit_per_unit.toString()) : 0,
-            totalInventoryValue: product.total_inventory_value ? parseFloat(product.total_inventory_value.toString()) : 0,
-            potentialProfit: product.potential_profit ? parseFloat(product.potential_profit.toString()) : 0
+            profitPerUnit: 0,
+            totalInventoryValue: 0,
+            potentialProfit: 0
           }
         })
 
         imported++
-        console.log(`Imported product: ${product.sku} - ${product.title}`)
+        console.log(`Imported product: ${product.id} - ${product.name}`)
       } catch (error) {
-        console.error(`Error importing product ${product.sku}:`, error)
-        errors.push(`${product.sku}: ${error.message}`)
+        console.error(`Error importing product ${product.id}:`, error)
+        errors.push(`${product.id}: ${error.message}`)
       }
     }
 
