@@ -14,9 +14,11 @@ export async function GET() {
         OR: [
           { featured: true },
           { showInFeatured: true }
-        ]
+        ],
+        saleState: 'LIVE'  // Only show LIVE products in featured, not PREVIEW
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      take: 2  // Limit to 2 featured products
     })
     
     // Format products the same way as main API
