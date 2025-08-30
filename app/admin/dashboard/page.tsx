@@ -47,6 +47,7 @@ interface ProductForm {
   images: string[]
   status: 'live' | 'coming-soon' | 'draft'
   sale_state?: 'DRAFT' | 'PREVIEW' | 'LIVE' | 'ARCHIVED'
+  release_at?: string | null
   drop_date?: string
   released_date?: string
   show_in_new_releases: boolean
@@ -86,6 +87,7 @@ export default function AdminDashboard() {
     images: [],
     status: 'draft',
     sale_state: 'DRAFT',
+    release_at: null,
     drop_date: '',
     released_date: '',
     show_in_new_releases: false,
@@ -181,6 +183,7 @@ export default function AdminDashboard() {
       images: [],
       status: 'draft',
       sale_state: 'DRAFT',
+      release_at: null,
       drop_date: '',
       released_date: '',
       show_in_new_releases: false,
