@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server'
 import { getSessionByToken, getUserById } from '@/lib/db/storage'
 import { cookies } from 'next/headers'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     const cookieStore = cookies()
