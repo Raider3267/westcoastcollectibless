@@ -22,6 +22,12 @@ export async function GET() {
     })
 
     console.log(`Found ${products.length} in-stock products`)
+    console.log('In-stock products:', products.map(p => ({ 
+      sku: p.sku, 
+      title: p.title?.substring(0, 50), 
+      saleState: p.saleState, 
+      status: p.status 
+    })))
     
     // Format the same way as other APIs
     const formattedProducts = products.map((product) => {
